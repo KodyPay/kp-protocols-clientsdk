@@ -2,7 +2,7 @@ name: release
 
 on:
   workflow_run:
-    workflows: [gradle-ci]
+    workflows: [build]
     types: [completed]
     branches: [main]
 
