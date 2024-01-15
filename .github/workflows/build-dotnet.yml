@@ -1,0 +1,22 @@
+name: build-dotnet
+on:
+  push:
+    branches:
+      - '**'
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup dotnet build
+        uses: actions/setup-dotnet@v3
+        with:
+          cache: true
+          source-url: https://nuget.pkg.github.com/KodyPay/index.json
+          cache-dependency-path: dotnet/packages.lock.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build dotnet project
+        run: |
+          dotnet build dotnet
