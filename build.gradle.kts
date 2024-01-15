@@ -5,7 +5,7 @@ apply(plugin = "kodypay.protobuf-grpc")
 group = "com.kodypay.sdk"
 kodypay {
     javaSources = true
-    jvmTarget = "17"
+    jvmTarget = "21"
     releaseStrategy = com.kodypay.plugin.release.KodypayStrategies.KP_DEFAULT
 }
 repositories { mavenCentral() }
