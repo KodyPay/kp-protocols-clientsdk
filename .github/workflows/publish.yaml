@@ -46,7 +46,7 @@ jobs:
         run: |
           npm ci
           npm run build
-          npm version ${{ env.NEXT_VERSION }}
+          npm version --no-git-tag-version ${{ env.NEXT_VERSION }}
           npm publish --scope=@kodypay ./build/grpc-web
         env:
           NEXT_VERSION: ${{ github.ref_name }}
