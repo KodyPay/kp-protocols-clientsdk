@@ -10,6 +10,7 @@ service KodyPayTerminalService {
   rpc Pay(PayRequest) returns (stream PayResponse);
   rpc Cancel(CancelRequest) returns (CancelResponse);
   rpc PaymentDetails(PaymentDetailsRequest) returns (PayResponse);
+  rpc Clear(ClearRequest) returns (ClearResponse);
 }
 
 // requires X-API-Key header with 'API Key' value
@@ -61,4 +62,12 @@ message CancelResponse {
 message PaymentDetailsRequest {
   string store_id = 1; // UUID of store
   string order_id = 2; // to identify the payment (order)
+}
+
+// requires X-API-Key header with 'API Key' value
+message ClearRequest {
+  string store_id = 1;
+}
+message ClearResponse {
+  int32 cleared = 1;
 }
