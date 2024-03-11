@@ -1,5 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 rootProject.name = "kp-protocols-clientsdk"
+
 pluginManagement {
     repositories {
         mavenLocal()

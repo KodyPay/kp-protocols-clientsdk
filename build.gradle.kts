@@ -2,7 +2,7 @@ plugins {
     id("kodypay.protobuf") version "2.0.0"
 }
 apply(plugin = "kodypay.protobuf-grpc")
-group = "com.kodypay.sdk"
+group = "com.kodypay.api.grpc"
 kodypay {
     javaSources = true
     jvmTarget = "21"
