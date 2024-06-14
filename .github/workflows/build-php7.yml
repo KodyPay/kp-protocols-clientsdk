@@ -45,12 +45,13 @@ jobs:
 
       - name: Cache gRPC PHP plugin
         uses: actions/cache@v3
+        id: cache-grpc-php-plugin
         with:
           path: |
             ./grpc/cmake/build
           key: ${{ runner.os }}-grpc-php-plugin-v1.64.2
 
-      - name: Install gRPC PHP plugin
+      - name: Build gRPC PHP plugin
         if: steps.cache-grpc-php-plugin.outputs.cache-hit != 'true'
         run: |
           sudo apt-get install -y build-essential autoconf libtool pkg-config
@@ -60,7 +61,10 @@ jobs:
           cd cmake/build
           cmake ../..
           make grpc_php_plugin
-          sudo cp ./grpc_php_plugin /usr/local/bin/
+
+      - name: Install gRPC PHP plugin
+        run: |
+          sudo cp ./grpc/cmake/build/grpc_php_plugin /usr/local/bin/
 
       - name: Compile Protobuf file
         run: |
