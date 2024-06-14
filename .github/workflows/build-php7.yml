@@ -1,0 +1,57 @@
+name: Build gRPC PHP7 Package
+
+on:
+  push:
+    branches:
+      - '**'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          extensions: mbstring, json, grpc, protobuf
+
+      - name: Install Composer dependencies
+        run: |
+          cd php7
+          composer install
+
+      - name: Install Protoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
+
+      - name: Install gRPC PHP plugin
+        run: |
+          sudo apt-get install -y build-essential autoconf libtool pkg-config
+          git clone --recurse-submodules -b v1.41.0 https://github.com/grpc/grpc
+          cd grpc
+          mkdir -p cmake/build
+          cd cmake/build
+          cmake ../..
+          make grpc_php_plugin
+          sudo cp ./grpc_php_plugin /usr/local/bin/
+
+      - name: Compile Protobuf file
+        run: |
+          mkdir -p output
+          protoc --proto_path=src/main/proto --php_out=./output --grpc_out=./output --plugin=protoc-gen-grpc=/usr/local/bin/grpc_php_plugin src/main/proto/com/kodypay/grpc/pay/v1/pay.proto
+
+      - name: Package the compiled files
+        run: |
+          mkdir -p package
+          cp -r output package/
+          cd package
+          zip -r kody-php7-grpc-package.zip .
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: kody-php7-grpc-package
+          path: kp-bamboo-php7/package/kody-php7-grpc-package.zip

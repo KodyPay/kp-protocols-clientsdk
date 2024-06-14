@@ -21,3 +21,6 @@ gradle-app.setting
 .project
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
+php7/output
+php7/vendor
+composer.lock
