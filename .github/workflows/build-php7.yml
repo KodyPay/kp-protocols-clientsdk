@@ -69,13 +69,13 @@ jobs:
 
       - name: Package the compiled files
         run: |
-          mkdir -p package
-          cp -r output/ package/
-          cd package
+          cd output
           zip -r kody-php7-grpc-package.zip .
+          pwd
+          ls -la
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
           name: kody-php7-grpc-package
-          path: ./php7/package/kody-php7-grpc-package.zip
+          path: ~/php7/output/kody-php7-grpc-package.zip
