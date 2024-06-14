@@ -68,12 +68,12 @@ jobs:
 
       - name: Compile Protobuf file
         run: |
-          mkdir -p output
-          protoc --proto_path=src/main/proto --php_out=./output --grpc_out=./output --plugin=protoc-gen-grpc=/usr/local/bin/grpc_php_plugin src/main/proto/com/kodypay/grpc/pay/v1/pay.proto
+          mkdir -p php7/output
+          protoc --proto_path=src/main/proto --php_out=./php7/output --grpc_out=./php7/output --plugin=protoc-gen-grpc=/usr/local/bin/grpc_php_plugin src/main/proto/com/kodypay/grpc/pay/v1/pay.proto
 
       - name: Package the compiled files
         run: |
-          cd output
+          cd php7/output
           zip -r kody-php7-grpc-package.zip .
           pwd
           ls -la
