@@ -17,17 +17,39 @@ jobs:
           php-version: '7.4'
           extensions: mbstring, json, grpc, protobuf
 
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.composer/cache
+            ./php7/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/php7/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
       - name: Install Composer dependencies
         run: |
           cd php7
-          composer install
+          composer install --prefer-dist --no-progress --no-suggest
 
       - name: Install Protoc
         run: |
           sudo apt-get update
           sudo apt-get install -y protobuf-compiler
 
+      - name: Check Protoc Version
+        run: |
+          protoc --version
+
+      - name: Cache gRPC PHP plugin
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/grpc/cmake/build
+          key: ${{ runner.os }}-grpc-php-plugin
+
       - name: Install gRPC PHP plugin
+        if: steps.cache-grpc-php-plugin.outputs.cache-hit != 'true'
         run: |
           sudo apt-get install -y build-essential autoconf libtool pkg-config
           git clone --recurse-submodules -b v1.41.0 https://github.com/grpc/grpc
@@ -41,7 +63,7 @@ jobs:
       - name: Compile Protobuf file
         run: |
           mkdir -p output
-          protoc --proto_path=src/main/proto --php_out=./output --grpc_out=./output --plugin=protoc-gen-grpc=/usr/local/bin/grpc_php_plugin src/main/proto/com/kodypay/grpc/pay/v1/pay.proto
+          protoc --experimental_allow_proto3_optional  --proto_path=src/main/proto --php_out=./output --grpc_out=./output --plugin=protoc-gen-grpc=/usr/local/bin/grpc_php_plugin src/main/proto/com/kodypay/grpc/pay/v1/pay.proto
 
       - name: Package the compiled files
         run: |
