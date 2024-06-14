@@ -47,14 +47,14 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ~/grpc/cmake/build
-          key: ${{ runner.os }}-grpc-php-plugin
+            ~/grpc
+          key: ${{ runner.os }}-grpc-php-plugin-v1
 
       - name: Install gRPC PHP plugin
         if: steps.cache-grpc-php-plugin.outputs.cache-hit != 'true'
         run: |
           sudo apt-get install -y build-essential autoconf libtool pkg-config
-          git clone --recurse-submodules -b v1.41.0 https://github.com/grpc/grpc
+          git clone --recurse-submodules -b v1.64.2  https://github.com/grpc/grpc
           cd grpc
           mkdir -p cmake/build
           cd cmake/build
@@ -70,7 +70,7 @@ jobs:
       - name: Package the compiled files
         run: |
           mkdir -p package
-          cp -r output package/
+          cp -r output/ package/
           cd package
           zip -r kody-php7-grpc-package.zip .
 
@@ -78,4 +78,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: kody-php7-grpc-package
-          path: kp-bamboo-php7/package/kody-php7-grpc-package.zip
+          path: ./php7/package/kody-php7-grpc-package.zip
