@@ -77,7 +77,7 @@ jobs:
           zip -r kody-php7-grpc-package.zip .
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: kody-php7-grpc-package
           path: ./php7/output/kody-php7-grpc-package.zip
