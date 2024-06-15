@@ -84,7 +84,6 @@ jobs:
         run: |
           cd php7
           composer config repositories.pkg vcs git@github.com:KodyPay/kp-protocols-clientsdk.git
-          composer config --global --auth ssh-github.com.token ${{ secrets.GITHUB_TOKEN }}
           composer publish --repository-url git@github.com:KodyPay/kp-protocols-clientsdk.git
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
