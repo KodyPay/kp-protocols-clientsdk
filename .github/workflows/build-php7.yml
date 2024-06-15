@@ -71,34 +71,6 @@ jobs:
           mkdir -p php7/output
           protoc --proto_path=src/main/proto --php_out=./php7/output --grpc_out=./php7/output --plugin=protoc-gen-grpc=/usr/local/bin/grpc_php_plugin src/main/proto/com/kodypay/grpc/pay/v1/pay.proto
 
-      - name: Package the compiled files
-        run: |
-          mkdir -p php7/package
-          cp -r php7/output/ php7/package/
-          cd php7/package
-          zip -r kody-php7-grpc-package.zip .
-
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
-
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: php7/package/kody-php7-grpc-package.zip
-          asset_name: kody-php7-grpc-package.zip
-          asset_content_type: application/zip
-
       - name: Configure SSH for Composer
         run: |
           mkdir -p ~/.ssh
