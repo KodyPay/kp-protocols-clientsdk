@@ -11,16 +11,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          extensions: mbstring, json, grpc, protobuf
+
       - name: Cache Composer dependencies
         uses: actions/cache@v3
         with:
-          path: /tmp/composer-cache
-          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
-
-      - name: Install dependencies
-        uses: php-actions/composer@v6
-        with:
-          php_version: '7.4'
+          path: |
+            ~/.composer/cache
+            ./php7/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/php7/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
         run: |
