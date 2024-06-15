@@ -74,7 +74,7 @@ jobs:
       - name: Package the compiled files
         run: |
           mkdir -p php7/package
-          cp -r php7/output/ kp-bamboo-php7/package/
+          cp -r php7/output/ php7/package/
           cd php7/package
           zip -r kody-php7-grpc-package.zip .
 
