@@ -1,0 +1,53 @@
+name: Publish PHP7
+on:
+  workflow_run:
+    workflows: ["Build gRPC PHP7 Package"]
+    types:
+      - completed
+jobs:
+  publish:
+    permissions:
+      packages: write
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: kody-php7-grpc-package
+          path: ./artifacts
+
+      - name: Extract Artifact
+        run: unzip -o ./artifacts/kody-php7-grpc-package.zip -d ./artifacts
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          extensions: mbstring, json, grpc, protobuf
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.composer/cache
+            ./php7/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/php7/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: |
+          cd php7
+          composer install --prefer-dist --no-progress
+
+      - name: Publish to GitHub Packages
+        run: |
+          cd php7
+          composer config repositories.pkg vcs https://github.com/KodyPay/kp-protocols-clientsdk
+          composer config http-basic.github.com ${{ secrets.GITHUB_ACTOR }} ${{ secrets.GITHUB_TOKEN }}
+          composer publish --repository-url https://github.com/KodyPay/kp-protocols-clientsdk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}

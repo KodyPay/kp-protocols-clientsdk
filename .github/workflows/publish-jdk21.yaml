@@ -23,12 +23,6 @@ jobs:
           distribution: 'adopt'
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-      - name: Setup Node 20
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-          cache: npm
-          registry-url: 'https://npm.pkg.github.com/'
       - name: Publish candidate
         if: |
           startsWith(github.ref, 'refs/tags/v') &&
@@ -39,15 +33,3 @@ jobs:
           startsWith(github.ref, 'refs/tags/v') &&
           (!contains(github.ref, '-rc.'))
         run: ./gradlew final -Prelease.useLastTag=true -s
-      - name: Publish NPM release
-        if: |
-          startsWith(github.ref, 'refs/tags/v') &&
-          (!contains(github.ref, '-rc.'))
-        run: |
-          npm ci
-          npm run build
-          npm version --no-git-tag-version ${{ env.NEXT_VERSION }}
-          npm publish --scope=@kodypay ./build/grpc-web
-        env:
-          NEXT_VERSION: ${{ github.ref_name }}
-          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_REGISTRY }}
