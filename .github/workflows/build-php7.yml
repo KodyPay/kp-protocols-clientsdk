@@ -1,4 +1,4 @@
-name: Build gRPC PHP7 Package
+name: Build PHP7
 
 on:
   push:

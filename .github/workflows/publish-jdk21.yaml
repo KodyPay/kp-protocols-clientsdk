@@ -1,4 +1,4 @@
-name: gradle-publish
+name: Publish JDK21
 on:
   push:
     tags:
@@ -8,7 +8,6 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    name: "gradle-publish"
     env:
       # NOTE: using global token because we're pulling dependencies from different repositories
       GITHUB_TOKEN: ${{ secrets.GH_PACKAGES_REGISTRY }}

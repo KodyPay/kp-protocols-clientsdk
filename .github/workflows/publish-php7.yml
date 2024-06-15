@@ -1,7 +1,7 @@
 name: Publish PHP7
 on:
   workflow_run:
-    workflows: ["Build gRPC PHP7 Package"]
+    workflows: ["Build PHP7"]
     types:
       - completed
 jobs:

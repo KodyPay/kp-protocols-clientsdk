@@ -1,4 +1,4 @@
-name: publish-dotnet
+name: Publish .NET
 on:
   push:
     tags:
