@@ -18,7 +18,7 @@ jobs:
       - name: Dispatch PHP SDK
         uses: peter-evans/repository-dispatch@v3
         with:
-          repository: kodypay/kody-clientsdk-php7
+          repository: kodypay/kody-clientsdk-php
           client-payload: '{"tag": "${{ env.tag }}", "repository": "${{ github.repository }}"}'
           event-type: tag-push
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
