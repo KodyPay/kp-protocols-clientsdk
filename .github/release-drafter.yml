@@ -1,0 +1,76 @@
+name-template: 'v$RESOLVED_VERSION ⚙️'
+tag-template: 'v$RESOLVED_VERSION'
+tag-prefix: 'v'
+version-template: '$MAJOR.$MINOR.$PATCH'
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+template: |
+  # What's Changed
+
+  $CHANGES
+
+categories:
+  - title: '🧠 Breaking changes'
+    label: 'type: breaking'
+  - title: '🎩 Minor changes'
+    label: 'type: minor'
+  - title: '🚀 Features'
+    label: 'type: feature'
+  - title: '🐛 Bug Fixes'
+    label: 'type: bug'
+  - title: '🧰 Maintenance'
+    label: 'type: chore'
+  - title: '📖 Documentation'
+    label: 'type: docs'
+  - title: 'Other changes'
+  - title: '⬆️ Dependency Updates'
+    label: 'type: dependencies'
+    collapse-after: 3
+
+version-resolver:
+  major:
+    labels:
+      - 'type: breaking'
+  minor:
+    labels:
+      - 'type: minor'
+  patch:
+    labels:
+      - 'type: feature'
+      - 'type: bug'
+      - 'type: chore'
+      - 'type: docs'
+      - 'type: dependencies'
+      - 'type: security'
+  default: patch
+
+exclude-labels:
+  - 'skip-changelog'
+
+autolabeler:
+  - label: 'type: breaking'
+    branch:
+      - '/breaking\/.+/'
+      - '/major\/.+/'
+    title:
+      - '/breaking(\(\w+-?[0-9]*\))? *:'
+  - label: 'type: minor'
+    branch:
+      - '/minor\/.+/'
+    title:
+      - '/minor(\(\w+-?[0-9]*\))? *:'
+  - label: 'type: docs'
+    branch:
+      - '/docs{0,1}\/.+/'
+  - label: 'type: chore'
+    branch:
+      - '/chore\/.+/'
+  - label: 'type: bug'
+    branch:
+      - '/fix\/.+/'
+    title:
+      - '/fix/i'
+  - label: 'type: feature'
+    branch:
+      - '/feat(ure)?\/.+/'
+    title:
+      - '/feat(ure)?(\(\w+-?[0-9]*\))? *:'
