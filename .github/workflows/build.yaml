@@ -29,13 +29,3 @@ jobs:
         env:
           # NOTE: using global token because we're pulling dependencies from different repositories
           GITHUB_TOKEN: ${{ secrets.GH_PACKAGES_REGISTRY }}
-      - name: Setup Node 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: npm
-          registry-url: 'https://npm.pkg.github.com/'
-      - name: Build NPM
-        run: |
-          npm ci
-          npm run build
