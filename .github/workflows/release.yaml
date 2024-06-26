@@ -4,8 +4,22 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_run:
+    workflows: [ build ]
+    types: [ completed ]
+    branches: [ main ]
 
 jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Release Drafter
+        uses: release-drafter/release-drafter@v5
+        with:
+          publish: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_RELEASE }}
   dispatch:
     runs-on: ubuntu-latest
     steps:
