@@ -1,8 +1,8 @@
 syntax = "proto3";
-package com.kody.grpc.ecom.v1;
+package com.kodypay.grpc.ecom.v1;
 option java_multiple_files = true;
 option java_outer_classname = "KodyEcomPaymentsProto";
-option java_package = "com.kody.grpc.ecom.v1";
+option java_package = "com.kodypay.grpc.ecom.v1";
 import "google/protobuf/timestamp.proto";
 
 // All service requests require X-API-Key header with 'API Key' value
