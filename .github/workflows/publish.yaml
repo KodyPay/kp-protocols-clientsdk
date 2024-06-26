@@ -1,0 +1,53 @@
+name: gradle-publish
+on:
+  push:
+    tags:
+      - v*.*.*
+      - v*.*.*-rc.*
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    name: "gradle-publish"
+    env:
+      # NOTE: using global token because we're pulling dependencies from different repositories
+      GITHUB_TOKEN: ${{ secrets.GH_PACKAGES_REGISTRY }}
+      NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_REGISTRY }}
+      NPM_CONFIG_TOKEN: ${{ secrets.GH_PACKAGES_REGISTRY }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'adopt'
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+      - name: Setup Node 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: npm
+          registry-url: 'https://npm.pkg.github.com/'
+      - name: Publish candidate
+        if: |
+          startsWith(github.ref, 'refs/tags/v') &&
+          contains(github.ref, '-rc.')
+        run: ./gradlew candidate -Prelease.useLastTag=true -s
+      - name: Publish release
+        if: |
+          startsWith(github.ref, 'refs/tags/v') &&
+          (!contains(github.ref, '-rc.'))
+        run: ./gradlew final -Prelease.useLastTag=true -s
+      - name: Publish NPM release
+        if: |
+          startsWith(github.ref, 'refs/tags/v') &&
+          (!contains(github.ref, '-rc.'))
+        run: |
+          npm ci
+          npm run build
+          npm version --no-git-tag-version ${{ env.NEXT_VERSION }}
+          npm publish --scope=@kodypay ./build/grpc-web
+        env:
+          NEXT_VERSION: ${{ github.ref_name }}
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_REGISTRY }}
