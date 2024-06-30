@@ -75,7 +75,7 @@ message PaymentDetailsResponse {
     optional string payment_data_json = 6; // json blob containing payment data
 
     google.protobuf.Timestamp date_created = 7;
-    google.protobuf.Timestamp date_paid = 8;
+    optional google.protobuf.Timestamp date_paid = 8;
 
     enum PaymentStatus {
       PENDING = 0;
@@ -92,6 +92,7 @@ message PaymentDetailsResponse {
     enum Type {
       UNKNOWN = 0;
       NOT_FOUND = 1;
+      INVALID_REQUEST = 2;
     }
   }
 
