@@ -4,13 +4,14 @@ option java_multiple_files = true;
 option java_outer_classname = "KodyEcomPaymentsProto";
 option java_package = "com.kodypay.grpc.ecom.v1";
 import "google/protobuf/timestamp.proto";
+import "com/kodypay/grpc/sdk/common/pagination.proto";
 
 // All service requests require X-API-Key header with 'API Key' value
 service KodyEcomPaymentsService {
   // Initiates a payment and returns a URL for the user to complete payment
   rpc InitiatePayment(PaymentInitiationRequest) returns (PaymentInitiationResponse);
   rpc PaymentDetails(PaymentDetailsRequest) returns (PaymentDetailsResponse);
-  rpc Payments(PaymentsRequest) returns (PaymentsResponse);
+  rpc GetPayments(GetPaymentsRequest) returns (GetPaymentsResponse);
 }
 
 // Payment Initiation Request
@@ -97,17 +98,12 @@ message PaymentDetails {
   }
 }
 
-message PaymentsRequest {
+message GetPaymentsRequest {
   string store_id = 1;
-  // can be used to make pagination stable
-  // after first request, pass up the created date of the first entry
-  // then if a new payment occurs during page traversal, it will be ignored
-  optional google.protobuf.Timestamp created_before = 2;
-  int64 page = 3;
-  int64 page_size = 4;
-  optional string order_id = 5;
+  com.kodypay.grpc.sdk.common.PageFilter pageFilter = 2;
+  optional string order_id = 3;
 }
-message PaymentsResponse {
+message GetPaymentsResponse {
   oneof result {
     PagedResponse response = 1;
     Error error = 2;
