@@ -9,8 +9,8 @@ import "google/protobuf/timestamp.proto";
 service KodyEcomPaymentsService {
   // Initiates a payment and returns a URL for the user to complete payment
   rpc InitiatePayment(PaymentInitiationRequest) returns (PaymentInitiationResponse);
-
   rpc PaymentDetails(PaymentDetailsRequest) returns (PaymentDetailsResponse);
+  rpc Payments(PaymentsRequest) returns (PaymentsResponse);
 }
 
 // Payment Initiation Request
@@ -62,27 +62,8 @@ message PaymentDetailsRequest {
 
 message PaymentDetailsResponse {
   oneof result {
-    Response response = 1;
+    PaymentDetails response = 1;
     Error error = 2;
-  }
-
-  message Response {
-    string payment_id = 1; // The unique identifier created by Kody
-    string payment_reference = 2; // Your unique payment reference that was set during the initiation
-    string order_id = 3; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
-    optional string order_metadata = 4; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
-    PaymentStatus status = 5;
-    optional string payment_data_json = 6; // json blob containing payment data
-
-    google.protobuf.Timestamp date_created = 7;
-    optional google.protobuf.Timestamp date_paid = 8;
-
-    enum PaymentStatus {
-      PENDING = 0;
-      SUCCESS = 1;
-      FAILED = 2;
-      CANCELLED = 3;
-    }
   }
 
   message Error {
@@ -95,5 +76,56 @@ message PaymentDetailsResponse {
       INVALID_REQUEST = 2;
     }
   }
+}
 
+message PaymentDetails {
+  string payment_id = 1; // The unique identifier created by Kody
+  string payment_reference = 2; // Your unique payment reference that was set during the initiation
+  string order_id = 3; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
+  optional string order_metadata = 4; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
+  PaymentStatus status = 5;
+  optional string payment_data_json = 6; // json blob containing payment data
+
+  google.protobuf.Timestamp date_created = 7;
+  optional google.protobuf.Timestamp date_paid = 8;
+
+  enum PaymentStatus {
+    PENDING = 0;
+    SUCCESS = 1;
+    FAILED = 2;
+    CANCELLED = 3;
+  }
+}
+
+message PaymentsRequest {
+  string store_id = 1;
+  // can be used to make pagination stable
+  // after first request, pass up the created date of the first entry
+  // then if a new payment occurs during page traversal, it will be ignored
+  optional google.protobuf.Timestamp created_before = 2;
+  int64 page = 3;
+  int64 page_size = 4;
+  optional string order_id = 5;
+}
+message PaymentsResponse {
+  oneof result {
+    PagedResponse response = 1;
+    Error error = 2;
+  }
+
+  message PagedResponse {
+    repeated PaymentDetails payments = 1;
+    int64 total = 2;
+  }
+
+  message Error {
+    Type type = 1;
+    string message = 2;
+
+    enum Type {
+      UNKNOWN = 0;
+      NOT_FOUND = 1;
+      INVALID_ARGUMENT = 2;
+    }
+  }
 }
