@@ -100,8 +100,13 @@ message PaymentDetailsResponse {
 
 message GetPaymentsRequest {
   string store_id = 1;
-  com.kodypay.grpc.sdk.common.PageFilter pageFilter = 2;
-  optional string order_id = 3;
+  com.kodypay.grpc.sdk.common.PageCursor pageFilter = 2;
+  Filter filter =3;
+
+  message Filter {
+    optional string order_id = 1;
+    optional google.protobuf.Timestamp created_after = 2;
+  }
 }
 message GetPaymentsResponse {
   oneof result {
@@ -110,10 +115,10 @@ message GetPaymentsResponse {
   }
 
   message Response {
-    repeated ResponseItem payments = 1;
+    repeated PaymentDetails payments = 1;
     int64 total = 2;
 
-    message ResponseItem {
+    message PaymentDetails {
       string payment_id = 1; // The unique identifier created by Kody
       string payment_reference = 2; // Your unique payment reference that was set during the initiation
       string order_id = 3; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
