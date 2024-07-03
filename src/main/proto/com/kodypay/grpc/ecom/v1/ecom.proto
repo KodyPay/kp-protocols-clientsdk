@@ -63,7 +63,7 @@ message PaymentDetailsRequest {
 
 message PaymentDetailsResponse {
   oneof result {
-    PaymentDetails response = 1;
+    Response response = 1;
     Error error = 2;
   }
 
@@ -77,24 +77,24 @@ message PaymentDetailsResponse {
       INVALID_REQUEST = 2;
     }
   }
-}
 
-message PaymentDetails {
-  string payment_id = 1; // The unique identifier created by Kody
-  string payment_reference = 2; // Your unique payment reference that was set during the initiation
-  string order_id = 3; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
-  optional string order_metadata = 4; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
-  PaymentStatus status = 5;
-  optional string payment_data_json = 6; // json blob containing payment data
+  message Response {
+    string payment_id = 1; // The unique identifier created by Kody
+    string payment_reference = 2; // Your unique payment reference that was set during the initiation
+    string order_id = 3; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
+    optional string order_metadata = 4; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
+    PaymentStatus status = 5;
+    optional string payment_data_json = 6; // json blob containing payment data
 
-  google.protobuf.Timestamp date_created = 7;
-  optional google.protobuf.Timestamp date_paid = 8;
+    google.protobuf.Timestamp date_created = 7;
+    optional google.protobuf.Timestamp date_paid = 8;
 
-  enum PaymentStatus {
-    PENDING = 0;
-    SUCCESS = 1;
-    FAILED = 2;
-    CANCELLED = 3;
+    enum PaymentStatus {
+      PENDING = 0;
+      SUCCESS = 1;
+      FAILED = 2;
+      CANCELLED = 3;
+    }
   }
 }
 
@@ -105,13 +105,32 @@ message GetPaymentsRequest {
 }
 message GetPaymentsResponse {
   oneof result {
-    PagedResponse response = 1;
+    Response response = 1;
     Error error = 2;
   }
 
-  message PagedResponse {
-    repeated PaymentDetails payments = 1;
+  message Response {
+    repeated ResponseItem payments = 1;
     int64 total = 2;
+
+    message ResponseItem {
+      string payment_id = 1; // The unique identifier created by Kody
+      string payment_reference = 2; // Your unique payment reference that was set during the initiation
+      string order_id = 3; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
+      optional string order_metadata = 4; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
+      PaymentStatus status = 5;
+      optional string payment_data_json = 6; // json blob containing payment data
+
+      google.protobuf.Timestamp date_created = 7;
+      optional google.protobuf.Timestamp date_paid = 8;
+
+      enum PaymentStatus {
+        PENDING = 0;
+        SUCCESS = 1;
+        FAILED = 2;
+        CANCELLED = 3;
+      }
+    }
   }
 
   message Error {
