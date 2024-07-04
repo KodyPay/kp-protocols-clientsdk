@@ -100,12 +100,12 @@ message PaymentDetailsResponse {
 
 message GetPaymentsRequest {
   string store_id = 1;
-  com.kodypay.grpc.sdk.common.PageCursor pageCursor = 2;
+  com.kodypay.grpc.sdk.common.PageCursor page_cursor = 2;
   Filter filter = 3;
 
   message Filter {
     optional string order_id = 1;
-    optional google.protobuf.Timestamp created_after = 2;
+    optional google.protobuf.Timestamp created_before = 2;
   }
 }
 message GetPaymentsResponse {
