@@ -101,7 +101,7 @@ message PaymentDetailsResponse {
 message GetPaymentsRequest {
   string store_id = 1;
   com.kodypay.grpc.sdk.common.PageCursor pageCursor = 2;
-  Filter filter =3;
+  Filter filter = 3;
 
   message Filter {
     optional string order_id = 1;
