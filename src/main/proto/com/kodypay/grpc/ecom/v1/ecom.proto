@@ -94,6 +94,7 @@ message PaymentDetailsResponse {
       SUCCESS = 1;
       FAILED = 2;
       CANCELLED = 3;
+      EXPIRED = 4;
     }
   }
 }
@@ -134,6 +135,7 @@ message GetPaymentsResponse {
         SUCCESS = 1;
         FAILED = 2;
         CANCELLED = 3;
+        EXPIRED = 4;
       }
     }
   }
