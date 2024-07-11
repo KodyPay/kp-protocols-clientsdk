@@ -24,10 +24,10 @@ jobs:
           event-type: tag-push
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
-      - name: Dispatch Kotlin SDK
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          repository: kodypay/kody-clientsdk-kotlin
-          client-payload: '{"tag": "${{ env.tag }}", "repository": "${{ github.repository }}"}'
-          event-type: tag-push
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+#      - name: Dispatch Kotlin SDK
+#        uses: peter-evans/repository-dispatch@v3
+#        with:
+#          repository: kodypay/kody-clientsdk-kotlin
+#          client-payload: '{"tag": "${{ env.tag }}", "repository": "${{ github.repository }}"}'
+#          event-type: tag-push
+#          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
