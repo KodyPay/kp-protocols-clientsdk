@@ -12,6 +12,7 @@ service KodyEcomPaymentsService {
   rpc InitiatePayment(PaymentInitiationRequest) returns (PaymentInitiationResponse);
   rpc PaymentDetails(PaymentDetailsRequest) returns (PaymentDetailsResponse);
   rpc GetPayments(GetPaymentsRequest) returns (GetPaymentsResponse);
+  rpc GetCardToken(GetCardTokenRequest) returns (GetCardTokenResponse);
 }
 
 // Payment Initiation Request
@@ -27,6 +28,7 @@ message PaymentInitiationRequest {
   optional string payer_email_address = 9; // We recommend that you provide this data, as it is used in velocity fraud checks. Required for 3D Secure 2 transactions.
   optional string payer_ip_address = 10; // The payer IP address used for risk checks, also required for 3D Secure 2 transactions.
   optional string payer_locale = 11; // The language code and country code to specify the language to display the payment pages. It will default to en_GB if not set.
+  optional bool tokenise_card = 12; // defaults false
 }
 
 // Payment Initiation Response
@@ -58,6 +60,26 @@ message PaymentDetailsRequest {
   oneof payment_identifier {
     string payment_id = 2; // The unique identifier created by Kody
     string payment_reference = 3; // Your unique payment reference that was set during the initiation
+  }
+}
+
+message GetCardTokenRequest {
+  string store_id = 1; // Your Kody store id
+  oneof payment_identifier {
+    string payment_id = 2; // The unique identifier created by Kody
+    string payment_reference = 3; // Your unique payment reference that was set during the initiation
+  }
+}
+
+message GetCardTokenResponse {
+  string token = 1;
+  string expiry = 2;
+  CardTokenStatus status = 3;
+
+  enum CardTokenStatus {
+    PENDING = 0;
+    FAILED = 1;
+    READY = 2;
   }
 }
 
