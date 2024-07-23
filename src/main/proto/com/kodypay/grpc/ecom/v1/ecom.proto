@@ -12,7 +12,7 @@ service KodyEcomPaymentsService {
   rpc InitiatePayment(PaymentInitiationRequest) returns (PaymentInitiationResponse);
   rpc PaymentDetails(PaymentDetailsRequest) returns (PaymentDetailsResponse);
   rpc GetPayments(GetPaymentsRequest) returns (GetPaymentsResponse);
-  rpc GetPaymentToken(GetPaymentTokenRequest) returns (GetPaymentTokenResponse);
+  rpc GetCardToken(GetCardTokenRequest) returns (GetCardTokenResponse);
 }
 
 // Payment Initiation Request
@@ -63,7 +63,7 @@ message PaymentDetailsRequest {
   }
 }
 
-message GetPaymentTokenRequest {
+message GetCardTokenRequest {
   string store_id = 1; // Your Kody store id
   oneof payment_identifier {
     string payment_id = 2; // The unique identifier created by Kody
@@ -71,12 +71,12 @@ message GetPaymentTokenRequest {
   }
 }
 
-message GetPaymentTokenResponse {
+message GetCardTokenResponse {
   string token = 1;
   string expiry = 2;
-  PaymentTokenStatus status = 3;
+  CardTokenStatus status = 3;
 
-  enum PaymentTokenStatus {
+  enum CardTokenStatus {
     PENDING = 0;
     FAILED = 1;
     READY = 2;
