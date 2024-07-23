@@ -28,7 +28,7 @@ message PaymentInitiationRequest {
   optional string payer_email_address = 9; // We recommend that you provide this data, as it is used in velocity fraud checks. Required for 3D Secure 2 transactions.
   optional string payer_ip_address = 10; // The payer IP address used for risk checks, also required for 3D Secure 2 transactions.
   optional string payer_locale = 11; // The language code and country code to specify the language to display the payment pages. It will default to en_GB if not set.
-  optional bool tokenise = 12; // defaults false
+  optional bool tokenise_card = 12; // defaults false
 }
 
 // Payment Initiation Response
@@ -74,12 +74,12 @@ message GetPaymentTokenRequest {
 message GetPaymentTokenResponse {
   string token = 1;
   string expiry = 2;
-  IntegratedPaymentTokenStatus status = 3;
+  PaymentTokenStatus status = 3;
 
-  enum IntegratedPaymentTokenStatus {
-    Pending = 0;
-    Failed = 1;
-    Ready = 2;
+  enum PaymentTokenStatus {
+    PENDING = 0;
+    FAILED = 1;
+    READY = 2;
   }
 }
 
