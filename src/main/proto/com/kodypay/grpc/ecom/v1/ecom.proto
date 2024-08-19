@@ -29,6 +29,12 @@ message PaymentInitiationRequest {
   optional string payer_ip_address = 10; // The payer IP address used for risk checks, also required for 3D Secure 2 transactions.
   optional string payer_locale = 11; // The language code and country code to specify the language to display the payment pages. It will default to en_GB if not set.
   optional bool tokenise_card = 12; // defaults false
+  optional ExpirySettings expiry = 13; // Nested message for expiry settings
+
+  message ExpirySettings {
+    bool show_timer = 1; // Display a countdown timer to the user in the payment page, default is false
+    uint64 expiring_seconds = 2; // Timeout duration in seconds, defaults to 1800 seconds (30 minutes)
+  }
 }
 
 // Payment Initiation Response
