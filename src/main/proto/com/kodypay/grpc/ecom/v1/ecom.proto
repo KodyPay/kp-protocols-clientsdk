@@ -30,6 +30,7 @@ message PaymentInitiationRequest {
   optional string payer_locale = 11; // The language code and country code to specify the language to display the payment pages. It will default to en_GB if not set.
   optional bool tokenise_card = 12; // defaults false
   optional ExpirySettings expiry = 13; // Nested message for expiry settings
+  string extra_field= 14;
 
   message ExpirySettings {
     bool show_timer = 1; // Display a countdown timer to the user in the payment page, default is false

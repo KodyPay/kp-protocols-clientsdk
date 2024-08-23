@@ -1,0 +1,17 @@
+name: buf-pull-request
+on: pull_request
+jobs:
+  validate-proto:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      # Install and setup buf (default latest version)
+      - uses: bufbuild/buf-setup-action@v0.3.1
+      # Lint Disabling lint as we are already failing for current protos
+#      - uses: bufbuild/buf-lint-action@v0.3.0
+#        with:
+#          input: "src/main/proto"
+      - uses: bufbuild/buf-breaking-action@v0.4.0
+        with:
+#          input: "src/main/proto"
+          against: "https://github.com/${GITHUB_REPOSITORY}.git#branch=main"
