@@ -29,6 +29,7 @@ message PayRequest {
   string store_id = 1; // UUID of store
   string amount = 2; // amount in BigDecimal/2.dp (0.00)
   string terminal_id = 3; // send the payment to this terminal serial number
+  optional bool show_tips = 4; // Show tips on the terminal
 }
 message PayResponse {
   PaymentStatus status = 1;
