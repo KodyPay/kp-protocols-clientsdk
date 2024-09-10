@@ -39,9 +39,9 @@ message PayResponse {
   google.protobuf.Timestamp date_created = 5;
   optional string ext_payment_ref = 6;
   google.protobuf.Timestamp date_paid = 7;
-  optional string totalAmount = 8;
-  optional string saleAmount = 9;
-  optional string tipsAmount = 10;
+  optional string total_amount = 8;
+  optional string sale_amount = 9;
+  optional string tips_amount = 10;
 }
 enum PaymentStatus {
   PENDING = 0;
