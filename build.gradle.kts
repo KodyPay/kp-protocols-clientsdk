@@ -1,17 +1,38 @@
+import com.google.protobuf.gradle.*
+
 plugins {
-    kotlin("jvm") version "2.0.20"
-    id("kodypay.core") version "3.0.14"
-    id("kodypay.protobuf") version "3.0.14"
+    id("java")
+    id("idea")
+    id("com.google.protobuf") version "0.9.4"
 }
-kodyProtobuf {
-    useGrpc = true
-    protobufVersion = "4.28.2"
-    grpcVersion = "1.68.0"
-    coroutinesVersion = "1.9.0"
-    grpcKotlinVersion = "1.4.1"
+
+repositories {
+    mavenCentral()
 }
-kodypay {
-    jvmTarget = "11"
-    withSources()
-    release { fixedStrategy = false }
+
+val protbufVersion = "4.28.2"
+val grpcVersion = "1.68.0"
+val javaxAnnotationsVersion = "1.3.2"
+
+dependencies {
+    implementation("com.google.protobuf:protobuf-java:$protbufVersion")
+    implementation("io.grpc:grpc-stub:$grpcVersion")
+    implementation("io.grpc:grpc-protobuf:$grpcVersion")
+    implementation("javax.annotation:javax.annotation-api:$javaxAnnotationsVersion")
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:$protbufVersion"
+    }
+    plugins {
+        id("grpc") { artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion" }
+    }
+    generateProtoTasks {
+        ofSourceSet("main").forEach {
+            it.plugins {
+               id("grpc") { }
+            }
+        }
+    }
 }
