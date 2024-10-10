@@ -1,33 +1,17 @@
 name: release
-
 on:
-  push:
-    tags:
-      - v*.*.*
-      - v*.*.*-rc.*
-
+  workflow_run:
+    workflows: [build]
+    types: [completed]
+    branches: [main]
 jobs:
-  dispatch:
+  release:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - name: Extract Tag Name
-        id: extract_tag
-        run: |
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-          echo "tag=${TAG_NAME}" >> $GITHUB_ENV
-
-      - name: Dispatch PHP SDK
-        uses: peter-evans/repository-dispatch@v3
+      - name: Release Drafter
+        uses: release-drafter/release-drafter@v5
         with:
-          repository: kodypay/kody-clientsdk-php
-          client-payload: '{"tag": "${{ env.tag }}", "repository": "${{ github.repository }}"}'
-          event-type: tag-push
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-
-#      - name: Dispatch Kotlin SDK
-#        uses: peter-evans/repository-dispatch@v3
-#        with:
-#          repository: kodypay/kody-clientsdk-kotlin
-#          client-payload: '{"tag": "${{ env.tag }}", "repository": "${{ github.repository }}"}'
-#          event-type: tag-push
-#          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          publish: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_RELEASE }}

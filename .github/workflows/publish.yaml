@@ -1,0 +1,36 @@
+name: publish
+on:
+  push:
+    tags:
+      - v*.*.*
+      - v*.*.*-rc.*
+jobs:
+  gradle:
+    uses: kodypay/kp-github-workflows/.github/workflows/gradle-lib-publish.yaml@main
+    secrets: inherit
+    with:
+      java_version: 17
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract Tag Name
+        id: extract_tag
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          echo "tag=${TAG_NAME}" >> $GITHUB_ENV
+
+      - name: Dispatch PHP SDK
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          repository: kodypay/kody-clientsdk-php
+          client-payload: '{"tag": "${{ env.tag }}", "repository": "${{ github.repository }}"}'
+          event-type: tag-push
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+#      - name: Dispatch Kotlin SDK
+#        uses: peter-evans/repository-dispatch@v3
+#        with:
+#          repository: kodypay/kody-clientsdk-kotlin
+#          client-payload: '{"tag": "${{ env.tag }}", "repository": "${{ github.repository }}"}'
+#          event-type: tag-push
+#          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
