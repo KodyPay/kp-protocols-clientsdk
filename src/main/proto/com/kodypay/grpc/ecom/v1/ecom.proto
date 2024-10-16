@@ -1,18 +1,33 @@
 syntax = "proto3";
 package com.kodypay.grpc.ecom.v1;
+
+import "com/kodypay/grpc/sdk/common/pagination.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "com.kodypay.grpc.ecom.v1";
 option java_multiple_files = true;
 option java_outer_classname = "KodyEcomPaymentsProto";
 option java_package = "com.kodypay.grpc.ecom.v1";
-import "google/protobuf/timestamp.proto";
-import "com/kodypay/grpc/sdk/common/pagination.proto";
 
 // All service requests require X-API-Key header with 'API Key' value
 service KodyEcomPaymentsService {
   // Initiates a payment and returns a URL for the user to complete payment
-  rpc InitiatePayment(PaymentInitiationRequest) returns (PaymentInitiationResponse);
-  rpc PaymentDetails(PaymentDetailsRequest) returns (PaymentDetailsResponse);
-  rpc GetPayments(GetPaymentsRequest) returns (GetPaymentsResponse);
-  rpc GetCardToken(GetCardTokenRequest) returns (GetCardTokenResponse);
+  rpc InitiatePayment(PaymentInitiationRequest) returns (PaymentInitiationResponse) {
+    option (google.api.http) = {
+      post: "/v1/ecom/payment/{store_id}"
+      body: "*"
+    };
+  }
+  rpc PaymentDetails(PaymentDetailsRequest) returns (PaymentDetailsResponse) {
+    option (google.api.http) = {get: "/v1/ecom/details/{store_id}"};
+  }
+  rpc GetPayments(GetPaymentsRequest) returns (GetPaymentsResponse) {
+    option (google.api.http) = {get: "/v1/ecom/payments/{store_id}"};
+  }
+  rpc GetCardToken(GetCardTokenRequest) returns (GetCardTokenResponse) {
+    option (google.api.http) = {get: "/v1/ecom/token/{store_id}"};
+  }
 }
 
 // Payment Initiation Request
