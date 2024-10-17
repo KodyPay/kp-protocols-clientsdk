@@ -5,7 +5,6 @@ plugins {
     java
     id("idea")
     id("build.buf") version "0.10.0"
-    id("maven-publish")
 }
 
 repositories {
@@ -13,7 +12,6 @@ repositories {
     maven {
         url = uri("https://buf.build/gen/maven")
     }
-    mavenLocal { content { includeGroupByRegex("com\\.kodypay\\..*") } }
 }
 group = "com.kodypay.api.grpc"
 defaultTasks("clean", "build")
@@ -47,16 +45,5 @@ buf {
     }
     build {
         imageFormat = ImageFormat.BINPB
-    }
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            from(components["java"])
-        }
-    }
-    repositories {
-        mavenLocal()
     }
 }
