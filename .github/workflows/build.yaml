@@ -25,4 +25,4 @@ jobs:
         uses: actions/upload-artifact@v4.4.3
         with:
           name: kp-protocols-clientsdk.pb
-          path: "**/build/bufbuild/image.binpb"
+          path: "**/build/*/image.binpb"
