@@ -1,9 +1,10 @@
 syntax = "proto3";
 package com.kodypay.grpc.sdk.common;
+
+option go_package = "com.kodypay.grpc.sdk.common";
 option java_multiple_files = true;
 option java_outer_classname = "KodySdkCommonProto";
 option java_package = "com.kodypay.grpc.sdk.common";
-import "google/protobuf/timestamp.proto";
 
 message PageCursor {
   int64 page = 1;
