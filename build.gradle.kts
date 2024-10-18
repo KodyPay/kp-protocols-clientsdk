@@ -8,7 +8,7 @@ plugins {
 
 repositories {
     mavenCentral()
-    }
+}
 
 val protbufVersion = "4.28.2"
 val grpcVersion = "1.68.0"
@@ -24,15 +24,15 @@ dependencies {
 protobuf {
     protoc {
         artifact = "com.google.protobuf:protoc:$protbufVersion"
-}
+    }
     plugins {
         id("grpc") { artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion" }
-}
+    }
     generateProtoTasks {
         ofSourceSet("main").forEach {
             it.plugins {
-               id("grpc") { }
-    }
+                id("grpc") { }
+            }
         }
     }
 }
