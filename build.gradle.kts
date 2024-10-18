@@ -31,7 +31,7 @@ protobuf {
     generateProtoTasks {
         ofSourceSet("main").forEach {
             it.plugins {
-                id("grpc") { }
+               id("grpc") { }
             }
         }
     }
