@@ -1,20 +1,14 @@
-import build.buf.gradle.BUF_BUILD_DIR
-import build.buf.gradle.ImageFormat
+import com.google.protobuf.gradle.*
 
 plugins {
-    java
+    id("java")
     id("idea")
-    id("build.buf") version "0.10.0"
+    id("com.google.protobuf") version "0.9.4"
 }
 
 repositories {
     mavenCentral()
-    maven {
-        url = uri("https://buf.build/gen/maven")
     }
-}
-group = "com.kodypay.api.grpc"
-defaultTasks("clean", "build")
 
 val protbufVersion = "4.28.2"
 val grpcVersion = "1.68.0"
@@ -27,23 +21,18 @@ dependencies {
     implementation("javax.annotation:javax.annotation-api:$javaxAnnotationsVersion")
 }
 
-// Add a task dependency for compilation
-tasks.named("compileJava").configure {
-    dependsOn("bufGenerate")
-    dependsOn("bufBuild")
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:$protbufVersion"
 }
-
-// Add the generated code to the main source set
-sourceSets["main"].java {
-    srcDir("${layout.buildDirectory}/$BUF_BUILD_DIR/java")
+    plugins {
+        id("grpc") { artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion" }
 }
-
-buf {
-    configFileLocation = rootProject.file("buf.yaml")
-    generate {
-        includeImports = true
+    generateProtoTasks {
+        ofSourceSet("main").forEach {
+            it.plugins {
+               id("grpc") { }
     }
-    build {
-        imageFormat = ImageFormat.BINPB
+        }
     }
 }
