@@ -10,8 +10,8 @@ repositories {
     mavenCentral()
 }
 
-val protbufVersion = "4.27.2"
-val grpcVersion = "1.65.0"
+val protbufVersion = "4.28.2"
+val grpcVersion = "1.68.0"
 val javaxAnnotationsVersion = "1.3.2"
 
 dependencies {
