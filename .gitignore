@@ -5,6 +5,3 @@
 .classpath
 build/
 .gradle/
-/dotnet/
-/node_modules/
-/googleapis/

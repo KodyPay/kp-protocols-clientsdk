@@ -1,33 +1,15 @@
 syntax = "proto3";
 package com.kodypay.grpc.pay.v1;
-
-import "google/api/annotations.proto";
-import "google/protobuf/timestamp.proto";
-
-option go_package = "com.kodypay.grpc.pay.v1";
 option java_multiple_files = true;
 option java_outer_classname = "KodyPayTerminalProto";
 option java_package = "com.kodypay.grpc.pay.v1";
+import "google/protobuf/timestamp.proto";
 
 service KodyPayTerminalService {
-  rpc Terminals(TerminalsRequest) returns (TerminalsResponse) {
-    option (google.api.http) = {get: "/v1/pay/terminals/{store_id}"};
-  }
-  rpc Pay(PayRequest) returns (stream PayResponse) {
-    option (google.api.http) = {
-      post: "/v1/pay/payment/{store_id}/{terminal_id}"
-      body: "*"
-    };
-  }
-  rpc Cancel(CancelRequest) returns (CancelResponse) {
-    option (google.api.http) = {
-      patch: "/v1/pay/cancel/{store_id}/{terminal_id}"
-      body: "*"
-    };
-  }
-  rpc PaymentDetails(PaymentDetailsRequest) returns (PayResponse) {
-    option (google.api.http) = {get: "/v1/pay/details/{store_id}/{order_id}"};
-  }
+  rpc Terminals(TerminalsRequest) returns (TerminalsResponse);
+  rpc Pay(PayRequest) returns (stream PayResponse);
+  rpc Cancel(CancelRequest) returns (CancelResponse);
+  rpc PaymentDetails(PaymentDetailsRequest) returns (PayResponse);
 }
 
 // requires X-API-Key header with 'API Key' value
