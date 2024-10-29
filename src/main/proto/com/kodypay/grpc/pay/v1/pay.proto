@@ -28,6 +28,12 @@ service KodyPayTerminalService {
   rpc PaymentDetails(PaymentDetailsRequest) returns (PayResponse) {
     option (google.api.http) = {get: "/v1/pay/details/{store_id}/{order_id}"};
   }
+  rpc Refund(RefundRequest) returns (stream RefundResponse) {
+    option (google.api.http) = {
+      post: "/v1/pay/refund/{store_id}/{order_id}"
+      body: "*"
+    };
+  }
 }
 
 // requires X-API-Key header with 'API Key' value
@@ -83,4 +89,27 @@ message CancelResponse {
 message PaymentDetailsRequest {
   string store_id = 1; // UUID of store
   string order_id = 2; // to identify the payment (order)
+}
+
+// requires X-API-Key header with 'API Key' value
+message RefundRequest {
+  string store_id = 1; // UUID of store
+  string order_id = 2;
+  string amount = 3; // amount in BigDecimal/2.dp (0.00)
+  optional bool print_merchant_receipt = 4;
+  optional bool print_shopper_receipt = 5;
+}
+
+message RefundResponse {
+  RefundStatus status = 1;
+  optional string failure_reason = 2; // only populated on failure
+  optional string receipt_json = 3; // json blob containing the receipt data
+  string order_id = 4;
+  google.protobuf.Timestamp date_created = 5;
+
+  enum RefundStatus {
+    PENDING = 0;
+    REQUESTED = 1;
+    FAILED = 2;
+  }
 }
