@@ -29,9 +29,6 @@ service KodyPayTerminalService {
     option (google.api.http) = {get: "/v1/pay/details/{store_id}/{order_id}"};
   }
   rpc Refund(RefundRequest) returns (stream RefundResponse) {
-   option (google.api.http) = {get: "/v1/pay/details/{store_id}/{order_id}"};
-  }
-  rpc Refund(RefundRequest) returns (stream RefundResponse) {
     option (google.api.http) = {
       post: "/v1/pay/refund/{store_id}/{order_id}"
       body: "*"
