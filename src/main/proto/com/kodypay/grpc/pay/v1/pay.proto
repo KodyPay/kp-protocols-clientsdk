@@ -80,12 +80,14 @@ message RefundResponse {
   optional string receipt_json = 3; // json blob containing the receipt data
   string order_id = 4;
   google.protobuf.Timestamp date_created = 5;
+
+  enum RefundStatus {
+    PENDING = 0;
+    REQUESTED = 1;
+    FAILED = 2;
+  }
 }
 
-enum RefundStatus {
-  REFUND_STATUS_PENDING = 0;
-  REFUND_STATUS_REQUESTED = 1;
-  REFUND_STATUS_FAILED = 2;
-}
+
 
 
