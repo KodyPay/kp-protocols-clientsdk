@@ -83,7 +83,7 @@ message RefundResponse {
   string order_id = 4;
   google.protobuf.Timestamp date_created = 5;
   string total_amount = 6;
-  string refund_amount = 7;
+  string total_amount_refunded = 7;
   string remaining_amount = 8;
   enum RefundStatus {
     PENDING = 0;
