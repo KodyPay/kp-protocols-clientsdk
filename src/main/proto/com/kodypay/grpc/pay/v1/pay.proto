@@ -11,6 +11,7 @@ service KodyPayTerminalService {
   rpc Cancel(CancelRequest) returns (CancelResponse);
   rpc PaymentDetails(PaymentDetailsRequest) returns (PayResponse);
   rpc Refund(RefundRequest) returns (stream RefundResponse);
+  rpc Auth(AuthorizationRequest) returns (stream AuthorizationResponse);
 }
 
 // requires X-API-Key header with 'API Key' value
@@ -91,4 +92,121 @@ message RefundResponse {
     FAILED = 2;
     REFUNDED = 3;
   }
+}
+
+// requires X-API-Key header with 'API Key' value
+message AuthorizationRequest {
+  string store_id = 1;                    // UUID of store
+  string amount = 2;                      // Amount in BigDecimal/2.dp (0.00)
+  string terminal_id = 3;                 // Send the payment to this terminal serial number
+  optional string transToken = 4;         // Optional, max 60 chars
+  optional CardIssuer issuerId = 5;       // Optional, max 2 chars
+  optional string pan = 6;                // Optional, masked, max 19 chars
+  optional string expiryDate = 7;         // Optional, YYMM format, 4 digits
+  optional string taxAmount = 8;          // Optional, max 12 digits
+  string cardPresent = 9;                 // Required, 1 char
+  string partialAuthFlag = 10;            // Required, "0" or "1"
+  optional string chargeInfo = 11;        // Optional, max 20 chars
+  optional string originalRRN = 12;       // Optional, max 12 chars
+  optional string customerId = 13;        // Optional, max 60 chars
+  optional string cardholderEmail = 14;   // Optional, max 254 chars
+}
+message AuthorizationResponse {
+  AuthStatus status = 1;                   // Authorization status
+  string receipt_json = 2;                 // JSON blob containing receipt data
+  string rrn = 3;                          // Required, max 12 chars
+  optional string transToken = 4;          // Optional, max 60 chars
+  optional CardIssuer issuerId = 5;        // Optional, max 2 chars
+  optional string pan = 6;                 // Optional, masked, max 19 chars
+  optional string expiryDate = 7;          // Optional, YYMM format, 4 digits
+  optional EntryMode entryMode = 8;        // Optional, entry mode code
+  optional string authCode = 9;            // Optional, max 6 chars
+
+  google.protobuf.Timestamp date_created = 10;  // Timestamp for when created
+  google.protobuf.Timestamp date_authed = 11;   // Timestamp for when authorized
+  optional string cardAlias = 12;          // Optional, max 60 chars
+  optional string customerId = 13;         // Optional, max 60 chars
+  optional string binRange = 14;           // Optional, max 8 chars
+  optional string countryCode = 15;        // Optional, 3-character ISO country code
+  optional string cardholderName = 16;     // Optional, max 50 chars
+  optional string cardholderEmail = 17;    // Optional, max 254 chars
+  optional string alternateTransRef = 18;  // Optional, max 64 chars
+
+  // DCC-related fields (commented out for future use)
+  // optional string dccIndicator = 19;       // Optional, 1 digit
+  // optional string billingCurrency = 20;    // Optional, 3-digit ISO currency code
+  // optional string billingAmount = 21;      // Optional, max 12 digits
+  // optional string dccExchangeRate = 22;    // Optional, max 10 digits
+
+  enum AuthStatus {
+    PENDING = 0;
+    REQUESTED = 1;
+    FAILED = 2;
+  }
+  enum EntryMode {
+    // Deprecated codes (0-9), do not use them
+    EMV_FALLBACK = 0;                      // 00 - EMV Fallback (Deprecated)
+    SWIPE_NO_PIN = 1;                      // 01 - Swiping without PIN (Deprecated)
+    MANUAL_ENTRY = 2;                      // 02 - Manual card number entry (Deprecated)
+    SWIPE_PIN = 3;                         // 03 - Swiping with PIN (Deprecated)
+    EMV_NO_PIN = 4;                        // 04 - EMV without PIN (Deprecated)
+    EMV_OFFLINE_PIN = 5;                   // 05 - EMV with offline PIN (Deprecated)
+    EMV_ONLINE_PIN = 6;                    // 06 - EMV with online PIN (Deprecated)
+    PROXIMITY_STRIPE = 7;                  // 07 - Proximity via Magnetic Stripe (Deprecated)
+    PROXIMITY_ICC = 8;                     // 08 - Proximity via ICC (Deprecated)
+    OTHER = 9;                             // 09 - Others (Deprecated)
+
+    // Modern codes
+    EMV_FALLBACK_SIGNATURE = 10;           // 10 E - EMV Fallback (Signature Verification)
+    PROXIMITY_STRIPE_SIGNATURE = 11;       // 11 S - Proximity via Magnetic Stripe (Signature Verification)
+    PROXIMITY_STRIPE_NO_CVM = 12;          // 12 S - Proximity via Magnetic Stripe (No CVM)
+    PROXIMITY_ICC_SIGNATURE = 13;          // 13 E - Proximity via ICC (Signature Verification)
+    PROXIMITY_ICC_PIN = 14;                // 14 E - Proximity via ICC (PIN Verification)
+    PROXIMITY_ICC_DEVICE_VERIFIED = 15;    // 15 E - Proximity via ICC (Customer Device Verified)
+    PROXIMITY_ICC_NO_CVM = 16;             // 16 E - Proximity via ICC (No CVM)
+    SWIPE_SIGNATURE = 17;                  // 17 S - Swiping without PIN (Signature Verification)
+    SWIPE_PIN_VERIFICATION = 18;           // 18 S - Swiping with PIN (PIN Verification)
+    SWIPE_NO_CVM = 19;                     // 19 S - Swiping – No CVM
+    MANUAL_SIGNATURE = 20;                 // 20 K - Manual entry (Signature Verification)
+    MANUAL_NO_CVM = 21;                    // 21 K - Manual entry – No CVM
+    EMV_SIGNATURE = 22;                    // 22 E - EMV (Signature Verification)
+    EMV_PIN = 23;                          // 23 E - EMV (PIN Verification)
+    EMV_PIN_AND_SIGNATURE = 24;            // 24 E - EMV (PIN & Signature Verification)
+    EMV_NO_CVM = 25;                       // 25 E - EMV (No CVM)
+    E_WALLET_PAYMENT = 26;                 // 26 W - E-Wallet Payment
+    SAVED_CARD_TOKEN_NO_CVM = 27;          // 27 T - Saved Card Token - No CVM
+    ECOMMERCE = 28;                        // 28 C - Ecommerce (Hospitality OPI Cloud Only)
+  }
+}
+enum CardIssuer {
+  LOCAL_DEBIT = 0;            // Local/Debit
+  VISA = 1;                   // VISA
+  MASTERCARD = 2;             // MasterCard
+  AMERICAN_EXPRESS = 3;       // American Express
+  DINERS_CLUB = 4;            // Diners Club
+  JCB = 5;                    // JCB
+  UNION_PAY = 6;              // Union Pay (CUP)
+  SVC_GIFT_CARD = 7;          // SVC/Gift card
+  DEBIT_CARD = 8;             // Debit Card
+  CUP_DEBIT = 9;              // CUP Debit
+  DEBIT_SMS = 10;             // Debit SMS (Such as Interac)
+  BANK_CARD = 11;             // Bank Card (local credit card)
+  DISCOVER = 12;              // Discover
+  PAYPAL = 13;                // PayPal
+  UKDM_SWITCH = 16;           // UKDM/Switch
+  VISA_ELECTRON = 17;         // VISA Electron
+  VISA_DEBIT = 18;            // VISA Debit
+  MAESTRO = 19;               // Maestro
+  VPAY = 20;                  // VPay
+  ALLIANCE = 21;              // Alliance
+  EC_CHIP = 22;               // EC Chip
+  GIROCARD = 23;              // GiroCard
+  MASTERCARD_DEBIT = 24;      // MasterCard Debit
+  WECHAT_PAY = 25;            // WeChat Pay
+  ALIPAY = 26;                // AliPay
+  MIR = 27;                   // MIR
+  REWARD_CARD = 28;           // Reward Card
+  PLCC = 29;                  // PLCC
+  GENERIC_EWALLET = 60;       // Generic eWallet
+  // Additional reserved fields can be added here as needed.
 }
