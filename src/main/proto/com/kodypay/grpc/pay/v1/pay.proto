@@ -85,6 +85,7 @@ message RefundResponse {
   string total_amount = 6;
   string total_amount_refunded = 7;
   string remaining_amount = 8;
+  string total_amount_requested = 9;
   enum RefundStatus {
     PENDING = 0;
     REQUESTED = 1;
