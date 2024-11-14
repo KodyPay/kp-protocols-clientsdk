@@ -82,7 +82,7 @@ message RefundResponse {
   optional string receipt_json = 3; // json blob containing the receipt data
   string order_id = 4;
   google.protobuf.Timestamp date_created = 5;
-  string total_amount = 6;
+  string total_paid_amount = 6;
   string total_amount_refunded = 7;
   string remaining_amount = 8;
   string total_amount_requested = 9;
