@@ -99,38 +99,38 @@ message AuthorizationRequest {
   string store_id = 1;                    // UUID of store
   string amount = 2;                      // Amount in BigDecimal/2.dp (0.00)
   string terminal_id = 3;                 // Send the payment to this terminal serial number
-  optional string transToken = 4;         // Optional, max 60 chars
-  optional CardIssuer issuerId = 5;       // Optional, max 2 chars
+  optional string trans_token = 4;        // Optional, max 60 chars
+  optional CardIssuer issuer_id = 5;      // Optional, max 2 chars
   optional string pan = 6;                // Optional, masked, max 19 chars
-  optional string expiryDate = 7;         // Optional, YYMM format, 4 digits
-  optional string taxAmount = 8;          // Optional, max 12 digits
-  string cardPresent = 9;                 // Required, 1 char
-  string partialAuthFlag = 10;            // Required, "0" or "1"
-  optional string chargeInfo = 11;        // Optional, max 20 chars
-  optional string originalRRN = 12;       // Optional, max 12 chars
-  optional string customerId = 13;        // Optional, max 60 chars
-  optional string cardholderEmail = 14;   // Optional, max 254 chars
+  optional string expiry_date = 7;         // Optional, YYMM format, 4 digits
+  optional string tax_amount = 8;          // Optional, max 12 digits
+  string card_present = 9;                 // Required, 1 char
+  string partial_auth_flag = 10;            // Required, "0" or "1"
+  optional string charge_info = 11;        // Optional, max 20 chars
+  optional string original_rrn = 12;       // Optional, max 12 chars
+  optional string customer_id = 13;        // Optional, max 60 chars
+  optional string cardholder_email = 14;   // Optional, max 254 chars
 }
 message AuthorizationResponse {
   AuthStatus status = 1;                   // Authorization status
   string receipt_json = 2;                 // JSON blob containing receipt data
   string rrn = 3;                          // Required, max 12 chars
-  optional string transToken = 4;          // Optional, max 60 chars
-  optional CardIssuer issuerId = 5;        // Optional, max 2 chars
+  optional string trans_token = 4;          // Optional, max 60 chars
+  optional CardIssuer issuer_id = 5;        // Optional, max 2 chars
   optional string pan = 6;                 // Optional, masked, max 19 chars
-  optional string expiryDate = 7;          // Optional, YYMM format, 4 digits
-  optional EntryMode entryMode = 8;        // Optional, entry mode code
-  optional string authCode = 9;            // Optional, max 6 chars
+  optional string expiry_date = 7;          // Optional, YYMM format, 4 digits
+  optional EntryMode entry_mode = 8;        // Optional, entry mode code
+  optional string auth_code = 9;            // Optional, max 6 chars
 
   google.protobuf.Timestamp date_created = 10;  // Timestamp for when created
   google.protobuf.Timestamp date_authed = 11;   // Timestamp for when authorized
-  optional string cardAlias = 12;          // Optional, max 60 chars
-  optional string customerId = 13;         // Optional, max 60 chars
-  optional string binRange = 14;           // Optional, max 8 chars
-  optional string countryCode = 15;        // Optional, 3-character ISO country code
-  optional string cardholderName = 16;     // Optional, max 50 chars
-  optional string cardholderEmail = 17;    // Optional, max 254 chars
-  optional string alternateTransRef = 18;  // Optional, max 64 chars
+  optional string card_alias = 12;          // Optional, max 60 chars
+  optional string customer_id = 13;         // Optional, max 60 chars
+  optional string bin_range = 14;           // Optional, max 8 chars
+  optional string country_code = 15;        // Optional, 3-character ISO country code
+  optional string cardholder_name = 16;     // Optional, max 50 chars
+  optional string cardholder_email = 17;    // Optional, max 254 chars
+  optional string alternate_trans_ref = 18;  // Optional, max 64 chars
 
   // DCC-related fields (commented out for future use)
   // optional string dccIndicator = 19;       // Optional, 1 digit
