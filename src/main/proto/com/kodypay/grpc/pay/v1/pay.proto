@@ -71,7 +71,10 @@ message PaymentDetailsRequest {
 // requires X-API-Key header with 'API Key' value
 message RefundRequest {
   string store_id = 1; // UUID of store
-  string order_id = 2;
+  oneof id {
+    string order_id = 2;
+    string link_id = 4; //LinkId created by wombat
+  }
   string amount = 3; // amount in BigDecimal/2.dp (0.00)
 }
 message RefundResponse {
@@ -83,6 +86,7 @@ message RefundResponse {
   string total_amount_refunded = 6;
   string remaining_amount = 7;
   string total_amount_requested = 8;
+  string paymentTransactionId = 9;
   enum RefundStatus {
     PENDING = 0;
     REQUESTED = 1;
