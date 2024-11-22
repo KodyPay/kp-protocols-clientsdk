@@ -73,7 +73,7 @@ message RefundRequest {
   string store_id = 1; // UUID of store
   oneof id {
     string order_id = 2;
-    string link_id = 4; //LinkId created by wombat
+    string payment_id = 4; //Payment id created by wombat
   }
   string amount = 3; // amount in BigDecimal/2.dp (0.00)
 }
