@@ -13,6 +13,7 @@ service KodyEcomPaymentsService {
   rpc PaymentDetails(PaymentDetailsRequest) returns (PaymentDetailsResponse);
   rpc GetPayments(GetPaymentsRequest) returns (GetPaymentsResponse);
   rpc GetCardToken(GetCardTokenRequest) returns (GetCardTokenResponse);
+  rpc Refund(RefundRequest) returns (stream RefundResponse);
 }
 
 // Payment Initiation Request
@@ -177,5 +178,27 @@ message GetPaymentsResponse {
       NOT_FOUND = 1;
       INVALID_ARGUMENT = 2;
     }
+  }
+}
+
+message RefundRequest {
+  string store_id = 1; // UUID of store
+  string payment_id = 2; // Payment id created by wombat
+  string amount = 3; // amount in BigDecimal/2.dp (0.00)
+}
+message RefundResponse {
+  RefundStatus status = 1;
+  optional string failure_reason = 2; // only populated on failure
+  string payment_id = 3;
+  google.protobuf.Timestamp date_created = 4;
+  string total_paid_amount = 5;
+  string total_amount_refunded = 6;
+  string remaining_amount = 7;
+  string total_amount_requested = 8;
+  string paymentTransactionId = 9;
+  enum RefundStatus {
+    PENDING = 0;
+    REQUESTED = 1;
+    FAILED = 2;
   }
 }
