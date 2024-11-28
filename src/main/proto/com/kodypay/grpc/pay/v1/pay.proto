@@ -31,6 +31,20 @@ message PayRequest {
   string amount = 2; // amount in BigDecimal/2.dp (0.00)
   string terminal_id = 3; // send the payment to this terminal serial number
   optional bool show_tips = 4; // Show tips on the terminal
+  PaymentFlow payment_flow = 5; // Choose specific payment flow on the terminal
+}
+
+message PaymentFlow{
+  PaymentType payment_type = 1; // Payment flow type
+  oneof verification_mode {
+    string token = 2; // Token that skips QR scanning
+    bool scan_qr = 3; // Flag to activate terminal QR scanning
+  }
+}
+
+enum PaymentType{
+  ALIPAY = 0;
+  WECHAT = 1;
 }
 message PayResponse {
   PaymentStatus status = 1;
