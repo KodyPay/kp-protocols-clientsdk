@@ -34,7 +34,7 @@ message PayRequest {
   optional PaymentMethod payment_method = 5; // Choose specific payment method on the terminal
 }
 
-message PaymentMethodSelection{
+message PaymentMethod{
   PaymentType payment_type = 1; // Payment flow type
   oneof verification_mode {
     string token = 2; // Token that skips QR scanning
