@@ -34,15 +34,18 @@ message PayRequest {
   optional PaymentMethod payment_method = 5; // Choose specific payment method on the terminal
 }
 
+
+
 message PaymentMethod{
-  PaymentType payment_type = 1; // Payment flow type
+  PaymentMethodType payment_method_type = 1; // Payment method type
+  // Verification mode is needed for AliPay and WeChat.
   oneof verification_mode {
-    string token = 2; // Token that skips QR scanning
-    bool scan_qr = 3; // Flag to activate terminal QR scanning
+    string token = 2; // With the token present QR scanning is skipped and goes straight to the payment screen.
+    bool scan_qr = 3; // Flag to activate terminal QR scanning. Since the token is not present the terminal would need to scan the QR code.
   }
 }
 
-enum PaymentType{
+enum PaymentMethodType{
   CARD = 0;
   ALIPAY = 1;
   WECHAT = 2;
