@@ -43,8 +43,9 @@ message PaymentMethodSelection{
 }
 
 enum PaymentType{
-  ALIPAY = 0;
-  WECHAT = 1;
+  CARD = 0;
+  ALIPAY = 1;
+  WECHAT = 2;
 }
 message PayResponse {
   PaymentStatus status = 1;
