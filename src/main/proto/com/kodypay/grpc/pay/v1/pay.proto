@@ -41,7 +41,7 @@ message PaymentMethod{
   // Verification mode is needed for AliPay and WeChat.
   oneof verification_mode {
     string token = 2; // With the token present QR scanning is skipped and goes straight to the payment screen.
-    bool scan_qr = 3; // Flag to activate terminal QR scanning. Since the token is not present the terminal would need to scan the QR code.
+    bool activate_qr_code_scanner = 3; // Flag to activate the terminal camera to scan the customer's QR Code (true), or display the payment method type QR Code for the user to scan (false, default).```
   }
 }
 
