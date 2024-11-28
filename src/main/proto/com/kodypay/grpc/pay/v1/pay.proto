@@ -31,7 +31,7 @@ message PayRequest {
   string amount = 2; // amount in BigDecimal/2.dp (0.00)
   string terminal_id = 3; // send the payment to this terminal serial number
   optional bool show_tips = 4; // Show tips on the terminal
-  optional PaymentMethodSelection payment_method_selection = 5; // Choose specific payment method on the terminal
+  optional PaymentMethod payment_method = 5; // Choose specific payment method on the terminal
 }
 
 message PaymentMethodSelection{
