@@ -31,6 +31,24 @@ message PayRequest {
   string amount = 2; // amount in BigDecimal/2.dp (0.00)
   string terminal_id = 3; // send the payment to this terminal serial number
   optional bool show_tips = 4; // Show tips on the terminal
+  optional PaymentMethod payment_method = 5; // Choose specific payment method on the terminal. If not set the terminal will request on the screen to select the payment method
+}
+
+
+
+message PaymentMethod{
+  PaymentMethodType payment_method_type = 1; // Payment method type
+  // Verification mode is needed for AliPay and WeChat.
+  oneof verification_mode {
+    string token = 2; // With the token present QR scanning is skipped and goes straight to the payment screen.
+    bool activate_qr_code_scanner = 3; // Flag to activate the terminal camera to scan the customer's QR Code (true), or display the payment method type QR Code for the user to scan (false, default).```
+  }
+}
+
+enum PaymentMethodType{
+  CARD = 0;
+  ALIPAY = 1;
+  WECHAT = 2;
 }
 message PayResponse {
   PaymentStatus status = 1;
