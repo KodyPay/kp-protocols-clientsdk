@@ -1,0 +1,39 @@
+syntax = "proto3";
+package com.kodypay.grpc.opi.v1;
+
+service TerminalMappingService {
+  rpc AddMapping(AddMappingRequest) returns (AddMappingResponse);
+  rpc FindMappings(FindMappingsRequest) returns (FindMappingsResponse);
+}
+
+// Message to represent a terminal mapping
+message TerminalMapping {
+  string id = 1;
+  string store_id = 2;
+  string site_id = 3;
+  string ws_no = 4;
+  string trans_currency = 5;
+  string industry_code = 6;
+  string terminal_id = 7;
+  int32 priority = 8;
+}
+
+// Request to add a terminal mapping
+message AddMappingRequest {
+  TerminalMapping mapping = 1;
+}
+
+// Response for adding a terminal mapping
+message AddMappingResponse {
+  string message = 1;
+}
+
+// Request to fetch mappings for a store
+message FindMappingsRequest {
+  string store_id = 1;
+}
+
+// Response to return terminal mappings for a store
+message FindMappingsResponse {
+  repeated TerminalMapping mappings = 1;
+}
