@@ -11,9 +11,9 @@ message TerminalMapping {
   string id = 1;
   string store_id = 2;
   string site_id = 3;
-  string ws_no = 4;
-  string trans_currency = 5;
-  string industry_code = 6;
+  optional string ws_no = 4;
+  optional string trans_currency = 5;
+  optional string industry_code = 6;
   string terminal_id = 7;
   int32 priority = 8;
 }
