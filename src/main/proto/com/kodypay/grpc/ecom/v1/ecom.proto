@@ -117,7 +117,7 @@ message PaymentDetailsResponse {
 
     google.protobuf.Timestamp date_created = 7;
     optional google.protobuf.Timestamp date_paid = 8;
-    optional string ext_payment_ref = 9;
+    optional string psp_reference = 9;
 
     enum PaymentStatus {
       PENDING = 0;
