@@ -46,7 +46,7 @@ message PaymentMethod{
   }
 }
 
-enum PaymentMethodType{
+enum PaymentMethodType {
   CARD = 0;
   ALIPAY = 1;
   WECHAT = 2;
@@ -54,15 +54,28 @@ enum PaymentMethodType{
 message PayResponse {
   PaymentStatus status = 1;
   optional string failure_reason = 2; // only populated on failure
-  optional string receipt_json = 3; // json blob containing the receipt data
+  optional string receipt_json = 3 [deprecated=true]; // replaced by payment_data.receipt_json
   string order_id = 4;
   google.protobuf.Timestamp date_created = 5;
   optional string ext_payment_ref = 6;
-  google.protobuf.Timestamp date_paid = 7;
-  optional string total_amount = 8;
-  optional string sale_amount = 9;
-  optional string tips_amount = 10;
+  google.protobuf.Timestamp date_paid = 7 [deprecated=true]; // replaced by payment_data.date_paid
+  optional string total_amount = 8 [deprecated=true]; // replaced by payment_data.total_amount
+  optional string sale_amount = 9 [deprecated=true]; // replaced by payment_data.sale_amount
+  optional string tips_amount = 10 [deprecated=true]; // replaced by payment_data.tips_amount
+  optional PaymentData payment_data = 11;
+
+  message PaymentData {
+    google.protobuf.Timestamp date_paid = 1;
+    string total_amount = 2;
+    string sale_amount = 3;
+    string tips_amount = 4;
+    string receipt_json = 5; // json blob containing the receipt data
+    string psp_reference = 6;
+    PaymentMethodType payment_method_type = 7;
+    string payment_method = 8;
+  }
 }
+
 enum PaymentStatus {
   PENDING = 0;
   SUCCESS = 1;
