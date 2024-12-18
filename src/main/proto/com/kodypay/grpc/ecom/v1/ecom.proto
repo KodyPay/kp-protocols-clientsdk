@@ -4,7 +4,6 @@ option java_multiple_files = true;
 option java_outer_classname = "KodyEcomPaymentsProto";
 option java_package = "com.kodypay.grpc.ecom.v1";
 import "google/protobuf/timestamp.proto";
-import "com/kodypay/grpc/sdk/common/pagination.proto";
 
 // All service requests require X-API-Key header with 'API Key' value
 service KodyEcomPaymentsService {
@@ -131,12 +130,17 @@ message PaymentDetailsResponse {
 
 message GetPaymentsRequest {
   string store_id = 1;
-  com.kodypay.grpc.sdk.common.PageCursor page_cursor = 2;
+  PageCursor page_cursor = 2;
   Filter filter = 3;
 
   message Filter {
     optional string order_id = 1;
     optional google.protobuf.Timestamp created_before = 2;
+  }
+
+  message PageCursor {
+    int64 page = 1;
+    int64 page_size = 2;
   }
 }
 message GetPaymentsResponse {
@@ -159,6 +163,7 @@ message GetPaymentsResponse {
 
       google.protobuf.Timestamp date_created = 7;
       optional google.protobuf.Timestamp date_paid = 8;
+      optional string psp_reference = 9;
 
       enum PaymentStatus {
         PENDING = 0;
