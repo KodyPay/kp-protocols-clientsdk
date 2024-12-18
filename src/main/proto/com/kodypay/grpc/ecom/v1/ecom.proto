@@ -117,6 +117,7 @@ message PaymentDetailsResponse {
     google.protobuf.Timestamp date_created = 7;
     optional google.protobuf.Timestamp date_paid = 8;
     optional string psp_reference = 9;
+    optional string payment_method = 10;
 
     enum PaymentStatus {
       PENDING = 0;
@@ -164,6 +165,7 @@ message GetPaymentsResponse {
       google.protobuf.Timestamp date_created = 7;
       optional google.protobuf.Timestamp date_paid = 8;
       optional string psp_reference = 9;
+      optional string payment_method = 10;
 
       enum PaymentStatus {
         PENDING = 0;
@@ -189,7 +191,10 @@ message GetPaymentsResponse {
 
 message RefundRequest {
   string store_id = 1; // UUID of store
-  string payment_id = 2; // Payment id created by wombat
+  oneof id {
+    string payment_id = 2; // Payment id created by wombat
+    string psp_reference = 4;
+  }
   string amount = 3; // amount in BigDecimal/2.dp (0.00)
 }
 message RefundResponse {
