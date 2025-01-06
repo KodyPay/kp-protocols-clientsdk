@@ -64,7 +64,7 @@ message PayResponse {
   optional string sale_amount = 9 [deprecated=true]; // replaced by payment_data.sale_amount
   optional string tips_amount = 10 [deprecated=true]; // replaced by payment_data.tips_amount
   optional PaymentData payment_data = 11;
-  optional string payment_reference = 12;
+ string idempotency_uuid = 12;
 
   message PaymentData {
     google.protobuf.Timestamp date_paid = 1;
