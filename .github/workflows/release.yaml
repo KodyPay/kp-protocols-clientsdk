@@ -2,6 +2,15 @@ name: release
 
 on:
   workflow_dispatch:
+    inputs:
+      sdk_language:
+        description: 'SDK Language'
+        required: true
+        type: choice
+        options:
+          - php
+          - kotlin
+          - all
 
 jobs:
   dispatch:
@@ -14,6 +23,7 @@ jobs:
           echo "tag=${TAG_NAME}" >> $GITHUB_ENV
 
       - name: Dispatch PHP SDK
+        if: ${{ github.event.inputs.sdk_language == 'php' || github.event.inputs.sdk_language == 'all' }}
         uses: peter-evans/repository-dispatch@v3
         with:
           repository: kodypay/kody-clientsdk-php
@@ -22,6 +32,7 @@ jobs:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
       - name: Dispatch Kotlin SDK
+        if: ${{ github.event.inputs.sdk_language == 'kotlin' || github.event.inputs.sdk_language == 'all' }}
         uses: peter-evans/repository-dispatch@v3
         with:
           repository: kodypay/kody-clientsdk-kotlin
