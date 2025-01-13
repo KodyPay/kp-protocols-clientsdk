@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package com.kodypay.grpc.menu.v1;
+option java_multiple_files = true;
+option java_outer_classname = "InventoryProto";
+option java_package = "com.kodypay.grpc.ordering.v1";
+
+service InventoryService {
+  // Retrieve full inventory or items filtered by category
+  rpc GetInventory (GetInventoryRequest) returns (GetInventoryResponse);
+
+  // Retrieve all categories for a store
+  rpc GetCategories (GetCategoriesRequest) returns (GetCategoriesResponse);
+}
+
+message GetCategoriesRequest {
+  string store_id = 1;
+}
+
+message GetCategoriesResponse {
+  // filtered: only include active categories
+  repeated Category categories = 1;
+}
+
+message Category {
+  string category_id = 1;
+  string name = 2;
+  repeated InventoryItemOrCombo items = 3;
+}
+
+message InventoryItemOrCombo {
+  oneof type {
+    InventoryItem item = 1;
+    Combo combo = 2;
+  }
+}
+
+message InventoryItem {
+  string item_id = 1;
+  string name = 2;
+  string description = 3;
+  // "0.00" = free item ?
+  string gross_price = 4;
+  // reference to the custom defined id
+  string integration_id = 5;
+  // user can define any tags for the item, such as 'Vegetarian', we do not maintain any structure for this
+  repeated string tags = 6;
+  repeated AddOnGroup addon_groups = 7;
+}
+
+// individual addons for an item will appear in a 'Default' group, with no rules
+message AddOnGroup {
+  string name = 1;
+  AddOnRule rules = 2;
+  repeated AddOnItem items = 3;
+  string group_id = 4;
+
+  message AddOnRule {
+    int32 min = 1;
+    int32 max = 2;
+  }
+}
+
+message AddOnItem {
+  string item_id = 1;
+  string name = 2;
+  string description = 3;
+  // "0.00" = free item
+  string gross_price = 4;
+  // reference to the custom defined id
+  string integration_id = 5;
+  // user can define any tags for the item, such as 'Vegetarian', we do not maintain any structure for this
+  repeated string tags = 6;
+  string group_id = 7;
+  optional int32 max = 8;
+  string parent_item_id = 9;
+}
+
+message Combo {
+  string combo_id = 1;
+  string name = 2;
+  string description = 3;
+  string gross_price = 4;
+  // to list of items (in specified categories)
+  repeated Category categories = 5;
+}
+
+message GetInventoryRequest {
+  string store_id = 1;
+}
+
+message GetInventoryResponse {
+  string menu_json = 1;
+}
