@@ -109,11 +109,13 @@ message Order {
   OrderStatus order_status = 7;
 }
 
+// Will be mapped from the payment status in io.v1.ordering.proto
 enum PaymentStatus {
   PAID = 0;
   UNPAID = 1;
 }
 
+// Which internal status to map?
 enum OrderStatus {
   // not been fulfilled yet
   OPEN = 0;
