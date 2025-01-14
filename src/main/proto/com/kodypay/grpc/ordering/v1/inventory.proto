@@ -90,5 +90,5 @@ message GetInventoryRequest {
 }
 
 message GetInventoryResponse {
-  string menu_json = 1;
+  repeated InventoryItemOrCombo items = 1;
 }
