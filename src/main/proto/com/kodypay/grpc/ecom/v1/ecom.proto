@@ -112,22 +112,36 @@ message PaymentDetailsResponse {
     string order_id = 3; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
     optional string order_metadata = 4; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
     PaymentStatus status = 5;
-    optional string payment_data_json = 6; // json blob containing payment data
+    optional PaymentData payment_data = 6; // json blob containing payment data
+    optional SaleData sale_data = 7; // json blob containing sale data
 
-    google.protobuf.Timestamp date_created = 7;
-    optional google.protobuf.Timestamp date_paid = 8;
-    optional string psp_reference = 9;
-    optional string payment_method = 10;
+    google.protobuf.Timestamp date_created = 8;
+    optional google.protobuf.Timestamp date_paid = 9;
+    optional string psp_reference = 10;
+    optional PaymentMethods payment_method = 11;
 
-    enum PaymentStatus {
-      PENDING = 0;
-      SUCCESS = 1;
-      FAILED = 2;
-      CANCELLED = 3;
-      EXPIRED = 4;
-    }
+  }
+
+  // PaymentData message for the e-commerce domain.
+  message PaymentData {
+    optional string card_type = 1;
+    // Last four digits of the payment method account.
+    optional string card_last_4_digits = 2;
+    // The authorization code for the transaction.
+    optional string auth_code = 3;
+  }
+
+  // SaleData message for the e-commerce domain.
+  message SaleData {
+    // The total amount for the payment.
+    string total_amount = 1;
+    // The sale amount (excluding additional charges like tips).
+    string sale_amount = 2;
+    // The tips amount included in the payment.
+    string tips_amount = 3;
   }
 }
+
 
 message GetPaymentsRequest {
   string store_id = 1;
@@ -160,20 +174,12 @@ message GetPaymentsResponse {
       string order_id = 3; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
       optional string order_metadata = 4; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
       PaymentStatus status = 5;
-      optional string payment_data_json = 6; // json blob containing payment data
 
       google.protobuf.Timestamp date_created = 7;
       optional google.protobuf.Timestamp date_paid = 8;
       optional string psp_reference = 9;
-      optional string payment_method = 10;
+      optional PaymentMethods payment_method = 10;
 
-      enum PaymentStatus {
-        PENDING = 0;
-        SUCCESS = 1;
-        FAILED = 2;
-        CANCELLED = 3;
-        EXPIRED = 4;
-      }
     }
   }
 
@@ -212,4 +218,28 @@ message RefundResponse {
     REQUESTED = 1;
     FAILED = 2;
   }
+}
+
+enum PaymentMethods {
+  ALIPAY = 0;
+  WECHAT = 1;
+  MASTERCARD = 2;
+  AMEX = 3;
+  BAN_CONTACT = 4;
+  CHINA_UNION_PAY = 5;
+  MAESTRO = 6;
+  DINERS = 7;
+  DISCOVER = 8;
+  JCB = 9;
+  VISA = 10;
+  GOOGLE_PAY = 11;
+  APPLE_PAY = 12;
+}
+
+enum PaymentStatus {
+  PENDING = 0;
+  SUCCESS = 1;
+  FAILED = 2;
+  CANCELLED = 3;
+  EXPIRED = 4;
 }
