@@ -19,7 +19,7 @@ service KodyEcomPaymentsService {
 message PaymentInitiationRequest {
   string store_id = 1; // Your Kody store id
   string payment_reference = 2; // Your unique reference of this payment request.
-  uint64 amount = 3; // Amount in minor units. For example, 2000 means GBP 20.00.
+  uint64 amount_minor_units = 3; // Amount in minor units. For example, 2000 means GBP 20.00.
   string currency = 4; // ISO 4217 three letter currency code
   string order_id = 5; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
   optional string order_metadata = 6; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
@@ -91,7 +91,7 @@ message GetCardTokenResponse {
 
 message PaymentDetailsResponse {
   oneof result {
-    Response response = 1;
+    PaymentDetails response = 1;
     Error error = 2;
   }
 
@@ -106,42 +106,56 @@ message PaymentDetailsResponse {
     }
   }
 
-  message Response {
+  message PaymentDetails {
     string payment_id = 1; // The unique identifier created by Kody
-    string payment_reference = 2; // Your unique payment reference that was set during the initiation
-    string order_id = 3; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
-    optional string order_metadata = 4; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
+    string payment_reference = 2 [deprecated=true]; // Your unique payment reference that was set during the initiation
+    string order_id = 3 [deprecated=true]; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
+    optional string order_metadata = 4 [deprecated=true]; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
     PaymentStatus status = 5;
-    optional PaymentData payment_data = 6; // json blob containing payment data
-    optional SaleData sale_data = 7; // json blob containing sale data
+    optional string payment_data_json = 6 [ deprecated = true ];
 
-    google.protobuf.Timestamp date_created = 8;
-    optional google.protobuf.Timestamp date_paid = 9;
-    optional string psp_reference = 10;
-    optional PaymentMethods payment_method = 11;
+    google.protobuf.Timestamp date_created = 7;
+    optional google.protobuf.Timestamp date_paid =8  [deprecated=true];
+    optional string psp_reference = 9 [deprecated=true];
+    optional string payment_method = 10[deprecated=true];
 
+    optional PaymentData payment_data = 11; // json blob containing payment data
+    optional SaleData sale_data = 12; // json blob containing sale data
   }
 
   // PaymentData message for the e-commerce domain.
   message PaymentData {
-    optional string card_type = 1;
-    // Last four digits of the payment method account.
-    optional string card_last_4_digits = 2;
-    // The authorization code for the transaction.
-    optional string auth_code = 3;
+    string psp_reference = 1;
+    PaymentMethods payment_method = 2;
+    string payment_method_variant = 3;
+    google.protobuf.Timestamp date_paid = 4;
+
+    oneof payment_method_details {
+      PaymentCard payment_card = 5;
+      PaymentWallet payment_wallet = 6;
+    }
+    message PaymentCard{
+      string card_last_4_digits =1;
+      // The authorization code for the transaction.
+      string auth_code =2;
+      string payment_token = 3;
+    }
+
+    message PaymentWallet{
+      optional string card_last_4_digits =1;
+      string payment_link_id = 2;
+    }
   }
 
   // SaleData message for the e-commerce domain.
   message SaleData {
-    // The total amount for the payment.
-    string total_amount = 1;
-    // The sale amount (excluding additional charges like tips).
-    string sale_amount = 2;
-    // The tips amount included in the payment.
-    string tips_amount = 3;
+    uint64 amount_minor_units = 1;
+    string currency = 4; // ISO 4217 three letter currency code
+    string order_id = 5; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
+    string payment_reference = 2; // Your unique reference of this payment request.
+    optional string order_metadata = 6; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
   }
 }
-
 
 message GetPaymentsRequest {
   string store_id = 1;
@@ -165,21 +179,24 @@ message GetPaymentsResponse {
   }
 
   message Response {
-    repeated PaymentDetails payments = 1;
+    repeated DeprecatedPaymentDetails deprecated_payments = 1 [deprecated = true];
     int64 total = 2;
+    repeated PaymentDetailsResponse.PaymentDetails payments = 3 ;
 
-    message PaymentDetails {
+    message DeprecatedPaymentDetails {
       string payment_id = 1; // The unique identifier created by Kody
       string payment_reference = 2; // Your unique payment reference that was set during the initiation
       string order_id = 3; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
       optional string order_metadata = 4; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
       PaymentStatus status = 5;
+      optional string payment_data_json = 6 ;
+
+
 
       google.protobuf.Timestamp date_created = 7;
       optional google.protobuf.Timestamp date_paid = 8;
       optional string psp_reference = 9;
-      optional PaymentMethods payment_method = 10;
-
+      optional string payment_method = 10;
     }
   }
 
@@ -221,19 +238,17 @@ message RefundResponse {
 }
 
 enum PaymentMethods {
-  ALIPAY = 0;
-  WECHAT = 1;
-  MASTERCARD = 2;
-  AMEX = 3;
-  BAN_CONTACT = 4;
-  CHINA_UNION_PAY = 5;
-  MAESTRO = 6;
-  DINERS = 7;
-  DISCOVER = 8;
-  JCB = 9;
-  VISA = 10;
-  GOOGLE_PAY = 11;
-  APPLE_PAY = 12;
+  VISA = 0;
+  MASTERCARD = 1;
+  AMEX = 2;
+  BAN_CONTACT = 3;
+  CHINA_UNION_PAY = 4;
+  MAESTRO = 5;
+  DINERS = 6;
+  DISCOVER = 7;
+  JCB = 8;
+  ALIPAY = 9;
+  WECHAT = 10;
 }
 
 enum PaymentStatus {
