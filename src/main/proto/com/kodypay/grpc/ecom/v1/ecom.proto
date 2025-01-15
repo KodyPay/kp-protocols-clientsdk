@@ -149,11 +149,11 @@ message PaymentDetailsResponse {
 
   // SaleData message for the e-commerce domain.
   message SaleData {
-    uint64 amount_minor_units = 1;
-    string currency = 4; // ISO 4217 three letter currency code
-    string order_id = 5; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
-    string payment_reference = 2; // Your unique reference of this payment request.
-    optional string order_metadata = 6; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
+    uint64 amount_minor_units = 1; // Amount in minor units. For example, 2000 means GBP 20.00.
+    string currency = 2; // ISO 4217 three letter currency code
+    string order_id = 3; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
+    string payment_reference = 4; // Your unique reference of this payment request.
+    optional string order_metadata = 5; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
   }
 }
 
