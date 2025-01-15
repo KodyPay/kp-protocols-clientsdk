@@ -153,7 +153,7 @@ message PaymentDetailsResponse {
     string currency = 2; // ISO 4217 three letter currency code
     string order_id = 3; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
     string payment_reference = 4; // Your unique reference of this payment request.
-    optional string order_metadata = 5; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
+    optional string order_metadata_json = 5; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
   }
 }
 
@@ -189,9 +189,7 @@ message GetPaymentsResponse {
       string order_id = 3; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
       optional string order_metadata = 4; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
       PaymentStatus status = 5;
-      optional string payment_data_json = 6 ;
-
-
+      optional string payment_data_json = 6; // json blob containing payment data
 
       google.protobuf.Timestamp date_created = 7;
       optional google.protobuf.Timestamp date_paid = 8;
