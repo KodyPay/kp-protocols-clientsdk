@@ -30,10 +30,25 @@ message PaymentInitiationRequest {
   optional string payer_locale = 11; // The language code and country code to specify the language to display the payment pages. It will default to en_GB if not set.
   optional bool tokenise_card = 12; // defaults false
   optional ExpirySettings expiry = 13; // Nested message for expiry settings
+  optional CaptureOptions capture_options = 14; // Optional capture settings
 
   message ExpirySettings {
     bool show_timer = 1; // Display a countdown timer to the user in the payment page, default is false
     uint64 expiring_seconds = 2; // Timeout duration in seconds, defaults to 1800 seconds (30 minutes)
+  }
+
+  message CaptureOptions {
+    oneof capture_settings {
+      bool delayed_capture = 1; // If true, the capture will be delayed until manually triggered
+      int32 auto_capture_interval_mins = 2; // Automatically capture the payment after the specified interval in minutes
+      bool auto_capture_store_close_time = 3; // Automatically capture the payment at the store's closing time
+    }
+
+    oneof release_settings {
+      bool delayed_release = 4; // If true, the release of funds will be delayed until manually triggered
+      int32 auto_release_interval_mins = 5; // Automatically release the funds after the specified interval in minutes
+      bool auto_release_store_close_time = 6; // Automatically release the funds at the store's closing time
+    }
   }
 }
 
