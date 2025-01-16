@@ -108,7 +108,7 @@ message PayResponse {
     string total_amount = 1;
     string sale_amount = 2;
     string tips_amount = 3;
-    string idempotency_uuid = 4;
+    string payment_id = 4;
     optional string payment_reference = 5; // Your unique reference of this payment request.
     optional string order_id = 6; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
     string receipt_json = 7; // json blob containing the receipt data
@@ -177,7 +177,7 @@ message RefundRequest {
 message RefundResponse {
   RefundStatus status = 1;
   optional string failure_reason = 2; // only populated on failure
-  string idempotency_uuid = 3;
+  string payment_id = 3;
   google.protobuf.Timestamp date_created = 4;
   string total_paid_amount = 5;
   string total_amount_refunded = 6;
@@ -189,6 +189,5 @@ message RefundResponse {
     REQUESTED = 1;
     FAILED = 2;
   }
-  optional string payment_id = 10;
-  optional string order_id = 11;
+  optional string order_id = 10;
 }
