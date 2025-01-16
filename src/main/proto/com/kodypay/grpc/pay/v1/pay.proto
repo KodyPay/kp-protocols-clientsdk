@@ -88,16 +88,15 @@ message PayResponse {
 
   message PaymentData {
     string psp_reference = 1;
-    PaymentSettings.PaymentMethods payment_method = 3;
-    string payment_method_variant = 4;
-    string card_last_4_digits = 5;
-    google.protobuf.Timestamp date_paid = 6;
+    PaymentSettings.PaymentMethods payment_method = 2;
+    string payment_method_variant = 3;
+    google.protobuf.Timestamp date_paid = 4;
 
     oneof payment_method_details {
-      PaymentCard payment_card = 7;
+      PaymentCard payment_card = 5;
     }
 
-    message PaymentCard{
+    message PaymentCard {
       string card_last_4_digits = 1;
       // The authorization code for the transaction.
       string auth_code = 2;
