@@ -134,8 +134,8 @@ message PaymentDetailsResponse {
     optional string psp_reference = 9 [deprecated=true];
     optional string payment_method = 10[deprecated=true];
 
-    optional PaymentData payment_data = 11; // json blob containing payment data
-    optional SaleData sale_data = 12; // json blob containing sale data
+    optional PaymentData payment_data = 11; //  Payment related data
+    optional SaleData sale_data = 12; // Sale related data
   }
 
   // PaymentData message for the e-commerce domain.
