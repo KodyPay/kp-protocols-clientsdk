@@ -38,16 +38,19 @@ message PaymentInitiationRequest {
   }
 
   message CaptureOptions {
-    oneof capture_settings {
-      bool delayed_capture = 1; // If true, the capture will be delayed until manually triggered
-      int32 auto_capture_interval_mins = 2; // Automatically capture the payment after the specified interval in minutes
+    CaptureSettings capture_settings = 1;
+    optional ReleaseSettings release_settings = 2;
+
+    message CaptureSettings {
+      bool delayed_capture = 1; // If true, the capture will be delayed until manually triggered. Default is false
+      optional int32 auto_capture_interval_mins = 2; // Automatically capture the payment after the specified interval in minutes
       bool auto_capture_store_close_time = 3; // Automatically capture the payment at the store's closing time
     }
 
-    oneof release_settings {
-      bool delayed_release = 4; // If true, the release of funds will be delayed until manually triggered
-      int32 auto_release_interval_mins = 5; // Automatically release the funds after the specified interval in minutes
-      bool auto_release_store_close_time = 6; // Automatically release the funds at the store's closing time
+    message ReleaseSettings { // if not set, the funds will be released automatically by the card issuer
+      bool delayed_release = 1; // If true, the release of funds will be delayed until manually triggered
+      optional int32 auto_release_interval_mins = 2; // Automatically release the funds after the specified interval in minutes
+      bool auto_release_store_close_time = 3; // Automatically release the funds at the store's closing time
     }
   }
 }
@@ -134,8 +137,8 @@ message PaymentDetailsResponse {
     optional string psp_reference = 9 [deprecated=true];
     optional string payment_method = 10[deprecated=true];
 
-    optional PaymentData payment_data = 11; //  Payment related data
-    optional SaleData sale_data = 12; // Sale related data
+    optional PaymentData payment_data = 11; // PaymentData can be absent if payment has not been initiated
+    optional SaleData sale_data = 12;
   }
 
   // PaymentData message for the e-commerce domain.
@@ -143,11 +146,21 @@ message PaymentDetailsResponse {
     string psp_reference = 1;
     PaymentMethods payment_method = 2;
     string payment_method_variant = 3;
-    google.protobuf.Timestamp date_paid = 4;
+    PaymentAuthStatus auth_status =4;
+    google.protobuf.Timestamp auth_status_date = 5; // The date and time of the auth status change.
+
+    enum PaymentAuthStatus {
+      PENDING = 0;
+      AUTHORISED = 1;
+      FAILED = 2;
+      CAPTURED = 3;
+      RELEASED = 4;
+      EXPIRED = 5;
+    }
 
     oneof payment_method_details {
-      PaymentCard payment_card = 5;
-      PaymentWallet payment_wallet = 6;
+      PaymentCard payment_card = 6;
+      PaymentWallet payment_wallet = 7;
     }
     message PaymentCard{
       string card_last_4_digits =1;
@@ -168,7 +181,7 @@ message PaymentDetailsResponse {
     string currency = 2; // ISO 4217 three letter currency code
     string order_id = 3; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
     string payment_reference = 4; // Your unique reference of this payment request.
-    optional string order_metadata_json = 5; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
+    optional string order_metadata = 5; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
   }
 }
 
