@@ -66,7 +66,7 @@ message Order {
   // Store ID for which the order is placed.
   string store_id = 2;
 
-  // List of items or combos in the order. ?? do we want to flatten combos into items?
+  // List of items or combos in the order.
   repeated OrderItemOrCombo items = 3;
   optional string order_notes = 4;
   //(BigDecimal) total = sum(items) + service + delivery - discount
@@ -115,12 +115,11 @@ enum PaymentStatus {
   UNPAID = 1;
 }
 
-// Which internal status to map?
+// Integration Order Status
 enum OrderStatus {
   // not been fulfilled yet
   OPEN = 0;
   // order has been delivered
   COMPLETED = 1;
-  // has been completed ?? Duplicate of COMPLETED
   CLOSED = 2;
 }
