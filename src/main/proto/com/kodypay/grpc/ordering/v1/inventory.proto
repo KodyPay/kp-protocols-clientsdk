@@ -87,6 +87,7 @@ message Combo {
 
 message GetInventoryRequest {
   string store_id = 1;
+  optional string category_id = 2;
 }
 
 message GetInventoryResponse {
