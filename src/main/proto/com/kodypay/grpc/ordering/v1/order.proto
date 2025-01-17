@@ -18,7 +18,7 @@ message GetOrdersRequest {
   // Store ID for which orders are fetched.
   string store_id = 1;
 
-  // Filter for the order status: "open" or "closed".
+  // Filter for the order status.
   repeated OrderStatus status_in = 2;
 
   // Orders >= this date
