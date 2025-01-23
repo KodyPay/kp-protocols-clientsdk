@@ -62,7 +62,7 @@ message PaymentMethod {
 
 enum PaymentMethodType {
   CARD = 0;
-  QR_WALLET = 1;
+  E_WALLET = 1;
 }
 
 message PayResponse {
