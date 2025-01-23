@@ -52,19 +52,17 @@ message PayRequest {
   }
 }
 
-message PaymentMethod{
+message PaymentMethod {
   PaymentMethodType payment_method_type = 1; // Payment method type
-  // Verification mode is needed for AliPay and WeChat.
   oneof verification_mode {
     string token = 2; // With the token present QR scanning is skipped and goes straight to the payment screen.
-    bool activate_qr_code_scanner = 3; // Flag to activate the terminal camera to scan the customer's QR Code (true), or display the payment method type QR Code for the user to scan (false, default).```
+    bool activate_qr_code_scanner = 3; // Flag to activate the terminal camera to scan the customer's or Kody's QR Code (true), or display the payment method type QR Code for the user to scan (false, default).```
   }
 }
 
 enum PaymentMethodType {
   CARD = 0;
-  ALIPAY = 1;
-  WECHAT = 2;
+  QR_WALLET = 1;
 }
 
 message PayResponse {
