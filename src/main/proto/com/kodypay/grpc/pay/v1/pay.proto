@@ -11,6 +11,7 @@ service KodyPayTerminalService {
   rpc Cancel(CancelRequest) returns (CancelResponse);
   rpc PaymentDetails(PaymentDetailsRequest) returns (PayResponse);
   rpc Refund(RefundRequest) returns (stream RefundResponse);
+  rpc Void(VoidPaymentRequest) returns (VoidPaymentResponse);
 }
 
 // requires X-API-Key header with 'API Key' value
@@ -140,4 +141,36 @@ message RefundResponse {
     FAILED = 2;
   }
   optional string order_id = 10;
+}
+
+message VoidPaymentRequest {
+  oneof ids {
+    string psp_reference = 1;
+    string payment_id = 2;
+  }
+  optional string payment_reference = 3 ;
+  optional string order_id = 4;
+}
+
+message VoidPaymentResponse {
+  string psp_reference = 1;
+  string payment_id = 2;
+  VoidStatus status = 3;
+  optional SaleData sale_data = 4;
+  google.protobuf.Timestamp date_voided = 5;
+
+  enum VoidStatus {
+    PENDING = 0;
+    REQUESTED = 1;
+    VOIDED = 2;
+    FAILED = 3;
+  }
+
+  message SaleData {
+    string total_amount = 1;
+    string sale_amount = 2;
+    string tips_amount = 3;
+    string order_id = 4;
+    string payment_reference = 5;
+  }
 }
