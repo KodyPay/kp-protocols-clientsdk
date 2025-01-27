@@ -170,7 +170,7 @@ message VoidPaymentResponse {
     string total_amount = 1;
     string sale_amount = 2;
     string tips_amount = 3;
-    string order_id = 4; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
-    string payment_reference = 5; // Your unique reference of this payment request.
+    string order_id = 4;
+    string payment_reference = 5;
   }
 }
