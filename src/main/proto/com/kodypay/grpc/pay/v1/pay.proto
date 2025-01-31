@@ -72,7 +72,7 @@ message PayResponse {
   optional string receipt_json = 3 [deprecated = true]; // replaced by payment_data.receipt_json
   string idempotency_uuid = 4;
   google.protobuf.Timestamp date_created = 5;
-  optional string psp_reference = 6;
+  optional string psp_reference = 6 [deprecated = true]; // replaced by payment_data.psp_reference;
   google.protobuf.Timestamp date_paid = 7 [deprecated = true]; // replaced by payment_data.date_paid
   optional string total_amount = 8 [deprecated = true]; // replaced by payment_data.total_amount
   optional string sale_amount = 9 [deprecated = true]; // replaced by payment_data.sale_amount
