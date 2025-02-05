@@ -59,6 +59,8 @@ message PaymentMethod {
     string token = 2; // With the token present QR scanning is skipped and goes straight to the payment screen.
     bool activate_qr_code_scanner = 3; // Flag to activate the terminal camera to scan the customer's or Kody's QR Code (true), or display the payment method type QR Code for the user to scan (false, default).```
   }
+  optional bool enable_pbb = 4; // Flag to enable the pay by bank option.
+  optional bool enable_mcc = 5; // Flag to enable the multi currency conversion option.
 }
 
 enum PaymentMethodType {
