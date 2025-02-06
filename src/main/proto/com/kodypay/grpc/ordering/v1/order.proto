@@ -69,8 +69,8 @@ message RefundItemRequest {
   string store_id = 1;
   // Order ID containing the item to be refunded.
   string order_id = 2;
-  // Item ID to be refunded.
-  string item_id = 3;
+  // Item IDs to be refunded.
+  repeated string item_id = 3;
   // Optional reason for the refund.
   optional string reason = 4;
 }
