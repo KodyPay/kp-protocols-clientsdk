@@ -11,6 +11,11 @@ service OrderService {
   // RPC to retrieve orders based on filter criteria.
   rpc GetOrders(GetOrdersRequest) returns (GetOrdersResponse);
   rpc UpdateOrderStatus(UpdateOrderStatusRequest) returns (UpdateOrderStatusResponse);
+
+  // RPC to refund a specific item in an order.
+  rpc RefundItem(RefundItemRequest) returns (RefundItemResponse);
+  // RPC to refund an entire order.
+  rpc RefundOrder(RefundOrderRequest) returns (RefundOrderResponse);
 }
 
 // Request to fetch orders for a specific store.
@@ -56,6 +61,43 @@ message UpdateOrderStatusResponse {
   bool success = 1;
 
   // Optional message providing additional information about the update.
+  optional string message = 2;
+}
+
+message RefundItemRequest {
+  // Store ID for which the refund is being processed.
+  string store_id = 1;
+  // Order ID containing the item to be refunded.
+  string order_id = 2;
+  // Item IDs to be refunded.
+  repeated string item_id = 3;
+  // Optional reason for the refund.
+  optional string reason = 4;
+}
+
+// Response for refunding a specific item in an order.
+message RefundItemResponse {
+  // Indicates if the refund was successful.
+  bool success = 1;
+  // Optional message providing additional information about the refund.
+  optional string message = 2;
+}
+
+// Request to refund an entire order.
+message RefundOrderRequest {
+  // Store ID for which the refund is being processed.
+  string store_id = 1;
+  // Order ID to be refunded.
+  string order_id = 2;
+  // Optional reason for the refund.
+  optional string reason = 3;
+}
+
+// Response for refunding an entire order.
+message RefundOrderResponse {
+  // Indicates if the refund was successful.
+  bool success = 1;
+  // Optional message providing additional information about the refund.
   optional string message = 2;
 }
 
