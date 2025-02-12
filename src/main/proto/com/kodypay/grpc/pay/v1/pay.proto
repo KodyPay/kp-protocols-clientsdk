@@ -93,6 +93,14 @@ message PayResponse {
     string psp_reference = 6;
     PaymentMethodType payment_method_type = 7;
     string payment_method = 8;
+    PaymentCard payment_card = 9;
+
+    message PaymentCard {
+      string card_last_4_digits = 1;
+      string card_expiry_date = 2;
+      string pos_entry_mode = 3;
+
+    }
   }
 }
 
