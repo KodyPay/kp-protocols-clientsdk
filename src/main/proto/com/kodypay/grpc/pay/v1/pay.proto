@@ -101,6 +101,7 @@ message PayResponse {
       string card_expiry_date = 2;
       string pos_entry_mode = 3;
       string payment_token = 4;
+      string auth_code = 5;
     }
   }
 }
