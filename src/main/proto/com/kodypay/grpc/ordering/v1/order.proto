@@ -30,10 +30,10 @@ message GetOrdersRequest {
   optional google.protobuf.Timestamp after_date = 3;
 
   // Optional pagination token (for large datasets).
-  string page_token = 4;
+  optional string page_token = 4;
 
   // Maximum number of orders to return.
-  int32 page_size = 5;
+  optional int32 page_size = 5;
 }
 
 // Response containing the list of orders.
