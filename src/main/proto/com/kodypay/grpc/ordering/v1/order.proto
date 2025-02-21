@@ -174,4 +174,5 @@ enum OrderStatus {
   COMPLETED = 3;
   DECLINED = 4;
   FAILED = 5;
+  PICKED = 6;
 }
