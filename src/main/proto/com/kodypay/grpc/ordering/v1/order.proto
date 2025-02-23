@@ -157,15 +157,13 @@ message Order {
     string merchant_item_id = 8;
   }
   message OrderAddOnItem {
-    string addon_item_id = 1;
-    uint32 quantity = 2;
-    string item_notes = 3;
-    string order_addon_item_id = 4;
-    string parent_item_id = 5;
+    uint32 quantity = 1;
+    string item_notes = 2;
+    string parent_item_id = 3;
     // price of individual addon
-    string unit_price = 6;
-    optional string item_id = 7;
-    string merchant_item_id = 8;
+    string unit_price = 4;
+    optional string item_id = 5;
+    string merchant_item_id = 6;
   }
 }
 
