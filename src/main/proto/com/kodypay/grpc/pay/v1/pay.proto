@@ -166,7 +166,6 @@ message VoidPaymentRequest {
   optional string payment_reference = 3 ;
   optional string order_id = 4;
   string store_id = 5;
-  optional string terminal_id = 6;
 }
 
 message VoidPaymentResponse {
