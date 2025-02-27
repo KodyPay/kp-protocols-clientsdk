@@ -113,6 +113,7 @@ enum PaymentStatus {
   DECLINED = 4;
   REFUND_PENDING = 5;
   REFUND_REQUESTED = 6;
+  REFUND_FAILED = 7;
 }
 
 // requires X-API-Key header with 'API Key' value
