@@ -36,7 +36,7 @@ message InventoryItemOrCombo {
 }
 
 message InventoryItem {
-  string item_id = 1;
+  string merchant_item_id = 1;
   string name = 2;
   string description = 3;
   // "0.00" = free item ?
@@ -62,7 +62,7 @@ message AddOnGroup {
 }
 
 message AddOnItem {
-  string item_id = 1;
+  string merchant_item_id = 1;
   string name = 2;
   string description = 3;
   // "0.00" = free item
