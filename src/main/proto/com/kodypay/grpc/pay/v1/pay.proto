@@ -81,6 +81,7 @@ message PayResponse {
   optional string payment_reference = 12;
   optional string order_id = 13;
   repeated PayRequest.PaymentMethods accepts_only = 14;
+  optional bool is_payment_declined = 15; // Field to be able to differentiate cancelled from declined, for Oracle use, without breaking backwards compatibility.
 
   message PaymentData {
     google.protobuf.Timestamp date_paid = 1;
