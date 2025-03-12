@@ -9,6 +9,7 @@ import "google/protobuf/timestamp.proto";
 service KodyEcomPaymentsService {
   // Initiates a payment and returns a URL for the user to complete payment
   rpc InitiatePayment(PaymentInitiationRequest) returns (PaymentInitiationResponse);
+  rpc InitiatePaymentStream(PaymentInitiationRequest) returns (stream PaymentInitiationResponse);
   rpc PaymentDetails(PaymentDetailsRequest) returns (PaymentDetailsResponse);
   rpc PaymentDetailsStream(PaymentDetailsRequest) returns (stream PaymentDetailsResponse);
   rpc GetPayments(GetPaymentsRequest) returns (GetPaymentsResponse);
