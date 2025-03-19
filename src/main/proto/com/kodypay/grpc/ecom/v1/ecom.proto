@@ -123,6 +123,7 @@ message PaymentDetailsResponse {
       UNKNOWN = 0;
       NOT_FOUND = 1;
       INVALID_REQUEST = 2;
+      DUPLICATE_ATTEMPT = 3;
     }
   }
 
