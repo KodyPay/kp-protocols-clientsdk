@@ -133,6 +133,7 @@ message Order {
   optional string location_number = 6;
   OrderStatus status = 7;
   optional google.protobuf.Timestamp date_created = 8; // set by server when order is received for first time
+  optional string service_charge_amount = 9;
 
   message OrderItemOrCombo {
     oneof type {
