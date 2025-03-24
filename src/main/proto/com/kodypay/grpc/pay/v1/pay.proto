@@ -107,12 +107,12 @@ message PayResponse {
   }
 
   message RefundDetails {
-    string payment_transaction_id = 1;
-    string amount = 2;
-    google.protobuf.Timestamp date = 3;
-    optional string psp_reference = 4; // Might not have a PSP yet reference if pending
-    optional string terminal_id = 5;
-    bool is_pending = 6;
+    string payment_id = 1;
+    optional string psp_reference = 2; // Might not have a PSP yet reference if pending
+    string payment_transaction_id = 3;
+    string total_paid_amount = 4;
+    google.protobuf.Timestamp event_date = 5;
+    optional string terminal_id = 6;
   }
 }
 
