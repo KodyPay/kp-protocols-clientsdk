@@ -82,6 +82,7 @@ message PayResponse {
   optional string order_id = 13;
   repeated PayRequest.PaymentMethods accepts_only = 14;
   optional bool is_payment_declined = 15; // Field to be able to differentiate cancelled from declined, for Oracle use, without breaking backwards compatibility.
+  repeated RefundDetails refunds = 16;
 
   message PaymentData {
     google.protobuf.Timestamp date_paid = 1;
@@ -103,6 +104,15 @@ message PayResponse {
       string payment_token = 4;
       string auth_code = 5;
     }
+  }
+
+  message RefundDetails {
+    string payment_id = 1;
+    optional string psp_reference = 2; // Might not have a PSP yet reference if pending
+    string payment_transaction_id = 3;
+    string total_paid_amount = 4;
+    google.protobuf.Timestamp event_date = 5;
+    optional string terminal_id = 6;
   }
 }
 
