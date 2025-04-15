@@ -214,15 +214,6 @@ message GetPaymentsResponse {
     int64 total = 2;
     repeated PaymentDetailsResponse.PaymentDetails payments = 3 ;
 
-    // SaleData message for the e-commerce domain.
-    message SaleData {
-      uint64 amount_minor_units = 1; // Amount in minor units. For example, 2000 means GBP 20.00.
-      string currency = 2; // ISO 4217 three letter currency code
-      string order_id = 3; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
-      string payment_reference = 4; // Your unique reference of this payment request.
-      optional string order_metadata = 5; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
-    }
-
     message DeprecatedPaymentDetails {
       string payment_id = 1; // The unique identifier created by Kody
       string payment_reference = 2; // Your unique payment reference that was set during the initiation
@@ -235,7 +226,6 @@ message GetPaymentsResponse {
       optional google.protobuf.Timestamp date_paid = 8;
       optional string psp_reference = 9;
       optional string payment_method = 10;
-      optional SaleData sale_data = 11;
     }
   }
 
