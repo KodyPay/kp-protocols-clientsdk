@@ -40,9 +40,8 @@ message Check {
 message FindChecksRequest {
   string search_query = 1; // e.g., "Table 5", "12345"
   enum SearchType {
-    UNKNOWN = 0;
-    TABLE_NAME = 1;
-    CHECK_NUMBER = 2;
+    TABLE_NAME = 0;
+    CHECK_NUMBER = 1;
     // Add other search types if supported/needed
   }
   SearchType search_type = 2;
