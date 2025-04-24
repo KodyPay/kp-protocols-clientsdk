@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package payattable.v1;
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto"; // For optional fields like tip
+
+// Service definition for Pay@Table operations
+service PayAtTableService {
+  // Find open checks based on search criteria (e.g., table number, check number)
+  rpc FindChecks (FindChecksRequest) returns (FindChecksResponse);
+}
+
+message CheckItem {
+  string name = 1;
+  string quantity = 2; // Using string for flexibility
+  string price = 3;    // Using string for flexibility (currency formatting)
+}
+
+message CheckPayment {
+  string tender_name = 1;
+  string amount = 2;
+  string reference_text = 3; // e.g., Auth Code
+}
+
+message Check {
+  string check_ref = 1; // Unique identifier for the check from Simphony
+  string check_number = 2;
+  string table_name = 3;
+  string total_amount = 4; // Current total due (string for currency)
+  string balance_due = 5; // Remaining balance (string for currency)
+  repeated CheckItem items = 6;
+  repeated CheckPayment payments_applied = 7;
+  string subtotal = 8;
+  string tax_total = 9;
+  // Add other relevant check details: guest count, server name, open time etc.
+  google.protobuf.Timestamp open_time = 10;
+}
+
+// Check Finding
+message FindChecksRequest {
+  string search_query = 1; // e.g., "Table 5", "12345"
+  enum SearchType {
+    TABLE_NAME = 0;
+    CHECK_NUMBER = 1;
+    // Add other search types if supported/needed
+  }
+  SearchType search_type = 2;
+}
+
+message FindChecksResponse {
+  repeated Check checks = 1;
+  string error_message = 2; // If retrieval fails
+}
