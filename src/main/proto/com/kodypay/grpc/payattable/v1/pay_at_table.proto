@@ -5,6 +5,7 @@ package com.kodypay.grpc.payattable.v1;
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto"; // For optional fields like tip
 
+
 // Service definition for Pay@Table operations
 service PayAtTableService {
   // Find open checks based on search criteria (e.g., table number, check number)
@@ -46,6 +47,7 @@ message FindChecksRequest {
     // Add other search types if supported/needed
   }
   SearchType search_type = 2;
+  string storeId = 3;
 }
 
 message FindChecksResponse {
