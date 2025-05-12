@@ -13,7 +13,7 @@ gRPC protocols for client-sdk.
 3. Use the tag to run the release action from the respective SDK repositories to release SDKs in different languages.
 
 ### Testing Release
-1. Tag the version in your development branch.
+1. Tag the version in your development branch, appending -alpha or -beta to the end of the version based on the nature of the changes (e.g., 1.0.0-alpha for early testing or 1.0.0-beta for more stable pre-release testing).
 2. Use the tag to run the release action from the respective SDK repositories to release SDKs in different languages.
 
 ## Active SDK Repositories
