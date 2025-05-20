@@ -38,6 +38,10 @@ message Check {
   google.protobuf.Timestamp open_time = 10;
 }
 
+enum ProviderType {
+  ORACLE = 0;
+}
+
 // Check Finding
 message FindChecksRequest {
   string search_query = 1; // e.g., "Table 5", "12345"
@@ -48,6 +52,7 @@ message FindChecksRequest {
   }
   SearchType search_type = 2;
   string store_id = 3;
+  ProviderType provider_type = 4;
 }
 
 message FindChecksResponse {
