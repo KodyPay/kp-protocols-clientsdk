@@ -13,6 +13,7 @@ enum UserPlatform {
   WEB = 0;
   MOBILE = 1;
   TERMINAL = 2;
+  SDK = 3;
 }
 
 message GetLogsRequest {
