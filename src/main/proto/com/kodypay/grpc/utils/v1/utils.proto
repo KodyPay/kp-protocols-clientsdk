@@ -18,17 +18,21 @@ enum UserPlatform {
 
 message GetLogsRequest {
   string store_id = 1;
-  optional google.protobuf.Timestamp timestamp = 2;  // Filter by timestamp
-  optional string type = 3;
 
-  optional string page_token = 4;
-  optional int32 page_size = 5;
+  // Time range filters
+  optional google.protobuf.Timestamp start_time = 2;  // Filter logs from this time (inclusive)
+  optional google.protobuf.Timestamp end_time = 3;    // Filter logs until this time (inclusive)
+
+  optional string event = 4;  // Filter by event type
+
+  optional string page_token = 5;
+  optional int32 page_size = 6;
 }
 
 message LogEntry {
   string id = 1;
   google.protobuf.Timestamp timestamp = 2;
-  string type = 3;
+  string event = 3;
   UserPlatform user_platform = 4;
   string service = 5;
   map<string, string> context = 6;
