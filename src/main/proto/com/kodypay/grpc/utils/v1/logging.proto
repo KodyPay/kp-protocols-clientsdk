@@ -1,19 +1,13 @@
 syntax = "proto3";
 package com.kodypay.grpc.utils.v1;
 option java_multiple_files = true;
-option java_outer_classname = "UtilsProto";
+option java_outer_classname = "LoggingProto";
 option java_package = "com.kodypay.grpc.utils.v1";
 import "google/protobuf/timestamp.proto";
 
-service UtilsService {
+service LoggingService {
   rpc GetLogs(GetLogsRequest) returns (GetLogsResponse);
-}
-
-enum UserPlatform {
-  WEB = 0;
-  MOBILE = 1;
-  TERMINAL = 2;
-  SDK = 3;
+  rpc GetLogsStream(GetLogsRequest) returns (stream GetLogsResponse);
 }
 
 message GetLogsRequest {
@@ -24,25 +18,16 @@ message GetLogsRequest {
   optional google.protobuf.Timestamp end_time = 3;    // Filter logs until this time (inclusive)
 
   optional string event = 4;  // Filter by event type
-
-  optional string page_token = 5;
-  optional int32 page_size = 6;
 }
 
 message LogEntry {
   string id = 1;
   google.protobuf.Timestamp timestamp = 2;
   string event = 3;
-  UserPlatform user_platform = 4;
-  string service = 5;
-  map<string, string> context = 6;
-  string user_identifier = 7;
+  map<string, string> context = 4;
 }
 
 message GetLogsResponse {
   // List of logs for the given filters
   repeated LogEntry logs = 1;
-
-  // Token for the next page of results, if any
-  string next_page_token = 2;
 }
