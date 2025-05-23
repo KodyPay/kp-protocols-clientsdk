@@ -135,6 +135,7 @@ message CancelRequest {
 }
 message CancelResponse {
   PaymentStatus status = 1;
+  optional string payment_id = 2;  // to confirm the payment (order) cancelled
 }
 
 // requires X-API-Key header with 'API Key' value
