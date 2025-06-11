@@ -1,0 +1,33 @@
+syntax = "proto3";
+package com.kodypay.grpc.utils.v1;
+option java_multiple_files = true;
+option java_outer_classname = "LoggingProto";
+option java_package = "com.kodypay.grpc.utils.v1";
+import "google/protobuf/timestamp.proto";
+
+service LoggingService {
+  rpc GetLogs(GetLogsRequest) returns (GetLogsResponse);
+  rpc GetLogsStream(GetLogsRequest) returns (stream GetLogsResponse);
+}
+
+message GetLogsRequest {
+  string store_id = 1;
+
+  // Time range filters
+  optional google.protobuf.Timestamp start_time = 2;  // Filter logs from this time (inclusive)
+  optional google.protobuf.Timestamp end_time = 3;    // Filter logs until this time (inclusive)
+
+  optional string event = 4;  // Filter by event type
+}
+
+message LogEntry {
+  string id = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  string event = 3;
+  map<string, string> context = 4;
+}
+
+message GetLogsResponse {
+  // List of logs for the given filters
+  repeated LogEntry logs = 1;
+}
