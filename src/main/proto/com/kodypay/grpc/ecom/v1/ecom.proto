@@ -92,7 +92,6 @@ message PaymentDetailsRequest {
   }
 }
 
-// not implemented yet
 message GetCardTokenRequest {
   string store_id = 1; // Your Kody store id
 
