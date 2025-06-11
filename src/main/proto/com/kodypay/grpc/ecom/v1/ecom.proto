@@ -15,6 +15,7 @@ service KodyEcomPaymentsService {
   rpc GetPayments(GetPaymentsRequest) returns (GetPaymentsResponse);
   rpc GetCardToken(GetCardTokenRequest) returns (GetCardTokenResponse);
   rpc Refund(RefundRequest) returns (stream RefundResponse);
+  rpc DeleteCardToken(DeleteCardTokenRequest) returns (DeleteCardTokenResponse);
 }
 
 // Payment Initiation Request
@@ -34,6 +35,7 @@ message PaymentInitiationRequest {
   optional ExpirySettings expiry = 13; // Nested message for expiry settings
   optional CaptureOptions capture_options = 14; // Optional capture settings
   optional bool is_pay_by_bank_accepted = 15; // Whether the payer can pay via pay by bank (Kody store must have pay by bank configured)
+  optional string shopper_reference = 16; // The shopper reference used for the payment, will be used to match tokenised payment methods, should be a unique identifier, if applicable.
 
   message ExpirySettings {
     bool show_timer = 1; // Display a countdown timer to the user in the payment page, default is false
@@ -90,11 +92,15 @@ message PaymentDetailsRequest {
   }
 }
 
+// not implemented yet
 message GetCardTokenRequest {
   string store_id = 1; // Your Kody store id
+
+  // token table only saves the external payment reference, wont work for the following two fields seems.
   oneof payment_identifier {
     string payment_id = 2; // The unique identifier created by Kody
     string payment_reference = 3; // Your unique payment reference that was set during the initiation
+    string token = 4; // The unique identifier of the card token to be retrieved
   }
 }
 
@@ -102,11 +108,21 @@ message GetCardTokenResponse {
   string token = 1;
   string expiry = 2;
   CardTokenStatus status = 3;
+  string shopper_reference = 4; // The shopper reference used for the payment, if applicable.
+  string brand = 5; // Card brand, e.g. mc, visa and so on
+  string variant = 6; // Card variant, e.g. mccredit, mcdebit, visa, visadebit, etc.
+  string holder_name = 7; // Cardholder name
+  string issuer_name = 8; // Issuer name of the card
+  string card_last_four = 9; // Last four digits of the card number
+  string created_at = 10; // Date when the stored payment method was created
+  string psp_reference = 11; // PSP reference for the stored payment method
+  repeated string supported_recurring_processing_models = 12; // Supported recurring processing models
 
   enum CardTokenStatus {
     PENDING = 0;
     FAILED = 1;
     READY = 2;
+    DELETED = 3;
   }
 }
 
@@ -287,4 +303,21 @@ enum PaymentStatus {
   FAILED = 2;
   CANCELLED = 3;
   EXPIRED = 4;
+}
+
+message DeleteCardTokenRequest {
+  string store_id = 1; // Kody store id
+  string token = 2; // The unique identifier of the card token to be deleted
+}
+
+message DeleteCardTokenResponse {
+  Status status = 1;
+  optional string error_message = 2; // Provides details if the deletion failed
+
+  enum Status {
+    UNKNOWN = 0;
+    DELETED = 1;
+    NOT_FOUND = 2;
+    FAILED = 3;
+  }
 }
