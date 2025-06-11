@@ -94,8 +94,6 @@ message PaymentDetailsRequest {
 
 message GetCardTokenRequest {
   string store_id = 1; // Your Kody store id
-
-  // token table only saves the external payment reference, wont work for the following two fields seems.
   oneof payment_identifier {
     string payment_id = 2; // The unique identifier created by Kody
     string payment_reference = 3; // Your unique payment reference that was set during the initiation
