@@ -112,8 +112,9 @@ message GetCardTokenResponse {
   string issuer_name = 8; // Issuer name of the card
   string card_last_four = 9; // Last four digits of the card number
   string created_at = 10; // Date when the stored payment method was created
-  string psp_reference = 11; // PSP reference for the stored payment method
-  repeated string supported_recurring_processing_models = 12; // Supported recurring processing models
+  optional string payment_id = 11; // payment id associated with the stored payment method, if applicable
+  optional string payment_reference = 12; // the external payment reference associated with the stored payment method, if applicable
+  repeated string supported_recurring_processing_models = 13; // Supported recurring processing models
 
   enum CardTokenStatus {
     PENDING = 0;
