@@ -7,7 +7,7 @@ import "google/protobuf/timestamp.proto";
 
 service LoggingService {
   rpc GetLogs(GetLogsRequest) returns (GetLogsResponse);
-  rpc GetLogsStream(GetLogsRequest) returns (stream GetLogsResponse);
+  rpc GetLogsStream(GetLogsRequest) returns (stream GetLogsStreamResponse);
 }
 
 message GetLogsRequest {
@@ -30,4 +30,9 @@ message LogEntry {
 message GetLogsResponse {
   // List of logs for the given filters
   repeated LogEntry logs = 1;
+}
+
+message GetLogsStreamResponse {
+  // Single log entry for streaming
+  LogEntry log = 1;
 }
