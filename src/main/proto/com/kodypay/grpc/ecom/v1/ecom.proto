@@ -36,6 +36,7 @@ message PaymentInitiationRequest {
   optional CaptureOptions capture_options = 14; // Optional capture settings
   optional bool is_pay_by_bank_accepted = 15; // Whether the payer can pay via pay by bank (Kody store must have pay by bank configured)
   optional string shopper_reference = 16; // The shopper reference used for the payment, will be used to match tokenised payment methods, should be a unique identifier, if applicable.
+  optional RecurringProcessingMode  recurring_processing_model = 17; // The recurring model to use for the payment, if applicable. Can be 'Subscription', 'UnscheduledCardOnFile' or 'CardOnFile'.
 
   message ExpirySettings {
     bool show_timer = 1; // Display a countdown timer to the user in the payment page, default is false
@@ -57,6 +58,12 @@ message PaymentInitiationRequest {
       optional int32 auto_release_interval_mins = 2; // Automatically release the funds after the specified interval in minutes
       bool auto_release_store_close_time = 3; // Automatically release the funds at the store's closing time
     }
+  }
+
+  enum RecurringProcessingMode {
+    CARD_ON_FILE = 0; // Card on file model
+    SUBSCRIPTION = 1; // Subscription model
+    UNSCHEDULED_CARD_ON_FILE = 2; // Unscheduled card on file model
   }
 }
 
