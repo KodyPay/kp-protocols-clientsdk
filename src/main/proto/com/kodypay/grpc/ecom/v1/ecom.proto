@@ -61,9 +61,10 @@ message PaymentInitiationRequest {
   }
 
   enum RecurringProcessingModel {
-    CARD_ON_FILE = 0; // Card on file model
-    SUBSCRIPTION = 1; // Subscription model
-    UNSCHEDULED_CARD_ON_FILE = 2; // Unscheduled card on file model
+    UNSPECIFIED = 0;  // Default value, not set
+    CARD_ON_FILE = 1; // Card on file model
+    SUBSCRIPTION = 2; // Subscription model
+    UNSCHEDULED_CARD_ON_FILE = 3; // Unscheduled card on file model
   }
 }
 
