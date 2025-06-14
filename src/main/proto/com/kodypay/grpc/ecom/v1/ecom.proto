@@ -119,13 +119,12 @@ message GetCardTokenResponse {
   string shopper_reference = 4; // The shopper reference used for the payment, if applicable.
   PaymentMethods payment_method = 5; // Card brand, e.g. mc, visa and so on
   string payment_method_variant = 6; // Card variant, e.g. mccredit, mcdebit, visa, visadebit, etc.
-  string holder_name = 7; // Cardholder name
-  string issuer_name = 8; // Issuer name of the card
-  string card_last_4_digits = 9; // Last four digits of the card number (aligns with PaymentCard.card_last_4_digits)
-  google.protobuf.Timestamp created_at = 10; // Date when the stored payment method was created
-  optional string payment_id = 11; // payment id associated with the stored payment method, if applicable
-  optional string payment_reference = 12; // the external payment reference associated with the stored payment method, if applicable
-  optional string recurring_processing_models = 13; // Recurring processing model
+  string funding_source = 7; // Funding source of the card, e.g. CREDIT, DEBIT, PREPAID, etc. (aligns with PaymentCard.funding_source)
+  string card_last_4_digits = 8; // Last four digits of the card number (aligns with PaymentCard.card_last_4_digits)
+  google.protobuf.Timestamp created_at = 9; // Date when the stored payment method was created
+  optional string payment_id = 10; // payment id associated with the stored payment method, if applicable
+  optional string payment_reference = 11; // the external payment reference associated with the stored payment method, if applicable
+  optional string recurring_processing_models = 12; // Recurring processing model
 
   enum CardTokenStatus {
     PENDING = 0;
