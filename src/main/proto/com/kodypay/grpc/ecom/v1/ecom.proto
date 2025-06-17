@@ -13,11 +13,12 @@ service KodyEcomPaymentsService {
   rpc PaymentDetails(PaymentDetailsRequest) returns (PaymentDetailsResponse);
   rpc PaymentDetailsStream(PaymentDetailsRequest) returns (stream PaymentDetailsResponse);
   rpc GetPayments(GetPaymentsRequest) returns (GetPaymentsResponse);
-  rpc GetCardToken(GetCardTokenRequest) returns (GetCardTokenResponse);
   rpc Refund(RefundRequest) returns (stream RefundResponse);
+  rpc CreateCardToken(CreateTokenRequest) returns (CreateTokenResponse);
+  rpc GetCardToken(GetCardTokenRequest) returns (GetCardTokenResponse);
   rpc DeleteCardToken(DeleteCardTokenRequest) returns (DeleteCardTokenResponse);
-  rpc ListCardTokens(ListCardTokensRequest) returns (ListCardTokensResponse);
-  rpc ChargeWithToken(ChargeWithTokenRequest) returns (PaymentDetailsResponse);
+  rpc GetCardTokens(GetCardTokensRequest) returns (GetCardTokensResponse);
+  rpc PayWithCardToken(PayWithCardTokenRequest) returns (PaymentDetailsResponse);
 }
 
 // Payment Initiation Request
@@ -33,13 +34,10 @@ message PaymentInitiationRequest {
   optional string payer_email_address = 9; // We recommend that you provide this data, as it is used in velocity fraud checks. Required for 3D Secure 2 transactions.
   optional string payer_ip_address = 10; // The payer IP address used for risk checks, also required for 3D Secure 2 transactions.
   optional string payer_locale = 11; // The language code and country code to specify the language to display the payment pages. It will default to en_GB if not set.
-  optional bool tokenise_card = 12; // defaults false
+  optional bool tokenise_card = 12 [deprecated = true]; // defaults false
   optional ExpirySettings expiry = 13; // Nested message for expiry settings
   optional CaptureOptions capture_options = 14; // Optional capture settings
   optional bool is_pay_by_bank_accepted = 15; // Whether the payer can pay via pay by bank (Kody store must have pay by bank configured)
-  optional string shopper_reference = 16; // The shopper reference used for the payment, will be used to match tokenised payment methods, should be a unique identifier, if applicable.
-  optional RecurringProcessingModel  recurring_processing_model = 17; // The recurring model to use for the payment, if applicable. Can be 'Subscription', 'UnscheduledCardOnFile' or 'CardOnFile'.
-  optional string idempotency_uuid = 18;
 
   message ExpirySettings {
     bool show_timer = 1; // Display a countdown timer to the user in the payment page, default is false
@@ -62,13 +60,6 @@ message PaymentInitiationRequest {
       bool auto_release_store_close_time = 3; // Automatically release the funds at the store's closing time
     }
   }
-}
-
-enum RecurringProcessingModel {
-  UNSPECIFIED = 0;  // Default value, not set
-  CARD_ON_FILE = 1; // Card on file model
-  SUBSCRIPTION = 2; // Subscription model
-  UNSCHEDULED_CARD_ON_FILE = 3; // Unscheduled card on file model
 }
 
 // Payment Initiation Response
@@ -100,37 +91,6 @@ message PaymentDetailsRequest {
   oneof payment_identifier {
     string payment_id = 2; // The unique identifier created by Kody
     string payment_reference = 3; // Your unique payment reference that was set during the initiation
-  }
-}
-
-message GetCardTokenRequest {
-  string store_id = 1; // Your Kody store id
-  oneof payment_identifier {
-    string payment_id = 2; // The unique identifier created by Kody
-    string payment_reference = 3; // Your unique payment reference that was set during the initiation
-    string payment_token = 4; // The unique identifier of the payment token to be retrieved
-  }
-}
-
-message GetCardTokenResponse {
-  string payment_token = 1; // Unique identifier for the stored payment method (aligns with PaymentCard.payment_token)
-  string card_expiry_date = 2; // Card expiry date, e.g., "MM/YY" (aligns with PaymentCard.card_expiry_date)
-  CardTokenStatus status = 3;
-  string shopper_reference = 4; // The shopper reference used for the payment, if applicable.
-  PaymentMethods payment_method = 5; // Card brand, e.g. mc, visa and so on
-  string payment_method_variant = 6; // Card variant, e.g. mccredit, mcdebit, visa, visadebit, etc.
-  string funding_source = 7; // Funding source of the card, e.g. CREDIT, DEBIT, PREPAID, etc. (aligns with PaymentCard.funding_source)
-  string card_last_4_digits = 8; // Last four digits of the card number (aligns with PaymentCard.card_last_4_digits)
-  google.protobuf.Timestamp created_at = 9; // Date when the stored payment method was created
-  optional string payment_id = 10; // payment id associated with the stored payment method, if applicable
-  optional string payment_reference = 11; // the external payment reference associated with the stored payment method, if applicable
-  optional string recurring_processing_models = 12; // Recurring processing model
-
-  enum CardTokenStatus {
-    PENDING = 0;
-    FAILED = 1;
-    READY = 2;
-    DELETED = 3;
   }
 }
 
@@ -194,7 +154,7 @@ message PaymentDetailsResponse {
       string card_last_4_digits =1;
       // The authorization code for the transaction.
       string auth_code =2;
-      string payment_token = 3;
+      string payment_token = 3 [deprecated = true];
     }
 
     message PaymentWallet{
@@ -313,45 +273,158 @@ enum PaymentStatus {
   EXPIRED = 4;
 }
 
-message DeleteCardTokenRequest {
-  string store_id = 1; // Kody store id
-  string payment_token = 2; // The unique identifier of the card token to be deleted
+message CreateTokenRequest {
+  string store_id = 1; // Your Kody store id
+  string idempotency_uuid = 2; // Idempotency key to ensure the request is processed only once, generated by client.
+  optional string token_reference = 3; // Your unique reference for this token request, if applicable. This can be used to match the token with your internal systems.
+  string payer_reference = 4; // The payer for whom the token is being created. This can be a user ID or any unique identifier you use to track users.
+  optional string metadata = 5; // A data set that can be used to store information about the order and used in the tokenisation process.
+  string return_url = 6; // The URL that your client application will be redirected to after the tokenisation is authorised. You can include additional query parameters, for example, the user id or order reference.
+  optional string payer_statement = 7; // The text to be shown on the payer's bank statement. Maximum 22 characters, otherwise banks might truncate the string. If not set it will use the store's terminals receipt printing name. Allowed characters: a-z, A-Z, 0-9, spaces, and special characters . , ' _ - ? + * /
+  optional string payer_email_address = 8; // We recommend that you provide this data, as it is used in velocity fraud checks. Required for 3D Secure 2 transactions.
+  optional string payer_phone_number = 9; // We recommend that you provide this data, as it is used in velocity fraud checks. Required for 3D Secure 2 transactions.
+  optional RecurringProcessingModel recurring_processing_model = 10; // The recurring model to use for the payment, if applicable. Can be 'Subscription', 'UnscheduledCardOnFile' or 'CardOnFile'.
 }
 
-message DeleteCardTokenResponse {
-  Status status = 1;
-  optional string error_message = 2; // Provides details if the deletion failed
+enum RecurringProcessingModel {
+  MODEL_UNSPECIFIED = 0;  // Default value, not set
+  CARD_ON_FILE = 1; // Card on file model
+  SUBSCRIPTION = 2; // Subscription model
+  UNSCHEDULED_CARD_ON_FILE = 3; // Unscheduled card on file model
+}
 
-  enum Status {
-    UNKNOWN = 0;
-    DELETED = 1;
-    NOT_FOUND = 2;
-    FAILED = 3;
+message CreateTokenResponse {
+  oneof result {
+    Response response = 1;
+    Error error = 2;
+  }
+
+  message Response {
+    string token_id = 1; // The unique identifier created by Kody
+    string create_token_url = 2; // The URL to send the user to from your application
+  }
+
+  message Error {
+    Type type = 1;
+    string message = 2;
+
+    enum Type {
+      UNKNOWN = 0;
+      DUPLICATE_ATTEMPT = 1;
+      INVALID_REQUEST = 2;
+    }
   }
 }
 
-message ListCardTokensRequest {
+message GetCardTokenRequest {
+  string store_id = 1; // Your Kody store id
+  oneof token_identifier {
+    string token_id = 2; // The unique identifier created by Kody
+    string token_reference = 3; // Your unique payment reference that was set during the initiation
+  }
+}
+
+message GetCardTokenResponse {
+  oneof result {
+    Response response = 1;
+    Error error = 2;
+  }
+
+  message Response {
+    string token_id = 1; // payment id associated with the stored payment method, if applicable
+    optional string token_reference = 2; // the external payment reference associated with the stored payment method, if applicable
+    string payment_token = 3; // Unique identifier for the stored payment method as created by Kody, e.g. a token that can be used for future payments
+    string payer_reference = 4; // The payer for whom the token is created, e.g. user id or any unique identifier you use to track users
+    RecurringProcessingModel recurring_processing_model = 5; // Recurring processing model
+    CardTokenStatus status = 6;
+    google.protobuf.Timestamp created_at = 7; // Date when the token was created
+    PaymentMethods payment_method = 8; // Card brand, e.g. mc, visa and so on
+    string payment_method_variant = 9; // Card variant, e.g. mccredit, mcdebit, visa, visadebit, etc.
+    string funding_source = 10; // Funding source of the card, e.g. CREDIT, DEBIT, PREPAID, etc. (aligns with PaymentCard.funding_source)
+    string card_last_4_digits = 11; // Last four digits of the card number (aligns with PaymentCard.card_last_4_digits)
+  }
+
+  enum CardTokenStatus {
+    PENDING = 0;
+    FAILED = 1;
+    READY = 2;
+    DELETED = 3;
+  }
+
+  message Error {
+    Type type = 1;
+    string message = 2;
+
+    enum Type {
+      UNKNOWN = 0;
+      PENDING_CREATE = 1; // Token not yet created, still in progress
+      INVALID_REQUEST = 2;
+    }
+  }
+}
+
+message DeleteCardTokenRequest {
+  string store_id = 1; // Kody store id
+  string token_id = 2; // The unique identifier of the card token to be deleted
+}
+
+message DeleteCardTokenResponse {
+  oneof result {
+    Response response = 1;
+    Error error = 2;
+  }
+
+  message Response {
+  }
+
+  message Error {
+    Type type = 1;
+    string message = 2;
+
+    enum Type {
+      UNKNOWN = 0;
+      NOT_FOUND = 1; // Maps from original Status.NOT_FOUND
+      FAILED = 2;    // Maps from original Status.FAILED
+      INVALID_REQUEST = 3; // Adding a common error type
+    }
+  }
+}
+
+message GetCardTokensRequest {
   string store_id = 1;
-  string shopper_reference = 2; // The shopper for whom to list tokens
+  string payer_reference = 2; // The shopper for whom to list tokens
 }
 
-message ListCardTokensResponse {
-  repeated GetCardTokenResponse tokens = 1;
+message GetCardTokensResponse {
+  oneof result {
+    Response response = 1;
+    Error error = 2;
+  }
+
+  message Response {
+    repeated GetCardTokenResponse.Response tokens = 1;
+  }
+
+  message Error {
+    Type type = 1;
+    string message = 2;
+
+    enum Type {
+      UNKNOWN = 0;
+      INVALID_REQUEST = 1; // e.g. missing store_id or payer_reference
+    }
+  }
 }
 
-message ChargeWithTokenRequest {
-  string store_id = 1;                                // Your Kody store id
-  string payment_token = 2;                           // The ID of the payment token to be charged
-  string shopper_reference = 3;                       // The shopper reference associated with the token/payment
-  RecurringProcessingModel recurring_processing_model = 4; // Indicates the type of token usage (e.g., CARD_ON_FILE)
-
-  uint64 amount_minor_units = 5;                      // Amount in minor units
-  string currency = 6;                                // ISO 4217 currency code
-  string payment_reference = 7;                       // Your unique reference for this payment
-  string order_id = 8;                                // Your identifier for the order
-
-  optional string order_metadata = 9;                 // Optional order details
-  optional string payer_statement = 10;               // Optional text for payer's bank statement
-  optional PaymentInitiationRequest.CaptureOptions capture_options = 11; // Optional capture settings if the charge is an authorization
-  optional string idempotency_uuid = 12;              // Idempotency key
+message PayWithCardTokenRequest {
+  string store_id = 1; // Your Kody store id
+  string idempotency_uuid = 2; // Idempotency key to ensure the request is processed only once, can be generated by client.
+  string payment_token = 3; // The ID of the payment token to be charged
+  uint64 amount_minor_units = 4; // Amount in minor units. For example, 2000 means GBP 20.00.
+  string currency = 5; // ISO 4217 three letter currency code
+  string payment_reference = 6; // Your unique reference for this payment
+  string order_id = 7; // Your identifier for the order
+  optional string order_metadata = 8; // Optional order details
+  optional string payer_statement = 9; // Optional text for payer's bank statement
+  optional PaymentInitiationRequest.CaptureOptions capture_options = 10; // Optional capture settings if the charge is an authorization
 }
