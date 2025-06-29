@@ -331,7 +331,7 @@ message GetCardTokenResponse {
   }
 
   message Response {
-    string token_id = 1; // payment id associated with the stored payment method, if applicable
+    string token_id = 1; // id from the 0 amount Ecom payment used to tokenise the stored payment method.
     optional string token_reference = 2; // the external payment reference associated with the stored payment method, if applicable
     string payment_token = 3; // Unique identifier for the stored payment method as created by Kody, e.g. a token that can be used for future payments
     string payer_reference = 4; // The payer for whom the token is created, e.g. user id or any unique identifier you use to track users
