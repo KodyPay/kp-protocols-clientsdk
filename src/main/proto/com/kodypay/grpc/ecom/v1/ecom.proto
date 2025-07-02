@@ -349,6 +349,7 @@ message GetCardTokenResponse {
     FAILED = 1;
     READY = 2;
     DELETED = 3;
+    PENDING_DELETE = 4; // Token is in the process of being deleted
   }
 
   message Error {
@@ -365,7 +366,10 @@ message GetCardTokenResponse {
 
 message DeleteCardTokenRequest {
   string store_id = 1; // Kody store id
-  string token_id = 2; // The unique identifier of the card token to be deleted
+  oneof token_identifier {
+    string token_id = 2; // The unique identifier created by Kody
+    string token_reference = 3; // Your unique payment reference that was set during the initiation
+  }
 }
 
 message DeleteCardTokenResponse {
