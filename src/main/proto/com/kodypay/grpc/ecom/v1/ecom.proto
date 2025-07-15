@@ -19,6 +19,7 @@ service KodyEcomPaymentsService {
   rpc DeleteCardToken(DeleteCardTokenRequest) returns (DeleteCardTokenResponse);
   rpc GetCardTokens(GetCardTokensRequest) returns (GetCardTokensResponse);
   rpc PayWithCardToken(PayWithCardTokenRequest) returns (PaymentDetailsResponse);
+  rpc GetTokenPaymentDetails(PaymentDetailsRequest) returns (PaymentDetailsResponse);
 }
 
 // Payment Initiation Request
@@ -28,7 +29,7 @@ message PaymentInitiationRequest {
   uint64 amount_minor_units = 3; // Amount in minor units. For example, 2000 means GBP 20.00.
   string currency = 4; // ISO 4217 three letter currency code
   string order_id = 5; // Your identifier of the order. It doesn't have to be unique, for example when the same order has multiple payments.
-  optional string order_metadata = 6; // A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
+  optional string order_metadata = 6; // Not implemented. A data set that can be used to store information about the order and used in the payment details. For example a JSON with checkout items. It will be useful as evidence to challenge chargebacks or any risk data.
   string return_url = 7; // The URL that your client application will be redirected to after the payment is authorised. You can include additional query parameters, for example, the user id or order reference.
   optional string payer_statement = 8; // The text to be shown on the payer's bank statement. Maximum 22 characters, otherwise banks might truncate the string. If not set it will use the store's terminals receipt printing name. Allowed characters: a-z, A-Z, 0-9, spaces, and special characters . , ' _ - ? + * /
   optional string payer_email_address = 9; // We recommend that you provide this data, as it is used in velocity fraud checks. Required for 3D Secure 2 transactions.
@@ -427,8 +428,8 @@ message PayWithCardTokenRequest {
   uint64 amount_minor_units = 4; // Amount in minor units. For example, 2000 means GBP 20.00.
   string currency = 5; // ISO 4217 three letter currency code
   string payment_reference = 6; // Your unique reference for this payment
-  string order_id = 7; // Your identifier for the order
-  optional string order_metadata = 8; // Optional order details
+  optional string order_id = 7; // Your identifier for the order
+  optional string order_metadata = 8; // Optional order details, not yet implemented.
   optional string payer_statement = 9; // Optional text for payer's bank statement
   optional PaymentInitiationRequest.CaptureOptions capture_options = 10; // Optional capture settings if the charge is an authorization
 }
