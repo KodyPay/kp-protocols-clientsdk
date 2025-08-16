@@ -1,0 +1,249 @@
+syntax = "proto3";
+
+package com.kodypay.grpc.payments.v1;
+
+option java_multiple_files = true;
+option java_outer_classname = "KodyPaymentsProto";
+option java_package = "com.kodypay.grpc.payments.v1";
+
+service KodyPreAuthTerminalService {
+  // Initiates a pre-authorization on a specific payment terminal.
+  // The terminal will then prompt the customer to present their card.
+  rpc PreAuthorize(PreAuthorizationRequest) returns (PreAuthorizationResponse);
+
+  // Increases the authorized amount on an existing pre-authorization.
+  rpc TopUpAuthorization(TopUpAuthorizationRequest) returns (TopUpAuthorizationResponse);
+
+  // Captures the funds from an existing pre-authorization to finalize a payment.
+  rpc CaptureAuthorization(CaptureAuthorizationRequest) returns (CaptureAuthorizationResponse);
+
+  // Releases the hold on funds from an existing pre-authorization.
+  rpc ReleaseAuthorization(ReleaseAuthorizationRequest) returns (ReleaseAuthorizationResponse);
+}
+
+// ==========================================================
+// Pre Authorization Messages
+// ==========================================================
+
+// Represents a request to initiate a pre-authorization on a physical payment terminal.
+message PreAuthorizationRequest {
+  // A unique key for this specific request attempt, used for idempotency.
+  string idempotency_uuid = 1;
+
+  // Client's unique reference for this transaction. This will be echoed in the response.
+  string pre_auth_reference = 2;
+
+  // Client's internal identifier for the order, folio, or tab. This will also be echoed.
+  optional string order_id = 3;
+
+  // The Kody Store ID.
+  string store_id = 4;
+
+  // The unique identifier for the target payment terminal to be activated.
+  string terminal_id = 5;
+
+  // The amount to authorize, in minor units.
+  uint64 amount_minor_units = 6;
+
+  // ISO 4217 three-letter currency code.
+  string currency = 7;
+
+  // The method of payment initiation.
+  optional PaymentMethodType payment_method_type = 8;
+}
+
+// Represents the response to a PreAuthorizationRequest.
+message PreAuthorizationResponse {
+  oneof result {
+    Success response = 1;
+    Error error = 2;
+  }
+
+  // Represents a successful authorization.
+  message Success {
+    // Client's unique reference, echoed from the request.
+    string pre_auth_reference = 1;
+
+    // The client's order ID, echoed back if it was provided in the request.
+    optional string order_id = 2;
+
+    // A Kody-generated, secure token representing this specific authorization.
+    // This token MUST be used for all subsequent capture, top-up, or release operations.
+    string pre_auth_token = 3;
+
+    // Details of the card used for this authorization.
+    PaymentCardDetails card_details = 4;
+
+    // Final status of the authorization.
+    AuthStatus status = 5;
+
+    // The amount that was actually authorized in minor units.
+    uint64 authorized_amount_minor_units = 6;
+
+    // The currency of the authorized amount.
+    string currency = 7;
+  }
+
+  // Represents a failed or errored transaction.
+  message Error {
+    // Client's unique reference, echoed from the request.
+    string pre_auth_reference = 1;
+
+    // The client's order ID, echoed back if it was provided in the request.
+    optional string order_id = 2;
+
+    // A standardized error code.
+    string error_code = 3;
+
+    // A descriptive error message.
+    string error_message = 4;
+  }
+}
+
+// ==========================================================
+// Top-Up Authorization Messages
+// ==========================================================
+
+message TopUpAuthorizationRequest {
+  string idempotency_uuid = 1;
+  string top_up_reference = 2; // Client's unique reference for this specific top-up action.
+  optional string order_id = 3; // The original order_id for context.
+
+  // The token from the original successful PreAuthorizationResponse.
+  string pre_auth_token = 4;
+
+  // The *additional* amount to authorize in minor units.
+  uint64 top_up_amount_minor_units = 5;
+  string currency = 6;
+}
+
+message TopUpAuthorizationResponse {
+  oneof result {
+    Success response = 1;
+    Error error = 2;
+  }
+  message Success {
+    string top_up_reference = 1; // Echoed from request.
+    string psp_reference = 2;    // The new PSP reference for this specific top-up action.
+    string auth_code = 3;
+
+    // The new total amount authorized on the card after the top-up.
+    uint64 total_authorized_amount_minor_units = 4;
+  }
+  message Error {
+    string top_up_reference = 1; // Echoed from request.
+    string error_code = 2;
+    string error_message = 3;
+  }
+}
+
+// ==========================================================
+// Capture Authorization Messages
+// ==========================================================
+
+message CaptureAuthorizationRequest {
+  string idempotency_uuid = 1;
+  string capture_reference = 2; // Client's unique reference for this capture action.
+  optional string order_id = 3;
+
+  // The token from the original successful PreAuthorizationResponse.
+  string pre_auth_token = 4;
+
+  // The final amount to capture in minor units. Can be <= total authorized amount.
+  uint64 capture_amount_minor_units = 5;
+  string currency = 6;
+
+  // Final amount of tip included in the capture, for reporting purposes.
+  optional uint64 tip_amount_minor_units = 7;
+}
+
+message CaptureAuthorizationResponse {
+  oneof result {
+    Success response = 1;
+    Error error = 2;
+  }
+  message Success {
+    string capture_reference = 1;
+    string psp_reference = 2; // The PSP reference for the capture transaction.
+  }
+  message Error {
+    string capture_reference = 1;
+    string error_code = 2;
+    string error_message = 3;
+  }
+}
+
+// ==========================================================
+// Release Authorization Messages
+// ==========================================================
+
+message ReleaseAuthorizationRequest {
+  string idempotency_uuid = 1;
+  string release_reference = 2; // Client's unique reference for this release action.
+  optional string order_id = 3;
+
+  // The token from the original successful PreAuthorizationResponse.
+  string pre_auth_token = 4;
+}
+
+message ReleaseAuthorizationResponse {
+  oneof result {
+    Success response = 1;
+    Error error = 2;
+  }
+  message Success {
+    string release_reference = 1;
+    string psp_reference = 2; // The PSP reference for the release/void transaction.
+  }
+  message Error {
+    string release_reference = 1;
+    string error_code = 2;
+    string error_message = 3;
+  }
+}
+
+
+// --- Supporting Messages ---
+
+enum AuthStatus {
+  AUTH_STATUS_UNSPECIFIED = 0;
+  APPROVED = 1;
+  PARTIAL_APPROVED = 2;
+  DECLINED = 3;
+  CANCELLED = 4;
+  PENDING = 5;
+}
+
+// Contains non-sensitive details of the card used in a transaction.
+message PaymentCardDetails {
+  string card_last_4_digits = 1;
+  string expiry_date_yymm = 2;
+  string pos_entry_mode = 3;
+
+  // The token representing the card itself (for repeat customer payments),
+  // distinct from the pre_auth_token which represents this specific transaction.
+  string payment_token = 4;
+
+  string auth_code = 5;
+  PaymentMethods card_brand = 6;
+}
+
+enum PaymentMethods {
+  VISA = 0;
+  MASTERCARD = 1;
+  AMEX = 2;
+  BAN_CONTACT = 3;
+  CHINA_UNION_PAY = 4;
+  MAESTRO = 5;
+  DINERS = 6;
+  DISCOVER = 7;
+  JCB = 8;
+  ALIPAY = 9;
+  WECHAT = 10;
+}
+
+enum PaymentMethodType {
+  TYPE_UNSPECIFIED = 0;
+  CARD_PRESENT = 1;
+  MOTO = 2; // Mail Order / Telephone Order
+}
