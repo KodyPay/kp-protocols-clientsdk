@@ -1,10 +1,11 @@
 syntax = "proto3";
 
-package com.kodypay.grpc.payments.v1;
+package com.kodypay.grpc.preauth.v1;
 
 option java_multiple_files = true;
-option java_outer_classname = "KodyPaymentsProto";
-option java_package = "com.kodypay.grpc.payments.v1";
+option java_outer_classname = "KodyPreAuthProto";
+option java_package = "com.kodypay.grpc.preauth.v1";
+import "google/protobuf/timestamp.proto";
 
 service KodyPreAuthTerminalService {
   // Initiates a pre-authorization on a specific payment terminal.
@@ -82,6 +83,9 @@ message PreAuthorizationResponse {
 
     // The currency of the authorized amount.
     string currency = 7;
+
+    // The timestamp of when the authorization was successfully created.
+    google.protobuf.Timestamp date_authorised = 9;
   }
 
   // Represents a failed or errored transaction.
@@ -129,6 +133,9 @@ message TopUpAuthorizationResponse {
 
     // The new total amount authorized on the card after the top-up.
     uint64 total_authorized_amount_minor_units = 4;
+
+    // The timestamp of when the authorization was successfully topped_up.
+    google.protobuf.Timestamp date_topped_up = 5;
   }
   message Error {
     string top_up_reference = 1; // Echoed from request.
@@ -164,7 +171,8 @@ message CaptureAuthorizationResponse {
   }
   message Success {
     string capture_reference = 1;
-    string psp_reference = 2; // The PSP reference for the capture transaction.
+    // The timestamp of when the authorization was successfully captured.
+    google.protobuf.Timestamp date_captured = 2;
   }
   message Error {
     string capture_reference = 1;
@@ -193,7 +201,8 @@ message ReleaseAuthorizationResponse {
   }
   message Success {
     string release_reference = 1;
-    string psp_reference = 2; // The PSP reference for the release/void transaction.
+    // The timestamp of when the authorization was successfully released.
+    google.protobuf.Timestamp date_released = 2;
   }
   message Error {
     string release_reference = 1;
@@ -243,7 +252,6 @@ enum PaymentMethods {
 }
 
 enum PaymentMethodType {
-  TYPE_UNSPECIFIED = 0;
-  CARD_PRESENT = 1;
-  MOTO = 2; // Mail Order / Telephone Order
+  CARD_PRESENT = 0;
+  MOTO = 1; // Mail Order / Telephone Order
 }
