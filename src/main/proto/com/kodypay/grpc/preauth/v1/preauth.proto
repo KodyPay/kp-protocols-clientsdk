@@ -20,6 +20,9 @@ service KodyPreAuthTerminalService {
 
   // Releases the hold on funds from an existing pre-authorisation.
   rpc ReleaseAuthorisation(ReleaseAuthorisationRequest) returns (ReleaseAuthorisationResponse);
+
+  // Retrieves the current state and details of a pre-authorisation.
+  rpc GetPreAuthorisation(GetPreAuthorisationRequest) returns (GetPreAuthorisationResponse);
 }
 
 // ==========================================================
@@ -218,16 +221,93 @@ message ReleaseAuthorisationResponse {
   }
 }
 
+// ==========================================================
+// Get Pre-Authorisation Messages
+// ==========================================================
+
+// Request to retrieve the details of an existing pre-authorisation.
+message GetPreAuthorisationRequest {
+  // The Kody-generated, secure token representing the pre-authorisation.
+  string pre_auth_token = 1;
+}
+
+// Response containing the full state of the pre-authorisation.
+message GetPreAuthorisationResponse {
+  oneof result {
+    Success response = 1;
+    Error error = 2;
+  }
+
+  // Represents a successful query.
+  message Success {
+    // Client's unique reference for the transaction.
+    string pre_auth_reference = 1;
+
+    // The Kody-generated, secure token representing this specific authorisation.
+    string pre_auth_token = 2;
+
+    // The client's order ID, if it was provided in the original request.
+    optional string order_id = 3;
+
+    // The current status of the pre-authorisation.
+    AuthStatus status = 4;
+
+    // The current total authorised amount in minor units.
+    uint64 total_authorised_amount_minor_units = 5;
+
+    // The amount that has been captured, in minor units.
+    uint64 captured_amount_minor_units = 6;
+
+    // ISO 4217 three-letter currency code.
+    string currency = 7;
+
+    // Details of the card used for this authorisation.
+    PaymentCardDetails card_details = 8;
+
+    // The timestamp of when the authorisation was successfully created.
+    google.protobuf.Timestamp date_authorised = 9;
+
+    // The timestamp of the last successful top-up, if any.
+    optional google.protobuf.Timestamp date_last_topped_up = 10;
+
+    // The timestamp of when the authorisation was captured, if applicable.
+    optional google.protobuf.Timestamp date_captured = 11;
+
+    // The timestamp of when the authorisation was released, if applicable.
+    optional google.protobuf.Timestamp date_released = 12;
+  }
+
+  // Represents a failure to find the pre-authorisation or an error.
+  message Error {
+    // A standardized error code (e.g., "NOT_FOUND").
+    string error_code = 1;
+
+    // A descriptive error message.
+    string error_message = 2;
+  }
+}
 
 // --- Supporting Messages ---
 
 enum AuthStatus {
+  // The status is not specified. Should not be used.
   AUTH_STATUS_UNSPECIFIED = 0;
-  APPROVED = 1;
-  PARTIAL_APPROVED = 2;
+  PENDING_AUTHORISATION = 1;
+  AUTHORISED = 2;
   DECLINED = 3;
   CANCELLED = 4;
-  PENDING = 5;
+  PENDING_CAPTURE = 5;
+  CAPTURED = 6;
+  CAPTURE_FAILED = 7;
+  PENDING_RELEASE = 8;
+  RELEASED = 9;
+  RELEASE_FAILED = 10;
+  PENDING_TOP_UP = 11;
+  TOP_UP_FAILED = 12;
+  EXPIRED = 13;
+  // The transaction failed due to a technical error (e.g., network issue, PSP error).
+  // This is for failures where the state is indeterminate.
+  FAILED = 14;
 }
 
 // Contains non-sensitive details of the card used in a transaction.
@@ -242,6 +322,7 @@ message PaymentCardDetails {
 
   string auth_code = 5;
   PaymentMethods card_brand = 6;
+  optional string card_variant = 7; // e.g. "credit", "debit", "prepaid"
 }
 
 enum PaymentMethods {
