@@ -8,26 +8,26 @@ option java_package = "com.kodypay.grpc.preauth.v1";
 import "google/protobuf/timestamp.proto";
 
 service KodyPreAuthTerminalService {
-  // Initiates a pre-authorization on a specific payment terminal.
+  // Initiates a pre-authorisation on a specific payment terminal.
   // The terminal will then prompt the customer to present their card.
-  rpc PreAuthorize(PreAuthorizationRequest) returns (PreAuthorizationResponse);
+  rpc PreAuthorise(PreAuthorisationRequest) returns (PreAuthorisationResponse);
 
-  // Increases the authorized amount on an existing pre-authorization.
-  rpc TopUpAuthorization(TopUpAuthorizationRequest) returns (TopUpAuthorizationResponse);
+  // Increases the authorised amount on an existing pre-authorisation.
+  rpc TopUpAuthorisation(TopUpAuthorisationRequest) returns (TopUpAuthorisationResponse);
 
-  // Captures the funds from an existing pre-authorization to finalize a payment.
-  rpc CaptureAuthorization(CaptureAuthorizationRequest) returns (CaptureAuthorizationResponse);
+  // Captures the funds from an existing pre-authorisation to finalize a payment.
+  rpc CaptureAuthorisation(CaptureAuthorisationRequest) returns (CaptureAuthorisationResponse);
 
-  // Releases the hold on funds from an existing pre-authorization.
-  rpc ReleaseAuthorization(ReleaseAuthorizationRequest) returns (ReleaseAuthorizationResponse);
+  // Releases the hold on funds from an existing pre-authorisation.
+  rpc ReleaseAuthorisation(ReleaseAuthorisationRequest) returns (ReleaseAuthorisationResponse);
 }
 
 // ==========================================================
-// Pre Authorization Messages
+// Pre Authorisation Messages
 // ==========================================================
 
-// Represents a request to initiate a pre-authorization on a physical payment terminal.
-message PreAuthorizationRequest {
+// Represents a request to initiate a pre-authorisation on a physical payment terminal.
+message PreAuthorisationRequest {
   // A unique key for this specific request attempt, used for idempotency.
   string idempotency_uuid = 1;
 
@@ -43,7 +43,7 @@ message PreAuthorizationRequest {
   // The unique identifier for the target payment terminal to be activated.
   string terminal_id = 5;
 
-  // The amount to authorize, in minor units.
+  // The amount to authorise, in minor units.
   uint64 amount_minor_units = 6;
 
   // ISO 4217 three-letter currency code.
@@ -53,14 +53,14 @@ message PreAuthorizationRequest {
   optional PaymentMethodType payment_method_type = 8;
 }
 
-// Represents the response to a PreAuthorizationRequest.
-message PreAuthorizationResponse {
+// Represents the response to a PreAuthorisationRequest.
+message PreAuthorisationResponse {
   oneof result {
     Success response = 1;
     Error error = 2;
   }
 
-  // Represents a successful authorization.
+  // Represents a successful authorisation.
   message Success {
     // Client's unique reference, echoed from the request.
     string pre_auth_reference = 1;
@@ -68,23 +68,23 @@ message PreAuthorizationResponse {
     // The client's order ID, echoed back if it was provided in the request.
     optional string order_id = 2;
 
-    // A Kody-generated, secure token representing this specific authorization.
+    // A Kody-generated, secure token representing this specific authorisation.
     // This token MUST be used for all subsequent capture, top-up, or release operations.
     string pre_auth_token = 3;
 
-    // Details of the card used for this authorization.
+    // Details of the card used for this authorisation.
     PaymentCardDetails card_details = 4;
 
-    // Final status of the authorization.
+    // Final status of the authorisation.
     AuthStatus status = 5;
 
-    // The amount that was actually authorized in minor units.
-    uint64 authorized_amount_minor_units = 6;
+    // The amount that was actually authorised in minor units.
+    uint64 authorised_amount_minor_units = 6;
 
-    // The currency of the authorized amount.
+    // The currency of the authorised amount.
     string currency = 7;
 
-    // The timestamp of when the authorization was successfully created.
+    // The timestamp of when the authorisation was successfully created.
     google.protobuf.Timestamp date_authorised = 9;
   }
 
@@ -105,23 +105,23 @@ message PreAuthorizationResponse {
 }
 
 // ==========================================================
-// Top-Up Authorization Messages
+// Top-Up Authorisation Messages
 // ==========================================================
 
-message TopUpAuthorizationRequest {
+message TopUpAuthorisationRequest {
   string idempotency_uuid = 1;
   string top_up_reference = 2; // Client's unique reference for this specific top-up action.
   optional string order_id = 3; // The original order_id for context.
 
-  // The token from the original successful PreAuthorizationResponse.
+  // The token from the original successful PreAuthorisationResponse.
   string pre_auth_token = 4;
 
-  // The *additional* amount to authorize in minor units.
+  // The *additional* amount to authorise in minor units.
   uint64 top_up_amount_minor_units = 5;
   string currency = 6;
 }
 
-message TopUpAuthorizationResponse {
+message TopUpAuthorisationResponse {
   oneof result {
     Success response = 1;
     Error error = 2;
@@ -131,10 +131,10 @@ message TopUpAuthorizationResponse {
     string psp_reference = 2;    // The new PSP reference for this specific top-up action.
     string auth_code = 3;
 
-    // The new total amount authorized on the card after the top-up.
-    uint64 total_authorized_amount_minor_units = 4;
+    // The new total amount authorised on the card after the top-up.
+    uint64 total_authorised_amount_minor_units = 4;
 
-    // The timestamp of when the authorization was successfully topped_up.
+    // The timestamp of when the authorisation was successfully topped_up.
     google.protobuf.Timestamp date_topped_up = 5;
   }
   message Error {
@@ -145,18 +145,18 @@ message TopUpAuthorizationResponse {
 }
 
 // ==========================================================
-// Capture Authorization Messages
+// Capture Authorisation Messages
 // ==========================================================
 
-message CaptureAuthorizationRequest {
+message CaptureAuthorisationRequest {
   string idempotency_uuid = 1;
   string capture_reference = 2; // Client's unique reference for this capture action.
   optional string order_id = 3;
 
-  // The token from the original successful PreAuthorizationResponse.
+  // The token from the original successful PreAuthorisationResponse.
   string pre_auth_token = 4;
 
-  // The final amount to capture in minor units. Can be <= total authorized amount.
+  // The final amount to capture in minor units. Can be <= total authorised amount.
   uint64 capture_amount_minor_units = 5;
   string currency = 6;
 
@@ -164,14 +164,14 @@ message CaptureAuthorizationRequest {
   optional uint64 tip_amount_minor_units = 7;
 }
 
-message CaptureAuthorizationResponse {
+message CaptureAuthorisationResponse {
   oneof result {
     Success response = 1;
     Error error = 2;
   }
   message Success {
     string capture_reference = 1;
-    // The timestamp of when the authorization was successfully captured.
+    // The timestamp of when the authorisation was successfully captured.
     google.protobuf.Timestamp date_captured = 2;
   }
   message Error {
@@ -182,26 +182,26 @@ message CaptureAuthorizationResponse {
 }
 
 // ==========================================================
-// Release Authorization Messages
+// Release Authorisation Messages
 // ==========================================================
 
-message ReleaseAuthorizationRequest {
+message ReleaseAuthorisationRequest {
   string idempotency_uuid = 1;
   string release_reference = 2; // Client's unique reference for this release action.
   optional string order_id = 3;
 
-  // The token from the original successful PreAuthorizationResponse.
+  // The token from the original successful PreAuthorisationResponse.
   string pre_auth_token = 4;
 }
 
-message ReleaseAuthorizationResponse {
+message ReleaseAuthorisationResponse {
   oneof result {
     Success response = 1;
     Error error = 2;
   }
   message Success {
     string release_reference = 1;
-    // The timestamp of when the authorization was successfully released.
+    // The timestamp of when the authorisation was successfully released.
     google.protobuf.Timestamp date_released = 2;
   }
   message Error {
