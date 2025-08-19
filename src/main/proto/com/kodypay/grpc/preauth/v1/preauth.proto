@@ -15,7 +15,7 @@ service KodyPreAuthTerminalService {
   // Increases the authorised amount on an existing pre-authorisation.
   rpc TopUpAuthorisation(TopUpAuthorisationRequest) returns (TopUpAuthorisationResponse);
 
-  // Captures the funds from an existing pre-authorisation to finalize a payment.
+  // Captures the funds from an existing pre-authorisation to finalise a payment.
   rpc CaptureAuthorisation(CaptureAuthorisationRequest) returns (CaptureAuthorisationResponse);
 
   // Releases the hold on funds from an existing pre-authorisation.
@@ -102,7 +102,7 @@ message PreAuthorisationResponse {
     // The client's order ID, echoed back if it was provided in the request.
     optional string order_id = 2;
 
-    // A standardized error code.
+    // A standardised error code.
     string error_code = 3;
 
     // A descriptive error message.
@@ -134,7 +134,7 @@ message TopUpAuthorisationResponse {
   }
   message Success {
     string top_up_reference = 1; // Echoed from request.
-    string psp_reference = 2;    // The new PSP reference for this specific top-up action.
+    string psp_reference = 2;
     optional string order_id = 3; // Echoed from reqeust.
 
     // The new total amount authorised on the card after the top-up.
@@ -177,7 +177,7 @@ message CaptureAuthorisationResponse {
   }
   message Success {
     string capture_reference = 1;
-    string psp_reference = 2;    // The new PSP reference for this specific top-up action.
+    string psp_reference = 2;
     optional string order_id = 3; // Echoed from request.
     // The timestamp of when the authorisation was successfully captured.
     google.protobuf.Timestamp date_captured = 4;
@@ -209,7 +209,7 @@ message ReleaseAuthorisationResponse {
   }
   message Success {
     string release_reference = 1;
-    string psp_reference = 2;    // The new PSP reference for this specific top-up action.
+    string psp_reference = 2;
     optional string order_id = 3; // Echoed from request.
     // The timestamp of when the authorisation was successfully released.
     google.protobuf.Timestamp date_released = 4;
@@ -279,7 +279,7 @@ message GetPreAuthorisationResponse {
 
   // Represents a failure to find the pre-authorisation or an error.
   message Error {
-    // A standardized error code (e.g., "NOT_FOUND").
+    // A standardised error code (e.g., "NOT_FOUND").
     string error_code = 1;
 
     // A descriptive error message.
