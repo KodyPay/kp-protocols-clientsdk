@@ -65,24 +65,27 @@ message PreAuthorisationResponse {
     // Client's unique reference, echoed from the request.
     string pre_auth_reference = 1;
 
+    // The PSP reference for this specific authorisation.
+    string psp_reference = 2;
+
     // The client's order ID, echoed back if it was provided in the request.
-    optional string order_id = 2;
+    optional string order_id = 3;
 
     // A Kody-generated, secure token representing this specific authorisation.
     // This token MUST be used for all subsequent capture, top-up, or release operations.
-    string pre_auth_token = 3;
+    string pre_auth_token = 4;
 
     // Details of the card used for this authorisation.
-    PaymentCardDetails card_details = 4;
+    PaymentCardDetails card_details = 5;
 
     // Final status of the authorisation.
-    AuthStatus status = 5;
+    AuthStatus status = 6;
 
     // The amount that was actually authorised in minor units.
-    uint64 authorised_amount_minor_units = 6;
+    uint64 authorised_amount_minor_units = 7;
 
     // The currency of the authorised amount.
-    string currency = 7;
+    string currency = 8;
 
     // The timestamp of when the authorisation was successfully created.
     google.protobuf.Timestamp date_authorised = 9;
@@ -129,7 +132,7 @@ message TopUpAuthorisationResponse {
   message Success {
     string top_up_reference = 1; // Echoed from request.
     string psp_reference = 2;    // The new PSP reference for this specific top-up action.
-    string auth_code = 3;
+    optional string order_id = 3; // Echoed from reqeust.
 
     // The new total amount authorised on the card after the top-up.
     uint64 total_authorised_amount_minor_units = 4;
@@ -171,8 +174,10 @@ message CaptureAuthorisationResponse {
   }
   message Success {
     string capture_reference = 1;
+    string psp_reference = 2;    // The new PSP reference for this specific top-up action.
+    optional string order_id = 3; // Echoed from request.
     // The timestamp of when the authorisation was successfully captured.
-    google.protobuf.Timestamp date_captured = 2;
+    google.protobuf.Timestamp date_captured = 4;
   }
   message Error {
     string capture_reference = 1;
@@ -201,8 +206,10 @@ message ReleaseAuthorisationResponse {
   }
   message Success {
     string release_reference = 1;
+    string psp_reference = 2;    // The new PSP reference for this specific top-up action.
+    optional string order_id = 3; // Echoed from request.
     // The timestamp of when the authorisation was successfully released.
-    google.protobuf.Timestamp date_released = 2;
+    google.protobuf.Timestamp date_released = 4;
   }
   message Error {
     string release_reference = 1;
