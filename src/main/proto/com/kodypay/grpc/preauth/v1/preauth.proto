@@ -1,0 +1,345 @@
+syntax = "proto3";
+
+package com.kodypay.grpc.preauth.v1;
+
+option java_multiple_files = true;
+option java_outer_classname = "KodyPreAuthProto";
+option java_package = "com.kodypay.grpc.preauth.v1";
+import "google/protobuf/timestamp.proto";
+
+service KodyPreAuthTerminalService {
+  // Initiates a pre-authorisation on a specific payment terminal.
+  // The terminal will then prompt the customer to present their card.
+  rpc PreAuthorise(PreAuthorisationRequest) returns (PreAuthorisationResponse);
+
+  // Increases the authorised amount on an existing pre-authorisation.
+  rpc TopUpAuthorisation(TopUpAuthorisationRequest) returns (TopUpAuthorisationResponse);
+
+  // Captures the funds from an existing pre-authorisation to finalise a payment.
+  rpc CaptureAuthorisation(CaptureAuthorisationRequest) returns (CaptureAuthorisationResponse);
+
+  // Releases the hold on funds from an existing pre-authorisation.
+  rpc ReleaseAuthorisation(ReleaseAuthorisationRequest) returns (ReleaseAuthorisationResponse);
+
+  // Retrieves the current state and details of a pre-authorisation.
+  rpc GetPreAuthorisation(GetPreAuthorisationRequest) returns (GetPreAuthorisationResponse);
+}
+
+// ==========================================================
+// Pre Authorisation Messages
+// ==========================================================
+
+// Represents a request to initiate a pre-authorisation on a physical payment terminal.
+message PreAuthorisationRequest {
+  // A unique key for this specific request attempt, used for idempotency.
+  string idempotency_uuid = 1;
+
+  // Client's unique reference for this transaction. This will be echoed in the response.
+  string pre_auth_reference = 2;
+
+  // Client's internal identifier for the order, folio, or tab. This will also be echoed.
+  optional string order_id = 3;
+
+  // The Kody Store ID.
+  string store_id = 4;
+
+  // The unique identifier for the target payment terminal to be activated.
+  string terminal_id = 5;
+
+  // The amount to authorise, in minor units.
+  uint64 amount_minor_units = 6;
+
+  // ISO 4217 three-letter currency code.
+  string currency = 7;
+
+  // The method of payment initiation.
+  optional PaymentMethodType payment_method_type = 8;
+}
+
+// Represents the response to a PreAuthorisationRequest.
+message PreAuthorisationResponse {
+  oneof result {
+    Success response = 1;
+    Error error = 2;
+  }
+
+  // Represents a successful authorisation.
+  message Success {
+    // Client's unique reference, echoed from the request.
+    string pre_auth_reference = 1;
+
+    // The PSP reference for this specific authorisation.
+    string psp_reference = 2;
+
+    // The client's order ID, echoed back if it was provided in the request.
+    optional string order_id = 3;
+
+    // A Kody-generated, secure token representing this specific authorisation.
+    // This token MUST be used for all subsequent capture, top-up, or release operations.
+    string pre_auth_token = 4;
+
+    // Details of the card used for this authorisation.
+    PaymentCardDetails card_details = 5;
+
+    // Final status of the authorisation.
+    AuthStatus status = 6;
+
+    // The amount that was actually authorised in minor units.
+    uint64 authorised_amount_minor_units = 7;
+
+    // The currency of the authorised amount.
+    string currency = 8;
+
+    // The timestamp of when the authorisation was successfully created.
+    google.protobuf.Timestamp date_authorised = 9;
+  }
+
+  // Represents a failed or errored transaction.
+  message Error {
+    // Client's unique reference, echoed from the request.
+    string pre_auth_reference = 1;
+
+    // The client's order ID, echoed back if it was provided in the request.
+    optional string order_id = 2;
+
+    // A standardised error code.
+    string error_code = 3;
+
+    // A descriptive error message.
+    string error_message = 4;
+  }
+}
+
+// ==========================================================
+// Top-Up Authorisation Messages
+// ==========================================================
+
+message TopUpAuthorisationRequest {
+  string idempotency_uuid = 1;
+  string top_up_reference = 2; // Client's unique reference for this specific top-up action.
+  optional string order_id = 3; // The original order_id for context.
+
+  // The token from the original successful PreAuthorisationResponse.
+  string pre_auth_token = 4;
+
+  // The *additional* amount to authorise in minor units.
+  uint64 top_up_amount_minor_units = 5;
+  string currency = 6;
+}
+
+message TopUpAuthorisationResponse {
+  oneof result {
+    Success response = 1;
+    Error error = 2;
+  }
+  message Success {
+    string top_up_reference = 1; // Echoed from request.
+    string psp_reference = 2;
+    optional string order_id = 3; // Echoed from reqeust.
+
+    // The new total amount authorised on the card after the top-up.
+    uint64 total_authorised_amount_minor_units = 4;
+
+    // The timestamp of when the authorisation was successfully topped_up.
+    google.protobuf.Timestamp date_topped_up = 5;
+  }
+  message Error {
+    string top_up_reference = 1; // Echoed from request.
+    string error_code = 2;
+    string error_message = 3;
+  }
+}
+
+// ==========================================================
+// Capture Authorisation Messages
+// ==========================================================
+
+message CaptureAuthorisationRequest {
+  string idempotency_uuid = 1;
+  string capture_reference = 2; // Client's unique reference for this capture action.
+  optional string order_id = 3;
+
+  // The token from the original successful PreAuthorisationResponse.
+  string pre_auth_token = 4;
+
+  // The final amount to capture in minor units. Can be <= total authorised amount.
+  uint64 capture_amount_minor_units = 5;
+  string currency = 6;
+
+  // Final amount of tip included in the capture, for reporting purposes.
+  optional uint64 tip_amount_minor_units = 7;
+}
+
+message CaptureAuthorisationResponse {
+  oneof result {
+    Success response = 1;
+    Error error = 2;
+  }
+  message Success {
+    string capture_reference = 1;
+    string psp_reference = 2;
+    optional string order_id = 3; // Echoed from request.
+    // The timestamp of when the authorisation was successfully captured.
+    google.protobuf.Timestamp date_captured = 4;
+  }
+  message Error {
+    string capture_reference = 1;
+    string error_code = 2;
+    string error_message = 3;
+  }
+}
+
+// ==========================================================
+// Release Authorisation Messages
+// ==========================================================
+
+message ReleaseAuthorisationRequest {
+  string idempotency_uuid = 1;
+  string release_reference = 2; // Client's unique reference for this release action.
+  optional string order_id = 3;
+
+  // The token from the original successful PreAuthorisationResponse.
+  string pre_auth_token = 4;
+}
+
+message ReleaseAuthorisationResponse {
+  oneof result {
+    Success response = 1;
+    Error error = 2;
+  }
+  message Success {
+    string release_reference = 1;
+    string psp_reference = 2;
+    optional string order_id = 3; // Echoed from request.
+    // The timestamp of when the authorisation was successfully released.
+    google.protobuf.Timestamp date_released = 4;
+  }
+  message Error {
+    string release_reference = 1;
+    string error_code = 2;
+    string error_message = 3;
+  }
+}
+
+// ==========================================================
+// Get Pre-Authorisation Messages
+// ==========================================================
+
+// Request to retrieve the details of an existing pre-authorisation.
+message GetPreAuthorisationRequest {
+  // The Kody-generated, secure token representing the pre-authorisation.
+  string pre_auth_token = 1;
+}
+
+// Response containing the full state of the pre-authorisation.
+message GetPreAuthorisationResponse {
+  oneof result {
+    Success response = 1;
+    Error error = 2;
+  }
+
+  // Represents a successful query.
+  message Success {
+    // Client's unique reference for the transaction.
+    string pre_auth_reference = 1;
+
+    // The Kody-generated, secure token representing this specific authorisation.
+    string pre_auth_token = 2;
+
+    // The client's order ID, if it was provided in the original request.
+    optional string order_id = 3;
+
+    // The current status of the pre-authorisation.
+    AuthStatus status = 4;
+
+    // The current total authorised amount in minor units.
+    uint64 total_authorised_amount_minor_units = 5;
+
+    // The amount that has been captured, in minor units.
+    optional uint64 captured_amount_minor_units = 6;
+
+    // ISO 4217 three-letter currency code.
+    string store_currency = 7;
+
+    // Details of the card used for this authorisation.
+    PaymentCardDetails card_details = 8;
+
+    // The timestamp of when the authorisation was successfully created.
+    google.protobuf.Timestamp date_authorised = 9;
+
+    // The timestamp of the last successful top-up, if any.
+    optional google.protobuf.Timestamp date_last_topped_up = 10;
+
+    // The timestamp of when the authorisation was captured, if applicable.
+    optional google.protobuf.Timestamp date_captured = 11;
+
+    // The timestamp of when the authorisation was released, if applicable.
+    optional google.protobuf.Timestamp date_released = 12;
+  }
+
+  // Represents a failure to find the pre-authorisation or an error.
+  message Error {
+    // A standardised error code (e.g., "NOT_FOUND").
+    string error_code = 1;
+
+    // A descriptive error message.
+    string error_message = 2;
+  }
+}
+
+// --- Supporting Messages ---
+
+enum AuthStatus {
+  // The status is not specified. Should not be used.
+  AUTH_STATUS_UNSPECIFIED = 0;
+  PENDING_AUTHORISATION = 1;
+  AUTHORISED = 2;
+  DECLINED = 3;
+  CANCELLED = 4;
+  PENDING_CAPTURE = 5;
+  CAPTURED = 6;
+  CAPTURE_FAILED = 7;
+  PENDING_RELEASE = 8;
+  RELEASED = 9;
+  RELEASE_FAILED = 10;
+  PENDING_TOP_UP = 11;
+  TOP_UP_FAILED = 12;
+  EXPIRED = 13;
+  // The transaction failed due to a technical error (e.g., network issue, PSP error).
+  // This is for failures where the state is indeterminate.
+  FAILED = 14;
+}
+
+// Contains non-sensitive details of the card used in a transaction.
+message PaymentCardDetails {
+  string card_last_4_digits = 1;
+  string expiry_date_yymm = 2;
+  string pos_entry_mode = 3;
+
+  // The token representing the card itself (for repeat customer payments),
+  // distinct from the pre_auth_token which represents this specific transaction.
+  string payment_token = 4;
+
+  string auth_code = 5;
+  PaymentMethods card_brand = 6;
+  optional string card_variant = 7; // e.g. visa debit', 'visa international credit'
+}
+
+enum PaymentMethods {
+  VISA = 0;
+  MASTERCARD = 1;
+  AMEX = 2;
+  BAN_CONTACT = 3;
+  CHINA_UNION_PAY = 4;
+  MAESTRO = 5;
+  DINERS = 6;
+  DISCOVER = 7;
+  JCB = 8;
+  ALIPAY = 9;
+  WECHAT = 10;
+}
+
+enum PaymentMethodType {
+  CARD_PRESENT = 0;
+  MOTO = 1; // Mail Order / Telephone Order
+}
