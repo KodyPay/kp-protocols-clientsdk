@@ -256,10 +256,10 @@ message GetPreAuthorisationResponse {
     uint64 total_authorised_amount_minor_units = 5;
 
     // The amount that has been captured, in minor units.
-    uint64 captured_amount_minor_units = 6;
+    optional uint64 captured_amount_minor_units = 6;
 
     // ISO 4217 three-letter currency code.
-    string currency = 7;
+    string store_currency = 7;
 
     // Details of the card used for this authorisation.
     PaymentCardDetails card_details = 8;
@@ -322,7 +322,7 @@ message PaymentCardDetails {
 
   string auth_code = 5;
   PaymentMethods card_brand = 6;
-  optional string card_variant = 7; // e.g. "credit", "debit", "prepaid"
+  optional string card_variant = 7; // e.g. visa debit', 'visa international credit'
 }
 
 enum PaymentMethods {
