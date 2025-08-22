@@ -50,12 +50,16 @@ message TokenDetails {
   optional RecurringProcessingModel recurring_processing_model = 5; // Recurring processing model
   optional CardTokenStatus status = 6; // Status of the token
   optional google.protobuf.Timestamp created_at = 7; // Date when the token was created
-  optional PaymentMethods payment_method = 8; // Card brand, e.g. mc, visa and so on
-  optional string payment_method_variant = 9; // Card variant, e.g. mccredit, mcdebit, visa, visadebit, etc.
-  optional string funding_source = 10; // Funding source of the card, e.g. CREDIT, DEBIT, PREPAID, etc. (aligns with PaymentCard.funding_source)
-  optional string card_last_4_digits = 11; // Last four digits of the card number (aligns with PaymentCard.card_last_4_digits)
-  optional string card_expiry_date = 12; // Expiry date of the card
-  optional string pos_entry_mode = 13; // POS entry mode of the card
+  optional CardInfo card_info = 8; // Card information
+
+  message CardInfo {
+    PaymentMethods payment_method = 1; // Card brand, e.g. mc, visa and so on
+    string payment_method_variant = 2; // Card variant, e.g. mccredit, mcdebit, visa, visadebit, etc.
+    string funding_source = 3; // Funding source of the card, e.g. CREDIT, DEBIT, PREPAID, etc. (aligns with PaymentCard.funding_source)
+    string card_last_4_digits = 4; // Last four digits of the card number (aligns with PaymentCard.card_last_4_digits)
+    string card_expiry_date = 5; // Expiry date of the card
+    string pos_entry_mode = 6; // POS entry mode of the card
+  }
 }
 
 message Error {
