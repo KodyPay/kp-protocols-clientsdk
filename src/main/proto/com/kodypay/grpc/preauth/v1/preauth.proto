@@ -10,7 +10,7 @@ import "google/protobuf/timestamp.proto";
 service KodyPreAuthTerminalService {
   // Initiates a pre-authorisation on a specific payment terminal.
   // The terminal will then prompt the customer to present their card.
-  rpc PreAuthorise(PreAuthorisationRequest) returns (PreAuthorisationResponse);
+  rpc PreAuthorise(PreAuthorisationRequest) returns (stream PreAuthorisationResponse);
 
   // Increases the authorised amount on an existing pre-authorisation.
   rpc TopUpAuthorisation(TopUpAuthorisationRequest) returns (TopUpAuthorisationResponse);
@@ -59,12 +59,12 @@ message PreAuthorisationRequest {
 // Represents the response to a PreAuthorisationRequest.
 message PreAuthorisationResponse {
   oneof result {
-    Success response = 1;
+    AuthorisationDetails response = 1;
     Error error = 2;
   }
 
   // Represents a successful authorisation.
-  message Success {
+  message AuthorisationDetails {
     // Client's unique reference, echoed from the request.
     string pre_auth_reference = 1;
 
@@ -79,7 +79,7 @@ message PreAuthorisationResponse {
     string pre_auth_token = 4;
 
     // Details of the card used for this authorisation.
-    PaymentCardDetails card_details = 5;
+    optional PaymentCardDetails card_details = 5;
 
     // Final status of the authorisation.
     AuthStatus status = 6;
@@ -91,7 +91,10 @@ message PreAuthorisationResponse {
     string currency = 8;
 
     // The timestamp of when the authorisation was successfully created.
-    google.protobuf.Timestamp date_authorised = 9;
+    google.protobuf.Timestamp created_at = 9;
+
+    // The timestamp of when the authorisation was successfully created.
+    optional google.protobuf.Timestamp authorised_at = 10;
   }
 
   // Represents a failed or errored transaction.
@@ -141,7 +144,7 @@ message TopUpAuthorisationResponse {
     uint64 total_authorised_amount_minor_units = 4;
 
     // The timestamp of when the authorisation was successfully topped_up.
-    google.protobuf.Timestamp date_topped_up = 5;
+    google.protobuf.Timestamp topped_up_at = 5;
   }
   message Error {
     string top_up_reference = 1; // Echoed from request.
@@ -180,7 +183,7 @@ message CaptureAuthorisationResponse {
     string psp_reference = 2;
     optional string order_id = 3; // Echoed from request.
     // The timestamp of when the authorisation was successfully captured.
-    google.protobuf.Timestamp date_captured = 4;
+    google.protobuf.Timestamp captured_at = 4;
   }
   message Error {
     string capture_reference = 1;
@@ -212,7 +215,7 @@ message ReleaseAuthorisationResponse {
     string psp_reference = 2;
     optional string order_id = 3; // Echoed from request.
     // The timestamp of when the authorisation was successfully released.
-    google.protobuf.Timestamp date_released = 4;
+    google.protobuf.Timestamp released_at = 4;
   }
   message Error {
     string release_reference = 1;
@@ -234,12 +237,12 @@ message GetPreAuthorisationRequest {
 // Response containing the full state of the pre-authorisation.
 message GetPreAuthorisationResponse {
   oneof result {
-    Success response = 1;
+    AuthorisationDetails response = 1;
     Error error = 2;
   }
 
   // Represents a successful query.
-  message Success {
+  message AuthorisationDetails {
     // Client's unique reference for the transaction.
     string pre_auth_reference = 1;
 
@@ -265,16 +268,19 @@ message GetPreAuthorisationResponse {
     PaymentCardDetails card_details = 8;
 
     // The timestamp of when the authorisation was successfully created.
-    google.protobuf.Timestamp date_authorised = 9;
+    google.protobuf.Timestamp created_at = 9;
 
     // The timestamp of the last successful top-up, if any.
-    optional google.protobuf.Timestamp date_last_topped_up = 10;
+    optional google.protobuf.Timestamp last_topped_up_at = 10;
 
     // The timestamp of when the authorisation was captured, if applicable.
-    optional google.protobuf.Timestamp date_captured = 11;
+    optional google.protobuf.Timestamp captured_at = 11;
 
     // The timestamp of when the authorisation was released, if applicable.
-    optional google.protobuf.Timestamp date_released = 12;
+    optional google.protobuf.Timestamp released_at = 12;
+
+    // The timestamp of when the payment is successfully authorised.
+    optional google.protobuf.Timestamp authorised_at = 13;
   }
 
   // Represents a failure to find the pre-authorisation or an error.
@@ -321,8 +327,8 @@ message PaymentCardDetails {
   string payment_token = 4;
 
   string auth_code = 5;
-  PaymentMethods card_brand = 6;
-  optional string card_variant = 7; // e.g. visa debit', 'visa international credit'
+  PaymentMethods payment_method = 6;
+  optional string payment_method_variant = 7; // e.g. visa debit', 'visa international credit'
 }
 
 enum PaymentMethods {
