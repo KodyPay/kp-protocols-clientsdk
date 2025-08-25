@@ -8,8 +8,8 @@ import "com/kodypay/grpc/common/enums.proto";
 
 // All service requests require X-API-Key header with 'API Key' value
 service KodyTerminalTokenService {
-  rpc CreateCardToken(CreateCardTokenRequest) returns (stream CreateCardTokenResponse);
-  rpc GetCardToken(GetCardTokenRequest) returns (GetCardTokenResponse);
+  rpc CreateCardToken(CreateCardTokenRequest) returns (stream TokenDetailsResponse);
+  rpc GetCardToken(GetCardTokenRequest) returns (TokenDetailsResponse);
 }
 
 message CreateCardTokenRequest {
@@ -20,13 +20,6 @@ message CreateCardTokenRequest {
   string payer_reference = 5; // The payer for whom the token is created, e.g. user id or any unique identifier you use to track users
 }
 
-message CreateCardTokenResponse {
-  oneof result {
-    TokenDetails response = 1;
-    Error error = 2;
-  }
-}
-
 message GetCardTokenRequest {
   string store_id = 1; // Your Kody store id
   oneof token_identifier {
@@ -35,14 +28,7 @@ message GetCardTokenRequest {
   }
 }
 
-message GetCardTokenResponse {
-  oneof result {
-    TokenDetails response = 1;
-    Error error = 2;
-  }
-}
-
-message TokenDetails {
+message TokenDetailsResponse {
   string token_id = 1; // The unique identifier created by Kody
   string token_reference = 2; // the external payment reference associated with the stored payment method, if applicable
   optional string payment_token = 3; // Unique identifier for the stored payment method as created by Kody, e.g. a token that can be used for future payments
@@ -58,16 +44,5 @@ message TokenDetails {
     string card_last_4_digits = 3; // Last four digits of the card number
     string card_expiry_date = 4; // Expiry date of the card
     string pos_entry_mode = 5; // POS entry mode of the card
-  }
-}
-
-message Error {
-  Type type = 1;
-  string message = 2;
-
-  enum Type {
-    UNKNOWN = 0;
-    DUPLICATE_ATTEMPT = 1;
-    INVALID_REQUEST = 2;
   }
 }
