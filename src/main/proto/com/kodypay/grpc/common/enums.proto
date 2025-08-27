@@ -16,6 +16,8 @@ enum PaymentMethods {
   JCB = 8;
   ALIPAY = 9;
   WECHAT = 10;
+  //add new enum value here
+  UNKNOWN_METHOD = -1; // To avoid automatically generated UNRECOGNIZED errors, add an UNKNOWN
 }
 
 enum RecurringProcessingModel {
@@ -31,4 +33,6 @@ enum CardTokenStatus {
   READY = 2;
   DELETED = 3;
   PENDING_DELETE = 4; // Token is in the process of being deleted
+  //add new enum value here
+  UNKNOWN_STATUS = -1; // To avoid automatically generated UNRECOGNIZED errors, add an UNKNOWN
 }
