@@ -6,6 +6,7 @@ option java_multiple_files = true;
 option java_outer_classname = "KodyPreAuthProto";
 option java_package = "com.kodypay.grpc.preauth.v1";
 import "google/protobuf/timestamp.proto";
+import "com/kodypay/grpc/common/enums.proto";
 
 service KodyPreAuthTerminalService {
   // Initiates a pre-authorisation on a specific payment terminal.
@@ -58,59 +59,36 @@ message PreAuthorisationRequest {
 
 // Represents the response to a PreAuthorisationRequest.
 message PreAuthorisationResponse {
-  oneof result {
-    AuthorisationDetails response = 1;
-    Error error = 2;
-  }
+  // Client's unique reference, echoed from the request.
+  string pre_auth_reference = 1;
 
-  // Represents a successful authorisation.
-  message AuthorisationDetails {
-    // Client's unique reference, echoed from the request.
-    string pre_auth_reference = 1;
+  // The PSP reference for this specific authorisation.
+  string psp_reference = 2;
 
-    // The PSP reference for this specific authorisation.
-    string psp_reference = 2;
+  // The client's order ID, echoed back if it was provided in the request.
+  optional string order_id = 3;
 
-    // The client's order ID, echoed back if it was provided in the request.
-    optional string order_id = 3;
+  // A Kody-generated, secure token representing this specific authorisation.
+  // This token MUST be used for all subsequent capture, top-up, or release operations.
+  string pre_auth_token = 4;
 
-    // A Kody-generated, secure token representing this specific authorisation.
-    // This token MUST be used for all subsequent capture, top-up, or release operations.
-    string pre_auth_token = 4;
+  // Details of the card used for this authorisation.
+  optional PaymentCard card_details = 5;
 
-    // Details of the card used for this authorisation.
-    optional PaymentCardDetails card_details = 5;
+  // Final status of the authorisation.
+  AuthStatus status = 6;
 
-    // Final status of the authorisation.
-    AuthStatus status = 6;
+  // The amount that was actually authorised in minor units.
+  uint64 authorised_amount_minor_units = 7;
 
-    // The amount that was actually authorised in minor units.
-    uint64 authorised_amount_minor_units = 7;
+  // The currency of the authorised amount.
+  string currency = 8;
 
-    // The currency of the authorised amount.
-    string currency = 8;
+  // The timestamp of when the authorisation was successfully created.
+  google.protobuf.Timestamp created_at = 9;
 
-    // The timestamp of when the authorisation was successfully created.
-    google.protobuf.Timestamp created_at = 9;
-
-    // The timestamp of when the authorisation was successfully created.
-    optional google.protobuf.Timestamp authorised_at = 10;
-  }
-
-  // Represents a failed or errored transaction.
-  message Error {
-    // Client's unique reference, echoed from the request.
-    string pre_auth_reference = 1;
-
-    // The client's order ID, echoed back if it was provided in the request.
-    optional string order_id = 2;
-
-    // A standardised error code.
-    string error_code = 3;
-
-    // A descriptive error message.
-    string error_message = 4;
-  }
+  // The timestamp of when the authorisation was successfully created.
+  optional google.protobuf.Timestamp authorised_at = 10;
 }
 
 // ==========================================================
@@ -131,26 +109,15 @@ message TopUpAuthorisationRequest {
 }
 
 message TopUpAuthorisationResponse {
-  oneof result {
-    Success response = 1;
-    Error error = 2;
-  }
-  message Success {
-    string top_up_reference = 1; // Echoed from request.
-    string psp_reference = 2;
-    optional string order_id = 3; // Echoed from reqeust.
+  string top_up_reference = 1; // Echoed from request.
+  string psp_reference = 2;
+  optional string order_id = 3; // Echoed from reqeust.
 
-    // The new total amount authorised on the card after the top-up.
-    uint64 total_authorised_amount_minor_units = 4;
+  // The new total amount authorised on the card after the top-up.
+  uint64 total_authorised_amount_minor_units = 4;
 
-    // The timestamp of when the authorisation was successfully topped_up.
-    google.protobuf.Timestamp topped_up_at = 5;
-  }
-  message Error {
-    string top_up_reference = 1; // Echoed from request.
-    string error_code = 2;
-    string error_message = 3;
-  }
+  // The timestamp of when the authorisation was successfully topped_up.
+  google.protobuf.Timestamp topped_up_at = 5;
 }
 
 // ==========================================================
@@ -174,22 +141,11 @@ message CaptureAuthorisationRequest {
 }
 
 message CaptureAuthorisationResponse {
-  oneof result {
-    Success response = 1;
-    Error error = 2;
-  }
-  message Success {
-    string capture_reference = 1;
-    string psp_reference = 2;
-    optional string order_id = 3; // Echoed from request.
-    // The timestamp of when the authorisation was successfully captured.
-    google.protobuf.Timestamp captured_at = 4;
-  }
-  message Error {
-    string capture_reference = 1;
-    string error_code = 2;
-    string error_message = 3;
-  }
+  string capture_reference = 1;
+  string psp_reference = 2;
+  optional string order_id = 3; // Echoed from request.
+  // The timestamp of when the authorisation was successfully captured.
+  google.protobuf.Timestamp captured_at = 4;
 }
 
 // ==========================================================
@@ -206,22 +162,11 @@ message ReleaseAuthorisationRequest {
 }
 
 message ReleaseAuthorisationResponse {
-  oneof result {
-    Success response = 1;
-    Error error = 2;
-  }
-  message Success {
-    string release_reference = 1;
-    string psp_reference = 2;
-    optional string order_id = 3; // Echoed from request.
-    // The timestamp of when the authorisation was successfully released.
-    google.protobuf.Timestamp released_at = 4;
-  }
-  message Error {
-    string release_reference = 1;
-    string error_code = 2;
-    string error_message = 3;
-  }
+  string release_reference = 1;
+  string psp_reference = 2;
+  optional string order_id = 3; // Echoed from request.
+  // The timestamp of when the authorisation was successfully released.
+  google.protobuf.Timestamp released_at = 4;
 }
 
 // ==========================================================
@@ -236,61 +181,44 @@ message GetPreAuthorisationRequest {
 
 // Response containing the full state of the pre-authorisation.
 message GetPreAuthorisationResponse {
-  oneof result {
-    AuthorisationDetails response = 1;
-    Error error = 2;
-  }
+  // Client's unique reference for the transaction.
+  string pre_auth_reference = 1;
 
-  // Represents a successful query.
-  message AuthorisationDetails {
-    // Client's unique reference for the transaction.
-    string pre_auth_reference = 1;
+  // The Kody-generated, secure token representing this specific authorisation.
+  string pre_auth_token = 2;
 
-    // The Kody-generated, secure token representing this specific authorisation.
-    string pre_auth_token = 2;
+  // The client's order ID, if it was provided in the original request.
+  optional string order_id = 3;
 
-    // The client's order ID, if it was provided in the original request.
-    optional string order_id = 3;
+  // The current status of the pre-authorisation.
+  AuthStatus status = 4;
 
-    // The current status of the pre-authorisation.
-    AuthStatus status = 4;
+  // The current total authorised amount in minor units.
+  uint64 total_authorised_amount_minor_units = 5;
 
-    // The current total authorised amount in minor units.
-    uint64 total_authorised_amount_minor_units = 5;
+  // The amount that has been captured, in minor units.
+  optional uint64 captured_amount_minor_units = 6;
 
-    // The amount that has been captured, in minor units.
-    optional uint64 captured_amount_minor_units = 6;
+  // ISO 4217 three-letter currency code.
+  string store_currency = 7;
 
-    // ISO 4217 three-letter currency code.
-    string store_currency = 7;
+  // Details of the card used for this authorisation.
+  PaymentCard card_details = 8;
 
-    // Details of the card used for this authorisation.
-    PaymentCardDetails card_details = 8;
+  // The timestamp of when the authorisation was successfully created.
+  google.protobuf.Timestamp created_at = 9;
 
-    // The timestamp of when the authorisation was successfully created.
-    google.protobuf.Timestamp created_at = 9;
+  // The timestamp of the last successful top-up, if any.
+  optional google.protobuf.Timestamp last_topped_up_at = 10;
 
-    // The timestamp of the last successful top-up, if any.
-    optional google.protobuf.Timestamp last_topped_up_at = 10;
+  // The timestamp of when the authorisation was captured, if applicable.
+  optional google.protobuf.Timestamp captured_at = 11;
 
-    // The timestamp of when the authorisation was captured, if applicable.
-    optional google.protobuf.Timestamp captured_at = 11;
+  // The timestamp of when the authorisation was released, if applicable.
+  optional google.protobuf.Timestamp released_at = 12;
 
-    // The timestamp of when the authorisation was released, if applicable.
-    optional google.protobuf.Timestamp released_at = 12;
-
-    // The timestamp of when the payment is successfully authorised.
-    optional google.protobuf.Timestamp authorised_at = 13;
-  }
-
-  // Represents a failure to find the pre-authorisation or an error.
-  message Error {
-    // A standardised error code (e.g., "NOT_FOUND").
-    string error_code = 1;
-
-    // A descriptive error message.
-    string error_message = 2;
-  }
+  // The timestamp of when the payment is successfully authorised.
+  optional google.protobuf.Timestamp authorised_at = 13;
 }
 
 // --- Supporting Messages ---
@@ -317,9 +245,9 @@ enum AuthStatus {
 }
 
 // Contains non-sensitive details of the card used in a transaction.
-message PaymentCardDetails {
+message PaymentCard {
   string card_last_4_digits = 1;
-  string expiry_date_yymm = 2;
+  string card_expiry_date = 2;
   string pos_entry_mode = 3;
 
   // The token representing the card itself (for repeat customer payments),
@@ -327,22 +255,8 @@ message PaymentCardDetails {
   string payment_token = 4;
 
   string auth_code = 5;
-  PaymentMethods payment_method = 6;
+  com.kodypay.grpc.common.PaymentMethods payment_method = 6;
   optional string payment_method_variant = 7; // e.g. visa debit', 'visa international credit'
-}
-
-enum PaymentMethods {
-  VISA = 0;
-  MASTERCARD = 1;
-  AMEX = 2;
-  BAN_CONTACT = 3;
-  CHINA_UNION_PAY = 4;
-  MAESTRO = 5;
-  DINERS = 6;
-  DISCOVER = 7;
-  JCB = 8;
-  ALIPAY = 9;
-  WECHAT = 10;
 }
 
 enum PaymentMethodType {
