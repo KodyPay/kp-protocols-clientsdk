@@ -68,9 +68,8 @@ message PreAuthorisationResponse {
   // The client's order ID, echoed back if it was provided in the request.
   optional string order_id = 3;
 
-  // A Kody-generated, secure token representing this specific authorisation.
-  // This token MUST be used for all subsequent capture, top-up, or release operations.
-  string pre_auth_token = 4;
+  // A Kody-generated id representing this specific authorisation. It is deposit id in Kody system.
+  string pre_auth_id = 4;
 
   // Details of the card used for this authorisation.
   optional PaymentCard card_details = 5;
@@ -100,8 +99,8 @@ message TopUpAuthorisationRequest {
   string top_up_reference = 2; // Client's unique reference for this specific top-up action.
   optional string order_id = 3; // The original order_id for context.
 
-  // The token from the original successful PreAuthorisationResponse.
-  string pre_auth_token = 4;
+  // The id from the original successful PreAuthorisationResponse.
+  string pre_auth_id = 4;
 
   // The *additional* amount to authorise in minor units.
   uint64 top_up_amount_minor_units = 5;
@@ -129,8 +128,8 @@ message CaptureAuthorisationRequest {
   string capture_reference = 2; // Client's unique reference for this capture action.
   optional string order_id = 3;
 
-  // The token from the original successful PreAuthorisationResponse.
-  string pre_auth_token = 4;
+  // The id from the original successful PreAuthorisationResponse.
+  string pre_auth_id = 4;
 
   // The final amount to capture in minor units. Can be <= total authorised amount.
   uint64 capture_amount_minor_units = 5;
@@ -157,8 +156,8 @@ message ReleaseAuthorisationRequest {
   string release_reference = 2; // Client's unique reference for this release action.
   optional string order_id = 3;
 
-  // The token from the original successful PreAuthorisationResponse.
-  string pre_auth_token = 4;
+  // The preauth id from the original successful PreAuthorisationResponse.
+  string pre_auth_id = 4;
 }
 
 message ReleaseAuthorisationResponse {
@@ -176,7 +175,7 @@ message ReleaseAuthorisationResponse {
 // Request to retrieve the details of an existing pre-authorisation.
 message GetPreAuthorisationRequest {
   // The Kody-generated, secure token representing the pre-authorisation.
-  string pre_auth_token = 1;
+  string pre_auth_id = 1;
 }
 
 // Response containing the full state of the pre-authorisation.
@@ -185,7 +184,7 @@ message GetPreAuthorisationResponse {
   string pre_auth_reference = 1;
 
   // The Kody-generated, secure token representing this specific authorisation.
-  string pre_auth_token = 2;
+  string pre_auth_id = 2;
 
   // The client's order ID, if it was provided in the original request.
   optional string order_id = 3;
@@ -251,7 +250,7 @@ message PaymentCard {
   string pos_entry_mode = 3;
 
   // The token representing the card itself (for repeat customer payments),
-  // distinct from the pre_auth_token which represents this specific transaction.
+  // distinct from the pre_auth_id which represents this specific transaction.
   string payment_token = 4;
 
   string auth_code = 5;
