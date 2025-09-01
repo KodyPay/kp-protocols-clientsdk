@@ -247,15 +247,14 @@ enum AuthStatus {
 message PaymentCard {
   string card_last_4_digits = 1;
   string card_expiry_date = 2;
-  string pos_entry_mode = 3;
+  optional string pos_entry_mode = 3;
 
-  // The token representing the card itself (for repeat customer payments),
+  // The token representing the card itself,
   // distinct from the pre_auth_id which represents this specific transaction.
-  string payment_token = 4;
+  optional string payment_token = 4;
 
-  string auth_code = 5;
-  com.kodypay.grpc.common.PaymentMethods payment_method = 6;
-  optional string payment_method_variant = 7; // e.g. visa debit', 'visa international credit'
+  com.kodypay.grpc.common.PaymentMethods payment_method = 5;
+  optional string payment_method_variant = 6; // e.g. visa debit', 'visa international credit'
 }
 
 enum PaymentMethodType {
