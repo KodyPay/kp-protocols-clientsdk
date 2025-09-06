@@ -98,13 +98,14 @@ message TopUpAuthorisationRequest {
   string idempotency_uuid = 1;
   string top_up_reference = 2; // Client's unique reference for this specific top-up action.
   optional string order_id = 3; // The original order_id for context.
+  string store_id = 4; // The Kody Store ID.
 
   // The id from the original successful PreAuthorisationResponse.
-  string pre_auth_id = 4;
+  string pre_auth_id = 5;
 
   // The *additional* amount to authorise in minor units.
-  uint64 top_up_amount_minor_units = 5;
-  string currency = 6;
+  uint64 top_up_amount_minor_units = 6;
+  string currency = 7;
 }
 
 message TopUpAuthorisationResponse {
@@ -127,16 +128,14 @@ message CaptureAuthorisationRequest {
   string idempotency_uuid = 1;
   string capture_reference = 2; // Client's unique reference for this capture action.
   optional string order_id = 3;
+  string store_id = 4; // The Kody Store ID.
 
   // The id from the original successful PreAuthorisationResponse.
-  string pre_auth_id = 4;
+  string pre_auth_id = 5;
 
   // The final amount to capture in minor units. Can be <= total authorised amount.
-  uint64 capture_amount_minor_units = 5;
-  string currency = 6;
-
-  // Final amount of tip included in the capture, for reporting purposes.
-  optional uint64 tip_amount_minor_units = 7;
+  uint64 capture_amount_minor_units = 6;
+  string currency = 7;
 }
 
 message CaptureAuthorisationResponse {
@@ -155,9 +154,10 @@ message ReleaseAuthorisationRequest {
   string idempotency_uuid = 1;
   string release_reference = 2; // Client's unique reference for this release action.
   optional string order_id = 3;
+  string store_id = 4; // The Kody Store ID.
 
   // The preauth id from the original successful PreAuthorisationResponse.
-  string pre_auth_id = 4;
+  string pre_auth_id = 5;
 }
 
 message ReleaseAuthorisationResponse {
