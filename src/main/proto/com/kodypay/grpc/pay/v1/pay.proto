@@ -216,9 +216,8 @@ message PayWithCardTokenRequest {
   string payment_token = 4;
   string expiry_date = 5; //format: MM/YY
   string idempotency_uuid = 6; // UUID idempotency key provided by client
-  common.PaymentMode payment_mode = 7;
-  optional string payment_reference = 8; // Unique payment reference provided by client
-  optional string merchant_reference = 9;
-  optional string payer_reference = 10;
-  map<string, string> metadata = 11;
+  optional string payment_reference = 7; // Unique payment reference provided by client
+  optional string merchant_reference = 8;
+  optional string payer_reference = 9;
+  map<string, string> metadata = 10;
 }

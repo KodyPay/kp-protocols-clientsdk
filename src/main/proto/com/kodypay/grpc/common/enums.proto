@@ -36,8 +36,3 @@ enum CardTokenStatus {
   //add new enum value here
   UNKNOWN_STATUS = -1; // To avoid automatically generated UNRECOGNIZED errors, add an UNKNOWN
 }
-
-enum PaymentMode {
-  AUTO_CAPTURE = 0;
-  PRE_AUTH = 1;
-}
