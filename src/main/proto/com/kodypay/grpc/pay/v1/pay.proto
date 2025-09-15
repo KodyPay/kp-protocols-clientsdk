@@ -13,8 +13,6 @@ service KodyPayTerminalService {
   rpc PaymentDetails(PaymentDetailsRequest) returns (PayResponse);
   rpc Refund(RefundRequest) returns (stream RefundResponse);
   rpc Void(VoidPaymentRequest) returns (VoidPaymentResponse);
-  rpc PayWithCardToken(PayWithCardTokenRequest) returns (PayResponse);
-  rpc TokenPaymentDetails(PaymentDetailsRequest) returns (PayResponse);
 }
 
 // requires X-API-Key header with 'API Key' value
@@ -207,17 +205,4 @@ message VoidPaymentResponse {
     string order_id = 4;
     string payment_reference = 5;
   }
-}
-
-message PayWithCardTokenRequest {
-  string store_id = 1; // Your Kody store id
-  string amount = 2;// amount in BigDecimal/2.dp (0.00)
-  string currency = 3; // ISO 4217 three letter currency code
-  string payment_token = 4;
-  string expiry_date = 5; //format: MM/YY
-  string idempotency_uuid = 6; // UUID idempotency key provided by client
-  optional string payment_reference = 7; // Unique payment reference provided by client
-  optional string merchant_reference = 8;
-  optional string payer_reference = 9;
-  map<string, string> metadata = 10;
 }
