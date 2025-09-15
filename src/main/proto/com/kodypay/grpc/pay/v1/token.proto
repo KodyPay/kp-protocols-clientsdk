@@ -10,6 +10,8 @@ import "com/kodypay/grpc/common/enums.proto";
 service KodyTerminalTokenService {
   rpc CreateCardToken(CreateCardTokenRequest) returns (stream TokenDetailsResponse);
   rpc GetCardToken(GetCardTokenRequest) returns (TokenDetailsResponse);
+  rpc PayWithCardToken(PayWithCardTokenRequest) returns (TokenPaymentResponse);
+  rpc GetTokenPayment(GetTokenPaymentRequest) returns (TokenPaymentResponse);
 }
 
 message CreateCardTokenRequest {
@@ -42,5 +44,55 @@ message TokenDetailsResponse {
     string card_last_4_digits = 3; // Last four digits of the card number
     string card_expiry_date = 4; // Expiry date of the card
     string pos_entry_mode = 5; // POS entry mode of the card
+  }
+}
+
+message PayWithCardTokenRequest {
+  string store_id = 1; // Your Kody store id
+  string amount = 2;// amount in BigDecimal/2.dp (0.00)
+  string currency = 3; // ISO 4217 three letter currency code
+  string payment_token = 4;
+  string expiry_date = 5; //format: MM/YY
+  string idempotency_uuid = 6; // UUID idempotency key provided by client
+  optional string payment_reference = 7; // Unique payment reference provided by client
+  optional string order_id = 8; // Unique order reference provided by client
+  optional string merchant_reference = 9;
+  optional string payer_reference = 10;
+  map<string, string> metadata = 11;
+}
+
+message GetTokenPaymentRequest {
+  string store_id = 1;
+  oneof payment_identifier {
+    string payment_id = 2;
+    string payment_reference = 3;
+  }
+}
+
+message TokenPaymentResponse {
+  string payment_id = 1; // The unique identifier created by Kody
+  string psp_reference = 2; //we get a psp ref even when there's an adyen failure. Used for receipts
+  PaymentStatus payment_status = 3;
+  optional string amount = 4;// amount in BigDecimal/2.dp (0.00)
+  optional string currency = 5; // ISO 4217 three letter currency code
+  optional string payment_reference = 6; // merchant payment reference, if provided
+  optional string order_id = 7;
+  optional string merchant_reference = 8;
+  optional google.protobuf.Timestamp payment_date = 9; // when the payment was made
+  optional string original_card_last_four = 10; // from token creation, for receipt
+  optional string original_card_brand = 11; // from token creation, for receipt
+  optional string original_card_variant = 12;
+  optional string auth_code = 13;
+
+  enum PaymentStatus {
+    PAYMENT_STATUS_UNSPECIFIED = 0;
+    NEW = 1;
+    PRE_AUTHORISED = 2;
+    AUTHORISED = 3;
+    CANCELLED = 4;
+    ERROR = 5;
+    REFUSED = 6;
+    PENDING_CAPTURE = 7;
+    CANCELLING = 8;
   }
 }
