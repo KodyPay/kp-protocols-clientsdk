@@ -83,6 +83,7 @@ message TokenPaymentResponse {
   optional string original_card_brand = 11; // from token creation, for receipt
   optional string original_card_variant = 12;
   optional string auth_code = 13;
+  optional string failure_reason = 14;
 
   enum PaymentStatus {
     PAYMENT_STATUS_UNSPECIFIED = 0;
