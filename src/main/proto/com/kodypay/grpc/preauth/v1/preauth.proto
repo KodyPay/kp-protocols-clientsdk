@@ -115,6 +115,9 @@ message PreAuthoriseWithCardTokenRequest {
 
   // The payment token representing the card to be charged.
   string payment_token = 7;
+
+  // The expiry date of the card in MM/YY format.
+  string expiry_date = 8;
 }
 
 // ==========================================================
