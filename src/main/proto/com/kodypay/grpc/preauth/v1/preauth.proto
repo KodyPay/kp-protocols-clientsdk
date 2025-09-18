@@ -13,6 +13,9 @@ service KodyPreAuthTerminalService {
   // The terminal will then prompt the customer to present their card.
   rpc PreAuthorise(PreAuthorisationRequest) returns (stream PreAuthorisationResponse);
 
+  // Initiates a pre-authorisation using a stored card token.
+  rpc PreAuthoriseWithCardToken(PreAuthoriseWithCardTokenRequest) returns (PreAuthorisationResponse);
+
   // Increases the authorised amount on an existing pre-authorisation.
   rpc TopUpAuthorisation(TopUpAuthorisationRequest) returns (TopUpAuthorisationResponse);
 
@@ -88,6 +91,33 @@ message PreAuthorisationResponse {
 
   // The timestamp of when the authorisation was successfully created.
   optional google.protobuf.Timestamp authorised_at = 10;
+}
+
+// Represents a request to initiate a pre-authorisation using a card token.
+message PreAuthoriseWithCardTokenRequest {
+  // A unique key for this specific request attempt, used for idempotency.
+  string idempotency_uuid = 1;
+
+  // Client's unique reference for this transaction. This will be echoed in the response.
+  string pre_auth_reference = 2;
+
+  // Client's internal identifier for the order, folio, or tab. This will also be echoed.
+  optional string order_id = 3;
+
+  // The Kody Store ID.
+  string store_id = 4;
+
+  // The amount to authorise, in minor units.
+  uint64 amount_minor_units = 5;
+
+  // ISO 4217 three-letter currency code.
+  string currency = 6;
+
+  // The payment token representing the card to be charged.
+  string payment_token = 7;
+
+  // The expiry date of the card in MM/YY format.
+  string expiry_date = 8;
 }
 
 // ==========================================================
