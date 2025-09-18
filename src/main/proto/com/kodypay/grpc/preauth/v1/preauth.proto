@@ -14,7 +14,7 @@ service KodyPreAuthTerminalService {
   rpc PreAuthorise(PreAuthorisationRequest) returns (stream PreAuthorisationResponse);
 
   // Initiates a pre-authorisation using a stored card token.
-  rpc PreAuthoriseWithCardToken(PreAuthoriseWithCardTokenRequest) returns (PreAuthorisationResponse);
+  rpc PreAuthoriseWithCardToken(PreAuthoriseWithCardTokenRequest) returns (stream PreAuthorisationResponse);
 
   // Increases the authorised amount on an existing pre-authorisation.
   rpc TopUpAuthorisation(TopUpAuthorisationRequest) returns (TopUpAuthorisationResponse);
