@@ -17,7 +17,7 @@ service KodyPreAuthTerminalService {
   rpc PreAuthoriseWithCardToken(PreAuthoriseWithCardTokenRequest) returns (stream PreAuthorisationResponse);
 
   // Increases the authorised amount on an existing pre-authorisation.
-  rpc TopUpAuthorisation(TopUpAuthorisationRequest) returns (TopUpAuthorisationResponse);
+  rpc TopUpAuthorisation(TopUpAuthorisationRequest) returns (stream TopUpAuthorisationResponse);
 
   // Captures the funds from an existing pre-authorisation to finalise a payment.
   rpc CaptureAuthorisation(CaptureAuthorisationRequest) returns (CaptureAuthorisationResponse);
@@ -144,10 +144,13 @@ message TopUpAuthorisationResponse {
   optional string order_id = 3; // Echoed from reqeust.
 
   // The new total amount authorised on the card after the top-up.
-  uint64 total_authorised_amount_minor_units = 4;
+  optional uint64 total_authorised_amount_minor_units = 4;
 
   // The timestamp of when the authorisation was successfully topped_up.
-  google.protobuf.Timestamp topped_up_at = 5;
+  optional google.protobuf.Timestamp topped_up_at = 5;
+
+  // The current status of the top-up operation.
+  AuthStatus status = 6;
 }
 
 // ==========================================================
