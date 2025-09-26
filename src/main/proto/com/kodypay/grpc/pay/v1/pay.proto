@@ -65,6 +65,7 @@ message PaymentMethod {
 enum PaymentMethodType {
   CARD = 0;
   E_WALLET = 1;
+  UNKNOWN = 2; //only for response(Used to indicate a situation when the payment method cannot be recognized)
 }
 
 message PayResponse {
@@ -96,7 +97,10 @@ message PayResponse {
     string payment_method = 8;
     optional PaymentCard payment_card = 9;
     optional string payment_method_variant = 10;
-    optional string refund_amount = 11;
+    optional string refund_amount = 11 [deprecated = true]; // replaced by RefundDetails.refund_amount
+    optional string original_currency = 12;
+    optional string paid_amount = 13;
+    optional string paid_currency = 14;
 
     message PaymentCard {
       string card_last_4_digits = 1;
@@ -104,6 +108,9 @@ message PayResponse {
       string pos_entry_mode = 3;
       string payment_token = 4;
       string auth_code = 5;
+      optional string card_bin = 6;
+      optional string issuer_bank = 7; // Issuer bank name, e.g. STANDARD CHARTERED BANK (HONG KONG) LTD
+      optional string funding_source = 8; // CREDIT or DEBIT
     }
   }
 
