@@ -65,7 +65,7 @@ message PaymentMethod {
 enum PaymentMethodType {
   CARD = 0;
   E_WALLET = 1;
-  UNKNOWN = -1;
+  UNKNOWN = 2; //only for response(Used to indicate a situation when the payment method cannot be recognized)
 }
 
 message PayResponse {
