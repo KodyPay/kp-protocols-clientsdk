@@ -98,11 +98,9 @@ message PayResponse {
     optional PaymentCard payment_card = 9;
     optional string payment_method_variant = 10;
     optional string refund_amount = 11 [deprecated = true]; // replaced by RefundDetails.refund_amount
-    optional string terminal_id = 12;
-    optional string terminal_serial_number = 13;
-    optional string original_currency = 14;
-    optional string paid_amount = 15;
-    optional string paid_currency = 16;
+    optional string original_currency = 12;
+    optional string paid_amount = 13;
+    optional string paid_currency = 14;
 
     message PaymentCard {
       string card_last_4_digits = 1;
