@@ -39,6 +39,7 @@ message PaymentInitiationRequest {
   optional ExpirySettings expiry = 13; // Nested message for expiry settings
   optional CaptureOptions capture_options = 14; // Optional capture settings
   optional bool is_pay_by_bank_accepted = 15; // Whether the payer can pay via pay by bank (Kody store must have pay by bank configured)
+  repeated PaymentMethods accepts_only = 16; // An inclusion list of accepted payment methods. If empty, all payment methods are accepted.
 
   message ExpirySettings {
     bool show_timer = 1; // Display a countdown timer to the user in the payment page, default is false
@@ -264,6 +265,8 @@ enum PaymentMethods {
   JCB = 8;
   ALIPAY = 9;
   WECHAT = 10;
+  APPLE_PAY = 11;
+  GOOGLE_PAY = 12;
 }
 
 enum PaymentStatus {
