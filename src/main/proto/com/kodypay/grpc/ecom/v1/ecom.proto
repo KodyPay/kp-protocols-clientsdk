@@ -265,6 +265,8 @@ enum PaymentMethods {
   JCB = 8;
   ALIPAY = 9;
   WECHAT = 10;
+  APPLE_PAY = 11;
+  GOOGLE_PAY = 12;
 }
 
 enum PaymentStatus {
