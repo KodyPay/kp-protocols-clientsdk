@@ -141,7 +141,7 @@ message TopUpAuthorisationRequest {
 message TopUpAuthorisationResponse {
   string top_up_reference = 1; // Echoed from request.
   string psp_reference = 2;
-  optional string order_id = 3; // Echoed from reqeust.
+  optional string order_id = 3; // Echoed from request.
 
   // The new total amount authorised on the card after the top-up.
   optional uint64 total_authorised_amount_minor_units = 4;
@@ -251,6 +251,9 @@ message GetPreAuthorisationResponse {
 
   // The timestamp of when the payment is successfully authorised.
   optional google.protobuf.Timestamp authorised_at = 13;
+
+  // Any adjustments made to this pre-authorisation.
+  repeated Adjustment adjustments = 14;
 }
 
 // --- Supporting Messages ---
@@ -293,4 +296,18 @@ message PaymentCard {
 enum PaymentMethodType {
   CARD_PRESENT = 0;
   MOTO = 1; // Mail Order / Telephone Order
+}
+
+message Adjustment {
+  string adjustment_id = 1;
+  optional string adjustment_reference = 2;
+  AdjustmentStatus status = 3;
+  uint64 amount_minor_units = 4;
+  google.protobuf.Timestamp date_time = 5;
+}
+
+enum AdjustmentStatus {
+  ADJUSTMENT_PENDING = 0;
+  ADJUSTMENT_SUCCESS = 1;
+  ADJUSTMENT_ERROR = 2;
 }
