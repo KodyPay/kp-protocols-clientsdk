@@ -299,15 +299,18 @@ enum PaymentMethodType {
 }
 
 message Adjustment {
-  string adjustment_id = 1;
-  optional string adjustment_reference = 2;
-  AdjustmentStatus status = 3;
-  uint64 amount_minor_units = 4;
-  google.protobuf.Timestamp date_time = 5;
+  string adjustment_id = 1; // Unique identifier for this adjustment.
+  optional string adjustment_reference = 2; // Client's reference for the adjustment, if provided.
+  AdjustmentStatus status = 3; // Current status of the adjustment.
+  uint64 amount_minor_units = 4; // Amount of the adjustment in minor currency units.
+  google.protobuf.Timestamp created_at = 5; // Timestamp when the adjustment was created.
+  google.protobuf.Timestamp updated_at = 6; // Timestamp when the adjustment was last updated.
+  optional string psp_reference = 7; // PSP reference for this adjustment, if available.
 }
 
 enum AdjustmentStatus {
-  ADJUSTMENT_PENDING = 0;
-  ADJUSTMENT_SUCCESS = 1;
-  ADJUSTMENT_ERROR = 2;
+  ADJUSTMENT_STATUS_UNSPECIFIED = 0;
+  ADJUSTMENT_PENDING = 1;
+  ADJUSTMENT_SUCCESS = 2;
+  ADJUSTMENT_ERROR = 3;
 }
