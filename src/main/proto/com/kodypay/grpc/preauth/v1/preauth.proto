@@ -221,8 +221,8 @@ message GetPreAuthorisationResponse {
   // The Kody-generated, secure token representing this specific authorisation.
   string pre_auth_id = 2;
 
-  // The client's order ID, if it was provided in the original request.
-  optional string order_id = 3;
+  // The PSP reference for this specific authorisation.
+  optional string psp_reference = 3;
 
   // The current status of the pre-authorisation.
   AuthStatus status = 4;
@@ -256,9 +256,6 @@ message GetPreAuthorisationResponse {
 
   // Any adjustments made to this pre-authorisation.
   repeated Adjustment adjustments = 14;
-
-  // The PSP reference for this specific authorisation.
-  optional string psp_reference = 15;
 }
 
 // --- Supporting Messages ---
