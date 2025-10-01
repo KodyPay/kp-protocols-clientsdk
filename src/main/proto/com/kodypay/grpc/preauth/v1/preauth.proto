@@ -207,8 +207,10 @@ message ReleaseAuthorisationResponse {
 
 // Request to retrieve the details of an existing pre-authorisation.
 message GetPreAuthorisationRequest {
+  // The Kody Store ID.
+  string store_id = 1;
   // The Kody-generated, secure token representing the pre-authorisation.
-  string pre_auth_id = 1;
+  string pre_auth_id = 2;
 }
 
 // Response containing the full state of the pre-authorisation.
