@@ -153,7 +153,7 @@ message TopUpAuthorisationResponse {
   AuthStatus status = 6;
 
   // Unique identifier for this top-up action.
-  string topupId = 7; // Unique identifier for this top-up action.
+  optional string topupId = 7; // Unique identifier for this top-up action.
 }
 
 // ==========================================================
