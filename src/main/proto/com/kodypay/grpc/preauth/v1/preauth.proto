@@ -151,6 +151,9 @@ message TopUpAuthorisationResponse {
 
   // The current status of the top-up operation.
   AuthStatus status = 6;
+
+  // Unique identifier for this top-up action.
+  optional string topupId = 7; // Unique identifier for this top-up action.
 }
 
 // ==========================================================
