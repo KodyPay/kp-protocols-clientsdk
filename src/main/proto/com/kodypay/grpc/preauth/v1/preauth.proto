@@ -283,14 +283,17 @@ message RefundCaptureRequest {
   // The Kody Store ID.
   string store_id = 4;
 
+  // The preauth id from the original successful PreAuthorisationResponse.
+  string pre_auth_id = 5;
+
   // The id from the original successful CaptureAuthorisationResponse.
-  string capture_id = 5;
+  string capture_id = 6;
 
   // The amount to refund in minor units. Can be <= captured amount.
-  uint64 refund_amount_minor_units = 6;
+  uint64 refund_amount_minor_units = 7;
 
   // ISO 4217 three-letter currency code.
-  string currency = 7;
+  string currency = 8;
 
 }
 
