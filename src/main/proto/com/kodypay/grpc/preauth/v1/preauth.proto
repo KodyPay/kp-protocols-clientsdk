@@ -376,6 +376,6 @@ enum AdjustmentStatus {
 enum RefundStatus {
   REFUND_STATUS_UNSPECIFIED = 0;
   REFUND_PENDING = 1;
-  REFUND_SUBMITTED = 2;
+  REFUND_REQUESTED = 2;
   REFUND_FAILED = 3;
 }
