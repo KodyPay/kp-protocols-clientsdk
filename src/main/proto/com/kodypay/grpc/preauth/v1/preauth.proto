@@ -310,11 +310,8 @@ message RefundCaptureResponse {
   // The timestamp of when the refund was successfully processed.
   google.protobuf.Timestamp refunded_at = 4;
 
-  // Unique identifier for this refund action.
-  string refund_id = 5;
-
   // The current status of the refund.
-  RefundStatus status = 6;
+  RefundStatus status = 5;
 }
 
 // --- Supporting Messages ---
