@@ -27,6 +27,9 @@ service KodyPreAuthTerminalService {
 
   // Retrieves the current state and details of a pre-authorisation.
   rpc GetPreAuthorisation(GetPreAuthorisationRequest) returns (GetPreAuthorisationResponse);
+
+  // Issues a refund against a previously captured authorisation using the capture_id.
+  rpc RefundCapture(RefundCaptureRequest) returns (RefundCaptureResponse);
 }
 
 // ==========================================================
@@ -153,7 +156,7 @@ message TopUpAuthorisationResponse {
   AuthStatus status = 6;
 
   // Unique identifier for this top-up action.
-  optional string topupId = 7; // Unique identifier for this top-up action.
+  string topup_id = 7;
 }
 
 // ==========================================================
@@ -180,6 +183,8 @@ message CaptureAuthorisationResponse {
   optional string order_id = 3; // Echoed from request.
   // The timestamp of when the authorisation was successfully captured.
   google.protobuf.Timestamp captured_at = 4;
+  // Unique identifier for this capture action.
+  string capture_id = 5;
 }
 
 // ==========================================================
@@ -261,6 +266,54 @@ message GetPreAuthorisationResponse {
   repeated Adjustment adjustments = 14;
 }
 
+// ==========================================================
+// Refund Capture Messages
+// ==========================================================
+
+message RefundCaptureRequest {
+  // A unique key for this specific request attempt, used for idempotency.
+  string idempotency_uuid = 1;
+
+  // Client's unique reference for this refund action.
+  string refund_reference = 2;
+
+  // Client's internal identifier for the order, if applicable.
+  optional string order_id = 3;
+
+  // The Kody Store ID.
+  string store_id = 4;
+
+  // The preauth id from the original successful PreAuthorisationResponse.
+  string pre_auth_id = 5;
+
+  // The id from the original successful CaptureAuthorisationResponse.
+  string capture_id = 6;
+
+  // The amount to refund in minor units. Can be <= captured amount.
+  uint64 refund_amount_minor_units = 7;
+
+  // ISO 4217 three-letter currency code.
+  string currency = 8;
+
+}
+
+message RefundCaptureResponse {
+  // Echoed from request.
+  string refund_reference = 1;
+
+  // PSP reference for this refund.
+  string psp_reference = 2;
+
+  // Echoed from request if provided.
+  optional string order_id = 3;
+
+  // The timestamp of when the refund was successfully processed.
+  google.protobuf.Timestamp refunded_at = 4;
+
+  // The current status of the refund.
+  RefundStatus status = 5;
+}
+
 // --- Supporting Messages ---
 
 enum AuthStatus {
@@ -318,4 +371,11 @@ enum AdjustmentStatus {
   ADJUSTMENT_PENDING = 1;
   ADJUSTMENT_SUCCESS = 2;
   ADJUSTMENT_ERROR = 3;
+}
+
+enum RefundStatus {
+  REFUND_STATUS_UNSPECIFIED = 0;
+  REFUND_PENDING = 1;
+  REFUND_REQUESTED = 2;
+  REFUND_FAILED = 3;
 }
