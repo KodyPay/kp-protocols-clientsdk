@@ -65,7 +65,7 @@ message PaymentMethod {
 enum PaymentMethodType {
   CARD = 0;
   E_WALLET = 1;
-  UNKNOWN = 2; //only for response(Used to indicate a situation when the payment method cannot be recognized)
+  UNKNOWN = 2; //Only used for response(Used to indicate a situation when the payment method cannot be recognized)
 }
 
 message PayResponse {
@@ -94,13 +94,15 @@ message PayResponse {
     string receipt_json = 5; // json blob containing the receipt data
     string psp_reference = 6;
     PaymentMethodType payment_method_type = 7;
-    string payment_method = 8;
+    string payment_method = 8; // Payment method. e.g., visa, mc, amex, etc.
     optional PaymentCard payment_card = 9;
-    optional string payment_method_variant = 10;
+    optional string payment_method_variant = 10; // Payment method variant. e.g., mc, mcsuperpremiumcredit, visa, visadebit, visacredit, etc.
     optional string refund_amount = 11 [deprecated = true]; // replaced by RefundDetails.refund_amount
-    optional string original_currency = 12;
-    optional string paid_amount = 13;
-    optional string paid_currency = 14;
+    optional string original_currency = 12; // The currency that applies to total_amount, sale_amount, and tips_amount. Defined by the store’s configured settlement currency.
+    optional string paid_amount = 13; // The amount paid by the customer. This will differ from total_amount if the customer pays in their home currency.
+    optional string paid_currency = 14; // The currency in which the customer paid. This will differ from original_currency if the customer pays in their home currency.
+    optional string exchange_rate = 15; // The exchange rate from original_currency to paid_currency.
+    optional string batch_id = 16; // Only used for batch payments
 
     message PaymentCard {
       string card_last_4_digits = 1;
@@ -108,9 +110,9 @@ message PayResponse {
       string pos_entry_mode = 3;
       string payment_token = 4;
       string auth_code = 5;
-      optional string card_bin = 6;
-      optional string issuer_bank = 7; // Issuer bank name, e.g. STANDARD CHARTERED BANK (HONG KONG) LTD
-      optional string funding_source = 8; // CREDIT or DEBIT
+      optional string card_bin = 6; // The first 6 digits of the card number, used to identify the issuer
+      optional string card_issuing_bank = 7; // Issuing bank name, e.g., STANDARD CHARTERED BANK (HONG KONG) LTD
+      optional string funding_source = 8; // The funding source of the customer’s card, e.g., CREDIT, DEBIT, or PREPAID.
     }
   }
 
