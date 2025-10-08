@@ -302,7 +302,7 @@ message RefundCaptureResponse {
   string refund_reference = 1;
 
   // PSP reference for this refund.
-  string psp_reference = 2;
+  optional string psp_reference = 2;
 
   // Echoed from request if provided.
   optional string order_id = 3;
