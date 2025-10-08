@@ -312,6 +312,9 @@ message RefundCaptureResponse {
 
   // The current status of the refund.
   RefundStatus status = 5;
+
+  // Populated if the refund failed.
+  optional string failure_reason = 6;
 }
 
 // --- Supporting Messages ---
