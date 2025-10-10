@@ -264,6 +264,9 @@ message GetPreAuthorisationResponse {
 
   // Any adjustments made to this pre-authorisation.
   repeated Adjustment adjustments = 14;
+
+  // Any captures made against this pre-authorisation.
+  repeated Capture captures = 15;
 }
 
 // ==========================================================
@@ -382,3 +385,22 @@ enum RefundStatus {
   REFUND_REQUESTED = 2;
   REFUND_FAILED = 3;
 }
+
+message Capture {
+  string capture_id = 1;
+  uint64 amount_minor_units = 2;
+  string currency = 3;
+  CaptureStatus status = 4;
+  google.protobuf.Timestamp created_at = 5;
+  optional string psp_reference = 6;
+  optional string error = 7;
+  optional string payment_transaction_id = 8;
+
+  enum CaptureStatus {
+    CAPTURE_STATUS_UNSPECIFIED = 0;
+    CAPTURE_PENDING = 1;
+    CAPTURE_SUCCESS = 2;
+    CAPTURE_FAILED = 3;
+  }
+}
+
