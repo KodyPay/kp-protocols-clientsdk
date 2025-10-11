@@ -389,12 +389,10 @@ enum RefundStatus {
 message Capture {
   string capture_id = 1;
   uint64 amount_minor_units = 2;
-  string currency = 3;
-  CaptureStatus status = 4;
-  google.protobuf.Timestamp created_at = 5;
-  optional string psp_reference = 6;
-  optional string error = 7;
-  optional string payment_transaction_id = 8;
+  CaptureStatus status = 3;
+  google.protobuf.Timestamp created_at = 4;
+  optional string psp_reference = 5;
+  optional string error = 6;
 
   enum CaptureStatus {
     CAPTURE_STATUS_UNSPECIFIED = 0;
