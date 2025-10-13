@@ -85,6 +85,7 @@ message PayResponse {
   repeated PayRequest.PaymentMethods accepts_only = 14;
   optional bool is_payment_declined = 15; // Field to be able to differentiate cancelled from declined, for Oracle use, without breaking backwards compatibility.
   repeated RefundDetails refunds = 16;
+  optional bool is_payment_captured = 17; // For payments that are not AUTO_CAPTURE, it is necessary to determine whether they have been captured based on this field.
 
   message PaymentData {
     google.protobuf.Timestamp date_paid = 1;
