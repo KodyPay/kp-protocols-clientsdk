@@ -102,7 +102,7 @@ message PayResponse {
     optional string original_currency = 12; // The currency that applies to total_amount, sale_amount, and tips_amount. Defined by the store’s configured settlement currency.
     optional string paid_amount = 13; // The amount paid by the customer. This will differ from total_amount if the customer pays in their home currency.
     optional string paid_currency = 14; // The currency in which the customer paid. This will differ from original_currency if the customer pays in their home currency.
-    optional string exchange_rate = 15; // The exchange rate from original_currency to paid_currency.
+    optional string exchange_rate = 15; // The exchange rate from original_currency to paid_currency, with up to 6 decimal places
     optional string batch_id = 16; // Only used for batch payments
 
     message PaymentCard {
