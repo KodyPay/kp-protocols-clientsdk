@@ -94,6 +94,9 @@ message PreAuthorisationResponse {
 
   // The timestamp of when the authorisation was successfully created.
   optional google.protobuf.Timestamp authorised_at = 10;
+
+  // Auth Code for the authorisation, if provided by the PSP.
+  optional string auth_code = 11;
 }
 
 // Represents a request to initiate a pre-authorisation using a card token.
