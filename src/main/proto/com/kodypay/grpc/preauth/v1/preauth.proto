@@ -58,9 +58,6 @@ message PreAuthorisationRequest {
 
   // ISO 4217 three-letter currency code.
   string currency = 7;
-
-  // The method of payment initiation.
-  optional PaymentMethodType payment_method_type = 8;
 }
 
 // Represents the response to a PreAuthorisationRequest.
@@ -360,11 +357,6 @@ message PaymentCard {
   optional string payment_method_variant = 6; // e.g. visa debit', 'visa international credit'
 }
 
-enum PaymentMethodType {
-  CARD_PRESENT = 0;
-  MOTO = 1; // Mail Order / Telephone Order
-}
-
 message Adjustment {
   string adjustment_id = 1; // Unique identifier for this adjustment.
   optional string adjustment_reference = 2; // Client's reference for the adjustment, if provided.
@@ -404,4 +396,3 @@ message Capture {
     CAPTURE_FAILED = 3;
   }
 }
-
