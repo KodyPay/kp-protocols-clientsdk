@@ -175,6 +175,7 @@ message CaptureAuthorisationRequest {
   // The final amount to capture in minor units. Can be <= total authorised amount.
   uint64 capture_amount_minor_units = 6;
   string currency = 7;
+  optional string terminal_id = 8; // required for batch payment.
 }
 
 message CaptureAuthorisationResponse {
