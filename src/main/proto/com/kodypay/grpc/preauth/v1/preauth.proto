@@ -58,6 +58,8 @@ message PreAuthorisationRequest {
 
   // ISO 4217 three-letter currency code.
   string currency = 7;
+
+  optional bool need_tokenisation = 8; // Whether to tokenise the card during pre-authorisation.
 }
 
 // Represents the response to a PreAuthorisationRequest.
