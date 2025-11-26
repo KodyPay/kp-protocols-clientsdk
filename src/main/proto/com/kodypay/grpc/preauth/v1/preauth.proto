@@ -32,7 +32,6 @@ service KodyPreAuthTerminalService {
   rpc RefundCapture(RefundCaptureRequest) returns (RefundCaptureResponse);
 }
 
-
 // ==========================================================
 // Pre Authorisation Messages
 // ==========================================================
