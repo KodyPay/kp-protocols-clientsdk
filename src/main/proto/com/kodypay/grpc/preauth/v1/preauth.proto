@@ -398,4 +398,3 @@ message Capture {
     CAPTURE_FAILED = 3;
   }
 }
-
