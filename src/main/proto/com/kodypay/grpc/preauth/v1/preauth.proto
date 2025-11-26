@@ -32,6 +32,7 @@ service KodyPreAuthTerminalService {
   rpc RefundCapture(RefundCaptureRequest) returns (RefundCaptureResponse);
 }
 
+
 // ==========================================================
 // Pre Authorisation Messages
 // ==========================================================
@@ -185,6 +186,8 @@ message CaptureAuthorisationResponse {
   google.protobuf.Timestamp captured_at = 4;
   // Unique identifier for this capture action.
   string capture_id = 5;
+
+  optional AuthStatus status = 6;
 }
 
 // ==========================================================
@@ -207,6 +210,7 @@ message ReleaseAuthorisationResponse {
   optional string order_id = 3; // Echoed from request.
   // The timestamp of when the authorisation was successfully released.
   google.protobuf.Timestamp released_at = 4;
+  optional AuthStatus status = 5;
 }
 
 // ==========================================================
@@ -396,3 +400,4 @@ message Capture {
     CAPTURE_FAILED = 3;
   }
 }
+
