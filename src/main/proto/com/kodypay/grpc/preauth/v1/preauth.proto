@@ -187,7 +187,7 @@ message CaptureAuthorisationResponse {
   // Unique identifier for this capture action.
   string capture_id = 5;
 
-  optional AuthStatus status = 6;
+  AuthStatus status = 6;
 }
 
 // ==========================================================
@@ -210,7 +210,7 @@ message ReleaseAuthorisationResponse {
   optional string order_id = 3; // Echoed from request.
   // The timestamp of when the authorisation was successfully released.
   google.protobuf.Timestamp released_at = 4;
-  optional AuthStatus status = 5;
+  AuthStatus status = 5;
 }
 
 // ==========================================================
