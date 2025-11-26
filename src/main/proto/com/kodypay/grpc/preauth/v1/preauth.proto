@@ -186,7 +186,6 @@ message CaptureAuthorisationResponse {
   google.protobuf.Timestamp captured_at = 4;
   // Unique identifier for this capture action.
   string capture_id = 5;
-
   AuthStatus status = 6;
 }
 
