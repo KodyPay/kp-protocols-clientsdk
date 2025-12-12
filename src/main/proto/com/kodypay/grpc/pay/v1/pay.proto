@@ -50,6 +50,7 @@ message PayRequest {
     JCB = 8;
     ALIPAY = 9;
     WECHAT = 10;
+    PAYME = 11;
   }
 }
 

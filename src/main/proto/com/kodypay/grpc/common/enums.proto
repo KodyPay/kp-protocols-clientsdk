@@ -16,6 +16,7 @@ enum PaymentMethods {
   JCB = 8;
   ALIPAY = 9;
   WECHAT = 10;
+  PAYME = 11;
   //add new enum value here
   UNKNOWN_METHOD = -1; // To avoid automatically generated UNRECOGNIZED errors, add an UNKNOWN
 }
