@@ -124,13 +124,13 @@ message PreAuthoriseWithCardTokenRequest {
   // The expiry date of the card in MM/YY format.
   string expiry_date = 8;
 
-  // The type of payment token being used.
-  TokenType token_type = 9;
+  // The source of payment token being used.
+  TokenSource token_source = 9;
 
-  enum TokenType {
-    TOKEN_TYPE_UNSPECIFIED = 0;
-    KODY_TOKEN = 1; // default
-    ADYEN_TOKEN = 2;
+  enum TokenSource {
+    TOKEN_SOURCE_UNSPECIFIED = 0;
+    KODY = 1; // default
+    ADYEN = 2;
   }
 }
 
