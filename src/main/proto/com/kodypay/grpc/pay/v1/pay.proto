@@ -12,6 +12,35 @@ service KodyPayTerminalService {
   rpc PaymentDetails(PaymentDetailsRequest) returns (PayResponse);
   rpc Refund(RefundRequest) returns (stream RefundResponse);
   rpc Void(VoidPaymentRequest) returns (VoidPaymentResponse);
+  rpc CloseBatch(CloseBatchRequest) returns (CloseBatchResponse);
+}
+
+// Request message for closing batches
+// requires X-API-Key header with 'API Key' value
+message CloseBatchRequest {
+  string store_id = 1;              // Required: Store identifier
+  repeated string terminal_ids = 2;   // Optional: Terminal identifier
+}
+
+// Response message for batch closure operation
+message CloseBatchResponse {
+  CloseBatchStatus status = 1;        // Overall status: "success", "partial_success", "failure"
+  string message = 2;                // Descriptive message
+  repeated CloseBatchResult results = 3;  // Results for each batch closure attempt
+
+  enum CloseBatchStatus {
+    SUCCESS = 0;          // Batch initiated closure successfully
+    PARTIAL_SUCCESS = 1;  // Some batches initiated closure successfully, others failed
+    FAILURE = 2;          // All batch closure attempts failed
+  }
+}
+
+// Individual batch closure result
+message CloseBatchResult {
+  string terminal_id = 1;            // Terminal that owned the batch
+  int32 batch_id = 2;                // batch identifier
+  bool success = 3;                  // Whether this closure initiation was successful
+  string message = 4;                // Success or error message for this batch
 }
 
 // requires X-API-Key header with 'API Key' value
