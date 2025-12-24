@@ -16,17 +16,17 @@ service KodyPayTerminalService {
 }
 
 // Request message for closing batches
+// requires X-API-Key header with 'API Key' value
 message CloseBatchRequest {
   string store_id = 1;              // Required: Store identifier
-  optional string terminal_id = 2;   // Optional: Terminal identifier
-  optional int32 batch_id = 3;       // Optional: Batch identifier
+  repeated string terminal_ids = 2;   // Optional: Terminal identifier
 }
 
 // Response message for batch closure operation
 message CloseBatchResponse {
   CloseBatchStatus status = 1;        // Overall status: "success", "partial_success", "failure"
   string message = 2;                // Descriptive message
-  repeated BatchClosureResult results = 3;  // Results for each batch closure attempt
+  repeated CloseBatchResult results = 3;  // Results for each batch closure attempt
 
   enum CloseBatchStatus {
     SUCCESS = 0;          // Batch initiated closure successfully
@@ -36,9 +36,9 @@ message CloseBatchResponse {
 }
 
 // Individual batch closure result
-message BatchClosureResult {
+message CloseBatchResult {
   string terminal_id = 1;            // Terminal that owned the batch
-  int32 closed_batch_id = 2;         // ID of the closed batch
+  int32 batch_id = 2;                // batch identifier
   bool success = 3;                  // Whether this closure initiation was successful
   string message = 4;                // Success or error message for this batch
 }
