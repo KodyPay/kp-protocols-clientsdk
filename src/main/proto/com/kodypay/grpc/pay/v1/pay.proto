@@ -58,7 +58,7 @@ message Terminal {
 // requires X-API-Key header with 'API Key' value
 message PayRequest {
   string store_id = 1; // UUID of store
-  string amount = 2; // amount in BigDecimal/2.dp (0.00)
+  string amount = 2; // total amount in BigDecimal/2.dp (0.00)
   string terminal_id = 3; // send the payment to this terminal serial number
   optional bool show_tips = 4; // Show tips on the terminal
   optional PaymentMethod payment_method = 5; // Choose specific payment method on the terminal. If not set the terminal will request on the screen to select the payment method
@@ -66,6 +66,7 @@ message PayRequest {
   optional string payment_reference = 7; // Unique payment reference provided by client
   optional string order_id = 8; // Unique order reference provided by client
   repeated PaymentMethods accepts_only = 9; // An inclusion list of accepted payment methods. If empty, all payment methods are accepted.
+  optional string tips_amount = 10; // tips amount in BigDecimal/2.dp (0.00), it should be included in the total amount.
 
   enum PaymentMethods {
     VISA = 0;
