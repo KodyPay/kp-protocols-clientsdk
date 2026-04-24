@@ -288,6 +288,12 @@ message CreateTokenRequest {
   optional string payer_email_address = 8; // We recommend that you provide this data, as it is used in velocity fraud checks. Required for 3D Secure 2 transactions.
   optional string payer_phone_number = 9; // We recommend that you provide this data, as it is used in velocity fraud checks. Required for 3D Secure 2 transactions.
   optional RecurringProcessingModel recurring_processing_model = 10; // The recurring model to use for the payment, if applicable. Can be 'Subscription', 'UnscheduledCardOnFile' or 'CardOnFile'.
+  optional ExpirySettings expiry = 11; // Settings for tokenisation URL expiry
+
+  message ExpirySettings {
+    bool show_timer = 1; // Display a countdown timer to the user in the tokenisation page, default is false
+    uint64 expiring_seconds = 2; // Timeout duration in seconds, defaults to 1800 seconds (30 minutes)
+  }
 }
 
 enum RecurringProcessingModel {
