@@ -1,0 +1,96 @@
+name: release_on_main
+
+on:
+  pull_request_target:
+    branches:
+      - main
+    types:
+      - closed
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: protocol-stable-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
+
+      - name: Fetch tags
+        run: git fetch --force --tags origin
+
+      - name: Resolve release metadata
+        id: resolve
+        env:
+          LABELS_JSON: ${{ toJson(github.event.pull_request.labels) }}
+        run: |
+          python3 scripts/resolve_release.py --labels-json "$LABELS_JSON"
+
+      - name: Create annotated tag
+        id: tag
+        if: steps.resolve.outputs.should_release == 'true'
+        env:
+          RELEASE_TAG: ${{ steps.resolve.outputs.next_tag }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "tag_created=false" >> "$GITHUB_OUTPUT"
+            echo "Tag $RELEASE_TAG already exists on origin."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$RELEASE_TAG" -m "Release $RELEASE_TAG"
+          git push origin "$RELEASE_TAG"
+          echo "tag_created=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        id: github_release
+        if: steps.resolve.outputs.should_release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.resolve.outputs.next_tag }}
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "release_created=false" >> "$GITHUB_OUTPUT"
+            echo "GitHub release $RELEASE_TAG already exists."
+            exit 0
+          fi
+
+          gh release create "$RELEASE_TAG" \
+            --title "$RELEASE_TAG" \
+            --generate-notes \
+            --verify-tag
+          echo "release_created=true" >> "$GITHUB_OUTPUT"
+
+      - name: Write release summary
+        env:
+          RELEASE_LABEL: ${{ steps.resolve.outputs.release_label }}
+          LATEST_STABLE_TAG: ${{ steps.resolve.outputs.latest_stable_tag }}
+          NEXT_TAG: ${{ steps.resolve.outputs.next_tag }}
+          SHOULD_RELEASE: ${{ steps.resolve.outputs.should_release }}
+          TAG_CREATED: ${{ steps.tag.outputs.tag_created }}
+          RELEASE_CREATED: ${{ steps.github_release.outputs.release_created }}
+        run: |
+          {
+            echo "## Stable release result"
+            echo
+            echo "- Release label: \`$RELEASE_LABEL\`"
+            echo "- Previous stable tag: \`$LATEST_STABLE_TAG\`"
+            if [ "$SHOULD_RELEASE" = "true" ]; then
+              echo "- Stable tag: \`$NEXT_TAG\`"
+              echo "- Annotated tag created in this run: \`${TAG_CREATED:-false}\`"
+              echo "- GitHub release created in this run: \`${RELEASE_CREATED:-false}\`"
+            else
+              echo "- Stable tag: skipped (\`release:none\`)"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

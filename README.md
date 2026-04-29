@@ -6,15 +6,21 @@ gRPC protocols for client-sdk.
 
 ### New Version Release
 1. Create a Pull Request (PR) to the `main` branch for review.
-2. Once the PR is approved and merged, manually tag the version based on the changes made and current version of the previous head of main branch:
-    - **Patch**: For bug fixes or small changes.
-    - **Minor**: For backward-compatible feature additions.
-    - **Major**: For breaking changes.
-3. Use the tag to run the release action from the respective SDK repositories to release SDKs in different languages.
+2. Add exactly one release label before merge:
+    - **`release:patch`**: For bug fixes or small protocol changes that still require a stable release.
+    - **`release:minor`**: For backward-compatible feature additions.
+    - **`release:major`**: For breaking changes.
+    - **`release:none`**: For docs, CI, or internal automation changes that should not create a stable tag.
+3. The `release_preview` workflow validates that exactly one release label is present and shows the next stable tag that would be created after merge.
+4. Once the PR is merged into protected `main`, the `release_on_main` workflow creates the annotated stable tag and a GitHub Release automatically.
+5. Use the stable tag to run the release action from the respective SDK repositories to release SDKs in different languages.
+
+The detailed policy and branch-protection expectations live in [docs/release_automation.md](docs/release_automation.md).
 
 ### Testing Release
-1. Tag the version in your development branch, appending -alpha or -beta to the end of the version based on the nature of the changes (e.g., 1.0.0-alpha for early testing or 1.0.0-beta for more stable pre-release testing).
-2. Use the tag to run the release action from the respective SDK repositories to release SDKs in different languages.
+1. Pre-release tags in development branches remain manual and must use a suffix such as `-alpha.N` or `-beta.N`.
+2. Pre-release tags do not participate in the next stable version calculation.
+3. Use the pre-release tag to run the release action from the respective SDK repositories when branch-level validation is needed.
 
 ## Active SDK Repositories
 Below is the list of active SDK repositories for different languages, most are public:
