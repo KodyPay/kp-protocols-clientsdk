@@ -15,8 +15,6 @@ gRPC protocols for client-sdk.
 4. Once the PR is merged into protected `main`, the `release_on_main` workflow creates the annotated stable tag and a GitHub Release automatically.
 5. Use the stable tag to run the release action from the respective SDK repositories to release SDKs in different languages.
 
-The detailed policy and branch-protection expectations live in [docs/release_automation.md](docs/release_automation.md).
-
 ### Testing Release
 1. Pre-release tags in development branches remain manual and must use a suffix such as `-alpha.N` or `-beta.N`.
 2. Pre-release tags do not participate in the next stable version calculation.
