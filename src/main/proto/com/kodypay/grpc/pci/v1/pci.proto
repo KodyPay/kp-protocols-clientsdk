@@ -1,0 +1,114 @@
+syntax = "proto3";
+
+package com.kodypay.grpc.pci.v1;
+
+option java_multiple_files = true;
+option java_outer_classname = "KodyPciTokenProto";
+option java_package = "com.kodypay.grpc.pci.v1";
+
+import "google/protobuf/timestamp.proto";
+
+// All service requests require X-API-Key header with 'API Key' value.
+service PciTokenService {
+  rpc TokeniseCard(TokeniseCardRequest) returns (TokeniseCardResponse);
+  rpc DetokeniseCard(DetokeniseCardRequest) returns (DetokeniseCardResponse);
+}
+
+enum TokenUsage {
+  TOKEN_USAGE_UNSPECIFIED = 0;
+  CARD_ON_FILE = 1;
+  UNSCHEDULED_CARD_ON_FILE = 2;
+  SUBSCRIPTION = 3;
+}
+
+enum DetokeniseReason {
+  REASON_UNSPECIFIED = 0;
+  MANUAL_OPERATION = 1;
+  MIGRATION = 2;
+  DISPUTE = 3;
+  VERIFICATION = 4;
+}
+
+message TokeniseCardRequest {
+  string store_id = 1; // Your Kody store id.
+  string idempotency_uuid = 2; // UUID v4 idempotency key.
+  CardDetails card = 3; // Full card data. holder_name is required for tokenisation input. Must never be logged.
+  string payer_reference = 4; // Required non-PII payer reference. Carries the shopper identity binding for this token.
+  TokenUsage usage = 5; // Required future-use classification. Maps to the downstream recurring processing model.
+}
+
+message TokeniseCardResponse {
+  oneof result {
+    Response response = 1;
+    Error error = 2;
+  }
+
+  message Response {
+    string payment_token = 2; // Same token namespace accepted by PayWithCardToken and PreAuthoriseWithCardToken.
+    string payer_reference = 3; // Echoed payer reference bound to this payment token.
+    CardSummary card = 4; // Non-sensitive card metadata for verification and downstream reuse.
+    google.protobuf.Timestamp created_at = 5;
+  }
+
+  message Error {
+    Type type = 1;
+    string message = 2;
+
+    enum Type {
+      UNKNOWN = 0;
+      INVALID_CARD = 1;
+      CARD_EXPIRED = 2;
+      DUPLICATE_ATTEMPT = 3;
+      INVALID_REQUEST = 4;
+      RATE_LIMIT_EXCEEDED = 5;
+    }
+  }
+}
+
+message DetokeniseCardRequest {
+  string store_id = 1; // Your Kody store id.
+  string idempotency_uuid = 2; // UUID v4 idempotency key for safe retries and audit deduplication.
+  string payment_token = 3; // Same token namespace returned by TokeniseCard and accepted by token payment/pre-auth APIs.
+  DetokeniseReason reason = 4; // Reason for retrieving the PAN.
+}
+
+message DetokeniseCardResponse {
+  oneof result {
+    Response response = 1;
+    Error error = 2;
+  }
+
+  message Response {
+    string payment_token = 2;
+    CardDetails card = 3;
+    google.protobuf.Timestamp timestamp = 4;
+  }
+
+  message Error {
+    Type type = 1;
+    string message = 2;
+
+    enum Type {
+      UNKNOWN = 0;
+      INVALID_TOKEN = 1;
+      TOKEN_NOT_FOUND = 2;
+      ACCESS_DENIED = 3;
+      PAN_NOT_AVAILABLE = 4;
+      RATE_LIMIT_EXCEEDED = 5;
+    }
+  }
+}
+
+message CardSummary {
+  optional string brand = 1; // Card brand when determinable from provider response or local brand detection.
+  string last_four = 2;
+  string expiry_month = 3;
+  string expiry_year = 4;
+}
+
+message CardDetails {
+  string number = 1; // Full PAN. PCI-scoped only.
+  string expiry_month = 2;
+  string expiry_year = 3;
+  string holder_name = 4; // Cardholder name. Required for tokenisation input and guaranteed in detokenisation output.
+}
