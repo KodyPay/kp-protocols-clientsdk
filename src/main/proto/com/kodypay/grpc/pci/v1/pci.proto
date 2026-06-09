@@ -67,7 +67,7 @@ message TokeniseCardResponse {
 
 message DetokeniseCardRequest {
   string store_id = 1; // Your Kody store id.
-  string idempotency_uuid = 2; // UUID v4 idempotency key for safe retries and audit deduplication.
+  string request_id = 2; // UUID v4 request identifier for log correlation and audit tracing. Does NOT provide execution-level idempotency.
   string payment_token = 3; // Same token namespace returned by TokeniseCard and accepted by token payment/pre-auth APIs.
   DetokeniseReason reason = 4; // Reason for retrieving the PAN.
 }
