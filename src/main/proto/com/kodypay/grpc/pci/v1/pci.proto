@@ -27,13 +27,6 @@ message TokeniseCardRequest {
   string idempotency_uuid = 2; // UUID v4 idempotency key.
   CardDetails card = 3; // Full card data. holder_name is required for tokenisation input. Must never be logged.
   string payer_reference = 4; // Required non-PII payer reference. Carries the shopper identity binding for this token.
-
-  // Removed: the platform only supports merchant-initiated UnscheduledCardOnFile
-  // (no CVC is collected or stored, so CardOnFile cannot be charged), so the
-  // recurring processing model is fixed downstream and a caller-chosen usage
-  // was misleading. Field number and name are reserved to prevent reuse.
-  reserved 5;
-  reserved "usage";
 }
 
 message TokeniseCardResponse {
