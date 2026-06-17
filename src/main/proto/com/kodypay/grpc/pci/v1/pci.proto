@@ -14,13 +14,6 @@ service PciTokenService {
   rpc DetokeniseCard(DetokeniseCardRequest) returns (DetokeniseCardResponse);
 }
 
-enum TokenUsage {
-  TOKEN_USAGE_UNSPECIFIED = 0;
-  CARD_ON_FILE = 1;
-  UNSCHEDULED_CARD_ON_FILE = 2;
-  SUBSCRIPTION = 3;
-}
-
 enum DetokeniseReason {
   REASON_UNSPECIFIED = 0;
   MANUAL_OPERATION = 1;
@@ -34,7 +27,6 @@ message TokeniseCardRequest {
   string idempotency_uuid = 2; // UUID v4 idempotency key.
   CardDetails card = 3; // Full card data. holder_name is required for tokenisation input. Must never be logged.
   string payer_reference = 4; // Required non-PII payer reference. Carries the shopper identity binding for this token.
-  TokenUsage usage = 5; // Required future-use classification. Maps to the downstream recurring processing model.
 }
 
 message TokeniseCardResponse {
