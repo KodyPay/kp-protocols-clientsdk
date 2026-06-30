@@ -22,6 +22,17 @@ enum DetokeniseReason {
   VERIFICATION = 4;
 }
 
+// Selects which card fields DetokeniseCard should return. EXPIRY covers both
+// expiry_month and expiry_year. Optional and backward-compatible: when the
+// caller sends no fields, all fields are returned (the original behaviour);
+// when fields are specified, only those are returned (data minimisation).
+enum CardField {
+  CARD_FIELD_UNSPECIFIED = 0;
+  CARD_FIELD_NUMBER = 1;       // PAN
+  CARD_FIELD_EXPIRY = 2;       // expiry_month + expiry_year
+  CARD_FIELD_HOLDER_NAME = 3;  // cardholder name
+}
+
 message TokeniseCardRequest {
   string store_id = 1; // Your Kody store id.
   string idempotency_uuid = 2; // UUID v4 idempotency key.
@@ -62,6 +73,7 @@ message DetokeniseCardRequest {
   string request_id = 2; // UUID v4 request identifier for log correlation and audit tracing. Does NOT provide execution-level idempotency.
   string payment_token = 3; // Same token namespace returned by TokeniseCard and accepted by token payment/pre-auth APIs.
   DetokeniseReason reason = 4; // Reason for retrieving the PAN.
+  repeated CardField fields = 5; // Optional. Which card fields to return. Empty = all fields (original behaviour); otherwise only the requested fields.
 }
 
 message DetokeniseCardResponse {
