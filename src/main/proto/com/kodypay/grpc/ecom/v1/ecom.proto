@@ -35,11 +35,13 @@ message PaymentInitiationRequest {
   optional string payer_email_address = 9; // We recommend that you provide this data, as it is used in velocity fraud checks. Required for 3D Secure 2 transactions.
   optional string payer_ip_address = 10; // The payer IP address used for risk checks, also required for 3D Secure 2 transactions.
   optional string payer_locale = 11; // The language code and country code to specify the language to display the payment pages. It will default to en_GB if not set.
-  optional bool tokenise_card = 12 [deprecated = true]; // defaults false
+  optional bool tokenise_card = 12; // If true, tokenises the card used for this payment so it can be reused via PayWithCardToken. Requires payer_reference to be set. Defaults to false.
   optional ExpirySettings expiry = 13; // Nested message for expiry settings
   optional CaptureOptions capture_options = 14; // Optional capture settings
   optional bool is_pay_by_bank_accepted = 15; // Whether the payer can pay via pay by bank (Kody store must have pay by bank configured)
   repeated PaymentMethods accepts_only = 16; // An inclusion list of accepted payment methods. If empty, all payment methods are accepted.
+  optional string payer_reference = 17; // The payer for whom the token is being created. This can be a user ID or any unique identifier you use to track users. Required when tokenise_card is true.
+  optional RecurringProcessingModel recurring_processing_model = 18; // The recurring model to use when tokenise_card is true. Can be 'Subscription', 'UnscheduledCardOnFile' or 'CardOnFile'.
 
   message ExpirySettings {
     bool show_timer = 1; // Display a countdown timer to the user in the payment page, default is false
