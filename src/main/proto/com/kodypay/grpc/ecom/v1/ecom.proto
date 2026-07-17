@@ -354,6 +354,7 @@ message GetCardTokenResponse {
     string payment_method_variant = 9; // Card variant, e.g. mccredit, mcdebit, visa, visadebit, etc.
     string funding_source = 10; // Funding source of the card, e.g. CREDIT, DEBIT, PREPAID, etc. (aligns with PaymentCard.funding_source)
     string card_last_4_digits = 11; // Last four digits of the card number (aligns with PaymentCard.card_last_4_digits)
+    optional string card_expiry_date = 12; // Expiry date of the tokenised card, format: MM/yyyy
   }
 
   enum CardTokenStatus {
