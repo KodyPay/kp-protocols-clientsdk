@@ -37,7 +37,7 @@ message PaymentInitiationRequest {
   optional string payer_locale = 11; // The language code and country code to specify the language to display the payment pages. It will default to en_GB if not set.
   optional bool tokenise_card = 12; // If true, tokenises the card used for this payment so it can be reused via PayWithCardToken. Requires payer_reference to be set. Defaults to false.
   optional ExpirySettings expiry = 13; // Nested message for expiry settings
-  optional CaptureOptions capture_options = 14; // Optional capture settings
+  optional CaptureOptions capture_options = 14 [deprecated=true]; // Deprecated: capture/release options are no longer supported.
   optional bool is_pay_by_bank_accepted = 15; // Whether the payer can pay via pay by bank (Kody store must have pay by bank configured)
   repeated PaymentMethods accepts_only = 16; // An inclusion list of accepted payment methods. If empty, all payment methods are accepted.
   optional string payer_reference = 17; // The payer for whom the token is being created. This can be a user ID or any unique identifier you use to track users. Required when tokenise_card is true.
@@ -50,6 +50,8 @@ message PaymentInitiationRequest {
   }
 
   message CaptureOptions {
+    option deprecated = true; // Deprecated: capture/release options are no longer supported.
+
     CaptureSettings capture_settings = 1;
     optional ReleaseSettings release_settings = 2;
 
@@ -444,5 +446,5 @@ message PayWithCardTokenRequest {
   optional string order_id = 7; // Your identifier for the order
   optional string order_metadata = 8; // Optional order details, not yet implemented.
   optional string payer_statement = 9; // Optional text for payer's bank statement
-  optional PaymentInitiationRequest.CaptureOptions capture_options = 10; // Optional capture settings if the charge is an authorization
+  optional PaymentInitiationRequest.CaptureOptions capture_options = 10 [deprecated=true]; // Deprecated: capture/release options are no longer supported.
 }
