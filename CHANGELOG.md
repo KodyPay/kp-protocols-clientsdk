@@ -11,6 +11,13 @@ All notable changes to this repository will be documented in this file.
 
 The aggregates are server-derived from the same rows as `refunds`, so they cannot disagree with it — which is why they are worth carrying rather than making every caller sum a list. ecom uses minor units and terminal a BigDecimal string, each following its own service's existing convention. `fully_refunded` is deliberately named for what it means: it is false while a payment is only partially refunded.
 
+### Removed
+- Removed `psp_reference` from ecom `RefundRequest` (field 4) and terminal `VoidPaymentRequest` (field 1), and reserved both the numbers and the name. Refunding or voiding by psp reference is no longer supported; use `payment_id`. Verified beforehand that no request in the previous 90 days used either field.
+
+  Removal is wire-safe: a client still sending the field has it treated as an unknown field and skipped, which leaves the request with no identifier, so it is rejected rather than acting on the wrong thing. Both messages keep their `oneof` with a single member, so `payment_id` presence and the `IdCase` / `IdsCase` accessors generated code already uses are unchanged, and a future identifier can be added without reshaping anything.
+
+  `reserved` is the important half: without it, field 4 / field 1 or the name `psp_reference` could later be reused for something with different meaning, and old clients still sending the old value would have it silently interpreted as the new field.
+
 ### Deprecated
 - `PaymentStatus.REFUND_PENDING` and `PaymentStatus.REFUND_REQUESTED` in `pay.proto`. Refund state does not belong on the payment's status — the payment stays successful whether or not it was later refunded, and how much came back belongs in `refunds` / `amount_refunded`. These two predate that decision and are still emitted for compatibility. ecom's `PaymentStatus` never had refund values, so it is already the shape both services should have.
 

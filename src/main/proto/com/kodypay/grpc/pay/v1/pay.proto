@@ -250,8 +250,14 @@ message RefundResponse {
 }
 
 message VoidPaymentRequest {
+  // Voiding by psp_reference is no longer supported: removed 2026-09-05 after 90 days with no request
+  // using it. A request that still sets it now carries no identifier and is rejected rather than
+  // voiding anything. Field 1 and the name stay reserved so neither can be reused for something else.
+  reserved 1;
+  reserved "psp_reference";
+  // Kept as a oneof with one member: exactly one identifier, and room for another later without
+  // changing the shape of the generated code.
   oneof ids {
-    string psp_reference = 1;
     string payment_id = 2;
   }
   optional string payment_reference = 3 ;
