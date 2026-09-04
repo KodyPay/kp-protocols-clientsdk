@@ -146,7 +146,7 @@ message PaymentDetailsResponse {
     optional string refund_psp_reference = 2;       // Absent until the acquirer has accepted the refund.
     string refund_amount = 3;                       // BigDecimal/2.dp (0.00)
     google.protobuf.Timestamp event_date = 4;
-    RefundResponse.RefundStatus status = 5;         // Same vocabulary as the Refund response.
+    RefundState status = 5;
   }
 
   // PaymentData message for the e-commerce domain.
@@ -265,12 +265,15 @@ message RefundResponse {
   string remaining_amount = 7;
   string total_amount_requested = 8;
   string paymentTransactionId = 9; // This refund's own id — not the payment's. Use it to identify this refund; the payment is in payment_id.
+  // The refund's actual state. Prefer this over `status`, which cannot express a completed refund and
+  // is frozen for backwards compatibility. Absent means the server predates this field.
+  optional RefundState refund_state = 10;
+  // Frozen: no values will be added here. A client generated against an older contract would receive
+  // an unknown number on this field and see UNRECOGNIZED. Read refund_state instead.
   enum RefundStatus {
-    PENDING = 0;      // Not yet sent to the acquirer.
+    PENDING = 0;
     REQUESTED = 1;    // Accepted by the acquirer. NOT a completed refund — refunds are asynchronous.
-    FAILED = 2;       // The acquirer rejected or failed the refund.
-    REFUNDED = 3;     // The refund completed. Previously unrepresentable: REQUESTED was as far as this enum went.
-    CANCELLED = 4;    // The payment was voided instead of refunded, so the payer was never charged.
+    FAILED = 2;
   }
 }
 
@@ -290,14 +293,30 @@ enum PaymentMethods {
   GOOGLE_PAY = 12;
 }
 
+// What a refund is actually doing. Lives on new fields only (RefundResponse.refund_state,
+// RefundDetails.status), so a client generated against an older contract never receives these values —
+// it simply does not read those fields. That is what makes it safe to report the truth here while
+// RefundStatus and PaymentStatus stay frozen.
+// Values are prefixed because proto enum values are siblings of their type within the package, not
+// children of it — PaymentStatus already occupies REFUND_PENDING and REFUND_REQUESTED.
+enum RefundState {
+  REFUND_STATE_UNSPECIFIED = 0;  // Never sent deliberately; a legal fallback rather than an illegal one.
+  REFUND_STATE_PENDING = 1;      // Not yet sent to the acquirer.
+  REFUND_STATE_REQUESTED = 2;    // Accepted by the acquirer, not yet completed.
+  REFUND_STATE_FAILED = 3;       // The acquirer rejected or failed it.
+  REFUND_STATE_REFUNDED = 4;     // Completed.
+  REFUND_STATE_CANCELLED = 5;    // The payment was voided instead, so the payer was never charged.
+}
+
+// Frozen with respect to refunds: a refunded payment still reports SUCCESS here, because adding values
+// to this field would change what every existing integrator sees. Whether a payment has been refunded,
+// and by how much, is in PaymentDetails.refunds.
 enum PaymentStatus {
   PENDING = 0;
   SUCCESS = 1;
   FAILED = 2;
   CANCELLED = 3;
   EXPIRED = 4;
-  REFUNDED = 5;            // Fully refunded. Reported as SUCCESS before this existed.
-  PARTIALLY_REFUNDED = 6;  // Some of the payment has been refunded; see PaymentDetails.refunds.
 }
 
 message CreateTokenRequest {
