@@ -2,6 +2,19 @@
 
 All notable changes to this repository will be documented in this file.
 
+## 2026-09-05
+
+### Added
+- Added `REFUNDED` and `CANCELLED` to `RefundResponse.RefundStatus` in both `com/kodypay/grpc/ecom/v1/ecom.proto` and `com/kodypay/grpc/pay/v1/pay.proto` (BAM-843). The enum went as far as `REQUESTED`, which means "the acquirer accepted the refund", so **whether a refund actually completed could not be expressed at all**. `CANCELLED` covers a refund taken as a void, where the payer is never charged rather than charged and refunded.
+- Added `REFUNDED` and `PARTIALLY_REFUNDED` to `PaymentStatus` in both files (BAM-843). A refunded payment reported `SUCCESS`.
+- Added `repeated RefundDetails refunds` to `PaymentDetailsResponse.PaymentDetails` in `ecom.proto` (BAM-842), with a new nested `RefundDetails` mirroring the terminal API's `PayResponse.RefundDetails`. This covers `PaymentDetails`, `PaymentDetailsStream` and `GetTokenPaymentDetails`, which all return `PaymentDetailsResponse`. The refunded total and remaining balance are the sum of these entries and are deliberately **not** also exposed as separate fields — two sources for one number can disagree.
+- Added `status` (field 7) to `PayResponse.RefundDetails` in `pay.proto` (BAM-842). The terminal API returned refunds with no status, so a caller could only infer the outcome from whether `refund_psp_reference` was set — which indicates acceptance, not success.
+
+### Note for implementers
+These are additive at the wire level, but a server that starts **emitting** the new values changes what existing integrators see: a fully refunded payment moves from `SUCCESS` to `REFUNDED`, and a completed refund from `REQUESTED` to `REFUNDED`. Clients generated against an older contract will map the new numbers to `UNRECOGNIZED`. Emission is therefore a separate, announced step rather than something to switch on with the contract.
+
+`REQUESTED` keeps its existing meaning — accepted, not completed — because Adyen offers no synchronous refund API, so it never could have meant anything else.
+
 ## 2026-09-04
 
 ### Added

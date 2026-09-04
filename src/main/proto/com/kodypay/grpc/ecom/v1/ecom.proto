@@ -134,6 +134,19 @@ message PaymentDetailsResponse {
 
     optional PaymentData payment_data = 11; // PaymentData can be absent if payment has not been initiated
     optional SaleData sale_data = 12;
+    // Every refund taken against this payment, oldest first. Empty when there are none. The refunded
+    // total and the remaining balance are the sum of these, deliberately not repeated as separate
+    // fields: two sources for one number can disagree.
+    repeated RefundDetails refunds = 13;
+  }
+
+  // One refund taken against the payment. Mirrors the terminal API's PayResponse.RefundDetails.
+  message RefundDetails {
+    string payment_transaction_id = 1;              // This refund's own id. Use it to identify this refund.
+    optional string refund_psp_reference = 2;       // Absent until the acquirer has accepted the refund.
+    string refund_amount = 3;                       // BigDecimal/2.dp (0.00)
+    google.protobuf.Timestamp event_date = 4;
+    RefundResponse.RefundStatus status = 5;         // Same vocabulary as the Refund response.
   }
 
   // PaymentData message for the e-commerce domain.
@@ -253,9 +266,11 @@ message RefundResponse {
   string total_amount_requested = 8;
   string paymentTransactionId = 9; // This refund's own id — not the payment's. Use it to identify this refund; the payment is in payment_id.
   enum RefundStatus {
-    PENDING = 0;
-    REQUESTED = 1;
-    FAILED = 2;
+    PENDING = 0;      // Not yet sent to the acquirer.
+    REQUESTED = 1;    // Accepted by the acquirer. NOT a completed refund — refunds are asynchronous.
+    FAILED = 2;       // The acquirer rejected or failed the refund.
+    REFUNDED = 3;     // The refund completed. Previously unrepresentable: REQUESTED was as far as this enum went.
+    CANCELLED = 4;    // The payment was voided instead of refunded, so the payer was never charged.
   }
 }
 
@@ -281,6 +296,8 @@ enum PaymentStatus {
   FAILED = 2;
   CANCELLED = 3;
   EXPIRED = 4;
+  REFUNDED = 5;            // Fully refunded. Reported as SUCCESS before this existed.
+  PARTIALLY_REFUNDED = 6;  // Some of the payment has been refunded; see PaymentDetails.refunds.
 }
 
 message CreateTokenRequest {

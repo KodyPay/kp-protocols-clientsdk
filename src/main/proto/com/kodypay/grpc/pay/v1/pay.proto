@@ -150,10 +150,14 @@ message PayResponse {
   message RefundDetails {
     string payment_id = 1;
     optional string refund_psp_reference = 2; // Might not have a PSP yet reference if pending
-    string payment_transaction_id = 3;
+    string payment_transaction_id = 3;        // This refund's own id. Use it to identify this refund.
     string refund_amount = 4;
     google.protobuf.Timestamp event_date = 5;
     optional string terminal_id = 6;
+    // Whether this refund completed. The list previously carried no status at all, so a caller could
+    // only guess from whether refund_psp_reference was set — which says the acquirer accepted it, not
+    // that it succeeded.
+    RefundResponse.RefundStatus status = 7;
   }
 }
 
@@ -163,8 +167,10 @@ enum PaymentStatus {
   FAILED = 2;
   CANCELLED = 3;
   DECLINED = 4;
-  REFUND_PENDING = 5;
-  REFUND_REQUESTED = 6;
+  REFUND_PENDING = 5;      // A refund exists but has not been sent to the acquirer.
+  REFUND_REQUESTED = 6;    // A refund was accepted by the acquirer but has not completed.
+  REFUNDED = 7;            // Fully refunded. Reported as SUCCESS before this existed.
+  PARTIALLY_REFUNDED = 8;  // Some of the payment has been refunded; see PayResponse.refunds.
 }
 
 // requires X-API-Key header with 'API Key' value
@@ -205,9 +211,11 @@ message RefundResponse {
   string total_amount_requested = 8;
   string paymentTransactionId = 9; // This refund's own id — not the payment's. Empty on the interim PENDING message, since the refund does not exist yet.
   enum RefundStatus {
-    PENDING = 0;
-    REQUESTED = 1;
-    FAILED = 2;
+    PENDING = 0;      // Not yet sent to the acquirer.
+    REQUESTED = 1;    // Accepted by the acquirer. NOT a completed refund — refunds are asynchronous.
+    FAILED = 2;       // The acquirer rejected or failed the refund.
+    REFUNDED = 3;     // The refund completed. Previously unrepresentable: REQUESTED was as far as this enum went.
+    CANCELLED = 4;    // The payment was voided instead of refunded, so the payer was never charged.
   }
   optional string order_id = 10;
   optional string ext_pay_reference = 11;
