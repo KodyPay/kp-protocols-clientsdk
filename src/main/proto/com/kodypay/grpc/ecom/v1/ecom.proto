@@ -146,7 +146,7 @@ message PaymentDetailsResponse {
     optional string refund_psp_reference = 2;       // Absent until the acquirer has accepted the refund.
     string refund_amount = 3;                       // BigDecimal/2.dp (0.00)
     google.protobuf.Timestamp event_date = 4;
-    RefundState status = 5;
+    Refund.Status status = 5;
   }
 
   // PaymentData message for the e-commerce domain.
@@ -267,7 +267,7 @@ message RefundResponse {
   string paymentTransactionId = 9; // This refund's own id — not the payment's. Use it to identify this refund; the payment is in payment_id.
   // The refund's actual state. Prefer this over `status`, which cannot express a completed refund and
   // is frozen for backwards compatibility. Absent means the server predates this field.
-  optional RefundState refund_state = 10;
+  optional Refund.Status refund_state = 10;
   // Frozen: no values will be added here. A client generated against an older contract would receive
   // an unknown number on this field and see UNRECOGNIZED. Read refund_state instead.
   enum RefundStatus {
@@ -297,15 +297,18 @@ enum PaymentMethods {
 // RefundDetails.status), so a client generated against an older contract never receives these values —
 // it simply does not read those fields. That is what makes it safe to report the truth here while
 // RefundStatus and PaymentStatus stay frozen.
-// Values are prefixed because proto enum values are siblings of their type within the package, not
-// children of it — PaymentStatus already occupies REFUND_PENDING and REFUND_REQUESTED.
-enum RefundState {
-  REFUND_STATE_UNSPECIFIED = 0;  // Never sent deliberately; a legal fallback rather than an illegal one.
-  REFUND_STATE_PENDING = 1;      // Not yet sent to the acquirer.
-  REFUND_STATE_REQUESTED = 2;    // Accepted by the acquirer, not yet completed.
-  REFUND_STATE_FAILED = 3;       // The acquirer rejected or failed it.
-  REFUND_STATE_REFUNDED = 4;     // Completed.
-  REFUND_STATE_CANCELLED = 5;    // The payment was voided instead, so the payer was never charged.
+// A refund's own lifecycle, which is not the payment's: the payment stays successful throughout.
+// Nested so the values keep short names — proto enum values are siblings of their type within the
+// package, and PaymentStatus already occupies PENDING, FAILED and CANCELLED at that level.
+message Refund {
+  enum Status {
+    UNSPECIFIED = 0;  // Never sent deliberately; a legal fallback rather than an illegal one.
+    PENDING = 1;      // Not yet sent to the acquirer.
+    REQUESTED = 2;    // The acquirer accepted the refund request. Not yet money back.
+    SUCCEEDED = 3;    // The refund completed.
+    FAILED = 4;       // The acquirer rejected or failed it.
+    CANCELLED = 5;    // The payment was voided instead, so the payer was never charged.
+  }
 }
 
 // Frozen with respect to refunds: a refunded payment still reports SUCCESS here, because adding values

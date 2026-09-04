@@ -157,7 +157,7 @@ message PayResponse {
     // Whether this refund completed. The list previously carried no status at all, so a caller could
     // only guess from whether refund_psp_reference was set — which says the acquirer accepted it, not
     // that it succeeded.
-    RefundState status = 7;
+    Refund.Status status = 7;
   }
 }
 
@@ -165,15 +165,18 @@ message PayResponse {
 // PayResponse.RefundDetails.status), so a client generated against an older contract never receives
 // these values — it simply does not read those fields. That is what makes it safe to report the truth
 // here while RefundStatus and PaymentStatus stay frozen.
-// Values are prefixed because proto enum values are siblings of their type within the package, not
-// children of it — PaymentStatus already occupies REFUND_PENDING and REFUND_REQUESTED.
-enum RefundState {
-  REFUND_STATE_UNSPECIFIED = 0;  // Never sent deliberately; a legal fallback rather than an illegal one.
-  REFUND_STATE_PENDING = 1;      // Not yet sent to the acquirer.
-  REFUND_STATE_REQUESTED = 2;    // Accepted by the acquirer, not yet completed.
-  REFUND_STATE_FAILED = 3;       // The acquirer rejected or failed it.
-  REFUND_STATE_REFUNDED = 4;     // Completed.
-  REFUND_STATE_CANCELLED = 5;    // The payment was voided instead, so the payer was never charged.
+// A refund's own lifecycle, which is not the payment's: the payment stays successful throughout.
+// Nested so the values keep short names — proto enum values are siblings of their type within the
+// package, and PaymentStatus already occupies PENDING, FAILED and CANCELLED at that level.
+message Refund {
+  enum Status {
+    UNSPECIFIED = 0;  // Never sent deliberately; a legal fallback rather than an illegal one.
+    PENDING = 1;      // Not yet sent to the acquirer.
+    REQUESTED = 2;    // The acquirer accepted the refund request. Not yet money back.
+    SUCCEEDED = 3;    // The refund completed.
+    FAILED = 4;       // The acquirer rejected or failed it.
+    CANCELLED = 5;    // The payment was voided instead, so the payer was never charged.
+  }
 }
 
 // Frozen with respect to refund outcomes: adding values here would change what every existing
@@ -238,7 +241,7 @@ message RefundResponse {
   optional string ext_order_id = 12;
   // The refund's actual state. Prefer this over `status`, which cannot express a completed refund and
   // is frozen for backwards compatibility. Absent means the server predates this field.
-  optional RefundState refund_state = 13;
+  optional Refund.Status refund_state = 13;
 }
 
 message VoidPaymentRequest {

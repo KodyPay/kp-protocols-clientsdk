@@ -5,15 +5,17 @@ All notable changes to this repository will be documented in this file.
 ## 2026-09-05
 
 ### Added
-- Added a new `RefundState` enum and put the refund's real state on **new fields only** — `RefundResponse.refund_state` and `RefundDetails.status` — in both `com/kodypay/grpc/ecom/v1/ecom.proto` and `com/kodypay/grpc/pay/v1/pay.proto` (BAM-843). `RefundStatus` went as far as `REQUESTED`, which means "the acquirer accepted the refund", so **whether a refund actually completed could not be expressed at all**. `REFUND_STATE_CANCELLED` covers a refund taken as a void, where the payer is never charged rather than charged and refunded.
-- Added `repeated RefundDetails refunds` to `PaymentDetailsResponse.PaymentDetails` in `ecom.proto` (BAM-842), with a new nested `RefundDetails` mirroring the terminal API's `PayResponse.RefundDetails`. This covers `PaymentDetails`, `PaymentDetailsStream` and `GetTokenPaymentDetails`, which all return `PaymentDetailsResponse`. The refunded total and remaining balance are the sum of these entries and are deliberately **not** also exposed as separate fields — two sources for one number can disagree.
+- Added `Refund.Status` — a refund's own lifecycle — and put it on **new fields only**: `RefundResponse.refund_state` and `RefundDetails.status`, in both `com/kodypay/grpc/ecom/v1/ecom.proto` and `com/kodypay/grpc/pay/v1/pay.proto` (BAM-843). The existing `RefundStatus` went as far as `REQUESTED`, which means "the acquirer accepted the refund", so **whether a refund actually completed could not be expressed at all**. `CANCELLED` covers a refund taken as a void, where the payer is never charged rather than charged and refunded.
+- Added `repeated RefundDetails refunds` to `PaymentDetailsResponse.PaymentDetails` in `ecom.proto` (BAM-842), with a new nested `RefundDetails` mirroring the terminal API's `PayResponse.RefundDetails`. This covers `PaymentDetails`, `PaymentDetailsStream` and `GetTokenPaymentDetails`, which all return `PaymentDetailsResponse`.
 - Added `status` (field 7) to `PayResponse.RefundDetails` in `pay.proto` (BAM-842). The terminal API returned refunds with no status, so a caller could only infer the outcome from whether `refund_psp_reference` was set — which indicates acceptance, not success.
 
 ### Unchanged, deliberately
 - **`RefundStatus` and `PaymentStatus` gain no values.** Adding to an existing field would land as `UNRECOGNIZED` on clients generated against an older contract, so it would have needed announcing and coordinating. New fields cost nothing instead: proto3 skips unknown fields silently and losslessly, so an old client never sees the new state and a new client reads it from `refund_state` / `RefundDetails.status`. The two paths are independent with no version negotiation.
-- A refunded payment therefore still reports `SUCCESS` on `PaymentStatus`. Whether it was refunded, and by how much, is in `refunds`. `REQUESTED` keeps its existing meaning — accepted, not completed — which is all it could ever have meant, since Adyen offers no synchronous refund API.
+- **A refunded payment still reports `SUCCESS` on `PaymentStatus`, and that is the intended model, not a compatibility compromise.** Stripe's `Charge.status` is only `succeeded` / `pending` / `failed`; a refunded charge stays `succeeded`, and refund information lives in separate fields. Whether a payment was refunded, and by how much, belongs in `refunds`.
+- `REQUESTED` keeps its existing meaning — accepted, not completed. Adyen's synchronous refund response carries `status: received` and nothing more; the outcome only arrives by webhook, so `REQUESTED` never could have meant anything else.
 
-`RefundState` values carry a `REFUND_STATE_` prefix because proto enum values are siblings of their type within the package, and `PaymentStatus` already occupies `REFUND_PENDING` and `REFUND_REQUESTED`.
+### Shape
+`Refund.Status` is nested rather than top-level so its values keep short names (`PENDING`, `SUCCEEDED`, …). Proto enum values are siblings of their type within the package, and `PaymentStatus` already occupies `PENDING`, `FAILED` and `CANCELLED` there — a top-level enum would have needed a `REFUND_STATE_` prefix on every value. The vocabulary follows Stripe's refund object, which models a refund as a first-class thing with its own status.
 
 ## 2026-09-04
 
