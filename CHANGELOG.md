@@ -5,17 +5,19 @@ All notable changes to this repository will be documented in this file.
 ## 2026-09-05
 
 ### Added
-- Added `Refund.Status` — a refund's own lifecycle — and put it on **new fields only**: `RefundResponse.refund_state` and `RefundDetails.status`, in both `com/kodypay/grpc/ecom/v1/ecom.proto` and `com/kodypay/grpc/pay/v1/pay.proto` (BAM-843). The existing `RefundStatus` went as far as `REQUESTED`, which means "the acquirer accepted the refund", so **whether a refund actually completed could not be expressed at all**. `CANCELLED` covers a refund taken as a void, where the payer is never charged rather than charged and refunded.
-- Added `repeated RefundDetails refunds` to `PaymentDetailsResponse.PaymentDetails` in `ecom.proto` (BAM-842), with a new nested `RefundDetails` mirroring the terminal API's `PayResponse.RefundDetails`. This covers `PaymentDetails`, `PaymentDetailsStream` and `GetTokenPaymentDetails`, which all return `PaymentDetailsResponse`.
-- Added `status` (field 7) to `PayResponse.RefundDetails` in `pay.proto` (BAM-842). The terminal API returned refunds with no status, so a caller could only infer the outcome from whether `refund_psp_reference` was set — which indicates acceptance, not success.
+- Added `Refund.Status` — a refund's own lifecycle — carried on `RefundDetails.status` in both `com/kodypay/grpc/ecom/v1/ecom.proto` and `com/kodypay/grpc/pay/v1/pay.proto` (BAM-843). Whether a refund completed could not be expressed anywhere before. `CANCELLED` covers a refund taken as a void, where the payer is never charged rather than charged and refunded.
+- Added `repeated RefundDetails refunds`, `amount_refunded_minor_units` and `fully_refunded` to `PaymentDetailsResponse.PaymentDetails` in `ecom.proto` (BAM-842). ecom query responses carried no refund information at all. One change covers `PaymentDetails`, `PaymentDetailsStream` and `GetTokenPaymentDetails`, which all return `PaymentDetailsResponse`.
+- Added `status` (field 7) to `PayResponse.RefundDetails`, plus `amount_refunded` and `fully_refunded` on `PayResponse`, in `pay.proto` (BAM-842). The terminal API returned refunds with no status, so a caller could only infer the outcome from whether `refund_psp_reference` was set — which indicates acceptance, not success.
+
+The aggregates follow Stripe, whose `Charge` carries `refunds`, `amount_refunded` and `refunded` together. They are server-derived from the same rows as `refunds`, so they cannot disagree with it. ecom uses minor units and terminal a BigDecimal string, each following its own service's existing convention.
+
+### Deprecated
+- `PaymentStatus.REFUND_PENDING` and `PaymentStatus.REFUND_REQUESTED` in `pay.proto`. Refund state does not belong on the payment's status: Stripe's `Charge.status` is only `succeeded` / `pending` / `failed`, and a refunded charge stays `succeeded`. These two predate that decision and are still emitted for compatibility. ecom's `PaymentStatus` never had refund values, so it is already the shape both services should have.
 
 ### Unchanged, deliberately
-- **`RefundStatus` and `PaymentStatus` gain no values.** Adding to an existing field would land as `UNRECOGNIZED` on clients generated against an older contract, so it would have needed announcing and coordinating. New fields cost nothing instead: proto3 skips unknown fields silently and losslessly, so an old client never sees the new state and a new client reads it from `refund_state` / `RefundDetails.status`. The two paths are independent with no version negotiation.
-- **A refunded payment still reports `SUCCESS` on `PaymentStatus`, and that is the intended model, not a compatibility compromise.** Stripe's `Charge.status` is only `succeeded` / `pending` / `failed`; a refunded charge stays `succeeded`, and refund information lives in separate fields. Whether a payment was refunded, and by how much, belongs in `refunds`.
-- `REQUESTED` keeps its existing meaning — accepted, not completed. Adyen's synchronous refund response carries `status: received` and nothing more; the outcome only arrives by webhook, so `REQUESTED` never could have meant anything else.
-
-### Shape
-`Refund.Status` is nested rather than top-level so its values keep short names (`PENDING`, `SUCCEEDED`, …). Proto enum values are siblings of their type within the package, and `PaymentStatus` already occupies `PENDING`, `FAILED` and `CANCELLED` there — a top-level enum would have needed a `REFUND_STATE_` prefix on every value. The vocabulary follows Stripe's refund object, which models a refund as a first-class thing with its own status.
+- **`RefundStatus` gains no values, and needs none.** It describes whether the refund *request* was accepted, which is all a synchronous response can say — Adyen's refund endpoint returns `status: received` and nothing more. A refund's outcome is only knowable later, so it lives on `refunds[].status` and nowhere else. There is deliberately **no** second status field on `RefundResponse`: one concept, one field.
+- **`PaymentStatus` gains no values.** Adding to an existing field would land as `UNRECOGNIZED` on clients generated against an older contract. Every new field here is genuinely new, and proto3 skips unknown fields silently, so an old client is unaffected and a new client reads the new surface. No version negotiation, nothing to announce.
+- **No `REVERSED` value.** Adyen documents a `REFUNDED_REVERSED` webhook, but it is not enabled for our merchant accounts, so the state is unreachable. Adding a value we never emit would be worse than adding it later if that changes.
 
 ## 2026-09-04
 

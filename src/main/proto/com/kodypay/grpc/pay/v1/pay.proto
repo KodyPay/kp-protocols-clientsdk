@@ -116,6 +116,12 @@ message PayResponse {
   optional bool is_payment_declined = 15; // Field to be able to differentiate cancelled from declined, for Oracle use, without breaking backwards compatibility.
   repeated RefundDetails refunds = 16;
   optional bool is_payment_captured = 17; // For payments that are not AUTO_CAPTURE, it is necessary to determine whether they have been captured based on this field.
+  // How much of the payment has been refunded, counting only refunds that succeeded. Server-derived
+  // from the same rows as `refunds`, so the two cannot disagree. A BigDecimal/2.dp string, following
+  // this service's convention rather than ecom's minor units.
+  optional string amount_refunded = 18;
+  // True only when the whole payment has been refunded. False while partially refunded.
+  optional bool fully_refunded = 19;
 
   message PaymentData {
     google.protobuf.Timestamp date_paid = 1;
@@ -161,13 +167,11 @@ message PayResponse {
   }
 }
 
-// What a refund is actually doing. Lives on new fields only (RefundResponse.refund_state,
-// PayResponse.RefundDetails.status), so a client generated against an older contract never receives
-// these values — it simply does not read those fields. That is what makes it safe to report the truth
-// here while RefundStatus and PaymentStatus stay frozen.
 // A refund's own lifecycle, which is not the payment's: the payment stays successful throughout.
-// Nested so the values keep short names — proto enum values are siblings of their type within the
-// package, and PaymentStatus already occupies PENDING, FAILED and CANCELLED at that level.
+// Carried only on PayResponse.refunds[].status — a surface that did not exist before, so there is no
+// older field beside it saying something different. Nested so the values keep short names: proto enum
+// values are siblings of their type within the package, and PaymentStatus already occupies PENDING,
+// FAILED and CANCELLED there.
 message Refund {
   enum Status {
     UNSPECIFIED = 0;  // Never sent deliberately; a legal fallback rather than an illegal one.
@@ -188,8 +192,11 @@ enum PaymentStatus {
   FAILED = 2;
   CANCELLED = 3;
   DECLINED = 4;
-  REFUND_PENDING = 5;      // A refund exists but has not been sent to the acquirer.
-  REFUND_REQUESTED = 6;    // A refund was accepted by the acquirer but has not completed.
+  // Deprecated: refund state does not belong on the payment's status. These two predate that decision
+  // and are still emitted for compatibility. Read `refunds` and `amount_refunded` instead. ecom's
+  // PaymentStatus never had refund values, so it is already the shape both services should have.
+  REFUND_PENDING = 5 [deprecated = true];
+  REFUND_REQUESTED = 6 [deprecated = true];
 }
 
 // requires X-API-Key header with 'API Key' value
@@ -229,19 +236,17 @@ message RefundResponse {
   string remaining_amount = 7;
   string total_amount_requested = 8;
   string paymentTransactionId = 9; // This refund's own id — not the payment's. Empty on the interim PENDING message, since the refund does not exist yet.
-  // Frozen: no values will be added here. A client generated against an older contract would receive
-  // an unknown number on this field and see UNRECOGNIZED. Read refund_state instead.
+  // Whether the refund REQUEST was accepted — which is all this response can say. Adyen's synchronous
+  // refund response carries `status: received` and nothing more; the outcome arrives later. Read the
+  // refund's own state from PaymentDetails.refunds[].status (ecom) / PayResponse.refunds[].status.
   enum RefundStatus {
     PENDING = 0;
-    REQUESTED = 1;    // Accepted by the acquirer. NOT a completed refund — refunds are asynchronous.
-    FAILED = 2;
+    REQUESTED = 1;    // Accepted by the acquirer. NOT money back yet.
+    FAILED = 2;       // Rejected outright.
   }
   optional string order_id = 10;
   optional string ext_pay_reference = 11;
   optional string ext_order_id = 12;
-  // The refund's actual state. Prefer this over `status`, which cannot express a completed refund and
-  // is frozen for backwards compatibility. Absent means the server predates this field.
-  optional Refund.Status refund_state = 13;
 }
 
 message VoidPaymentRequest {
