@@ -2,6 +2,14 @@
 
 All notable changes to this repository will be documented in this file.
 
+## 2026-09-04
+
+### Added
+- Added `idempotency_uuid` (field 5, optional string) to `RefundRequest` in `com/kodypay/grpc/ecom/v1/ecom.proto`. Ecom `Refund` was the only money-moving request in the suite without one, so a caller that retried after a slow or lost response necessarily refunded twice — the server had no way to tell a retry from a genuine second partial refund (BAM-942). Terminal Payments' `RefundRequest` has carried this field since BAM-857 was fixed the same way.
+
+### Changed
+- Documented what `RefundResponse.paymentTransactionId` identifies, in both `com/kodypay/grpc/ecom/v1/ecom.proto` and `com/kodypay/grpc/pay/v1/pay.proto`. It is **the refund's own id**, not the payment's; the payment stays in `payment_id`. Both services previously returned the payment's transaction id here, so the refund a caller had just created was not identifiable from the response at all. Ecom additionally leaves `payment_id` empty when the refund was requested by `psp_reference`, and terminal's interim `PENDING` message leaves `paymentTransactionId` empty because the refund row does not exist yet.
+
 ## 2026-07-17
 
 ### Added

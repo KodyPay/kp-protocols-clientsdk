@@ -197,13 +197,13 @@ message RefundRequest {
 message RefundResponse {
   RefundStatus status = 1;
   optional string failure_reason = 2; // only populated on failure
-  string payment_id = 3;
+  string payment_id = 3; // The payment that was refunded.
   google.protobuf.Timestamp date_created = 4;
   string total_paid_amount = 5;
   string total_amount_refunded = 6;
   string remaining_amount = 7;
   string total_amount_requested = 8;
-  string paymentTransactionId = 9;
+  string paymentTransactionId = 9; // This refund's own id — not the payment's. Empty on the interim PENDING message, since the refund does not exist yet.
   enum RefundStatus {
     PENDING = 0;
     REQUESTED = 1;
