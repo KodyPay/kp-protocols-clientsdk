@@ -137,11 +137,9 @@ message PaymentDetailsResponse {
     // Every refund taken against this payment, oldest first. Empty when there are none.
     repeated RefundDetails refunds = 13;
     // How much of the payment has been refunded, counting only refunds that succeeded. Server-derived
-    // from the same rows as `refunds`, so the two cannot disagree. Follows Stripe, whose Charge carries
-    // both `refunds` and `amount_refunded`.
+    // from the same rows as `refunds`, so the two cannot disagree.
     uint64 amount_refunded_minor_units = 14;
-    // True only when the whole payment has been refunded. False while partially refunded, matching
-    // Stripe's `Charge.refunded`.
+    // True only when the whole payment has been refunded; false while it is partially refunded.
     bool fully_refunded = 15;
   }
 

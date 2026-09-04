@@ -192,9 +192,9 @@ enum PaymentStatus {
   FAILED = 2;
   CANCELLED = 3;
   DECLINED = 4;
-  // Deprecated: refund state does not belong on the payment's status. These two predate that decision
-  // and are still emitted for compatibility. Read `refunds` and `amount_refunded` instead. ecom's
-  // PaymentStatus never had refund values, so it is already the shape both services should have.
+  // Deprecated: refund state does not belong on the payment's status — the payment stays successful
+  // whether or not it was later refunded. These two predate that decision and are still emitted for
+  // compatibility. Read `refunds` and `amount_refunded` instead.
   REFUND_PENDING = 5 [deprecated = true];
   REFUND_REQUESTED = 6 [deprecated = true];
 }
