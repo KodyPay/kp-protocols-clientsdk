@@ -116,6 +116,12 @@ message PayResponse {
   optional bool is_payment_declined = 15; // Field to be able to differentiate cancelled from declined, for Oracle use, without breaking backwards compatibility.
   repeated RefundDetails refunds = 16;
   optional bool is_payment_captured = 17; // For payments that are not AUTO_CAPTURE, it is necessary to determine whether they have been captured based on this field.
+  // How much of the payment has been refunded, counting only refunds that succeeded. Server-derived
+  // from the same rows as `refunds`, so the two cannot disagree. A BigDecimal/2.dp string, following
+  // this service's convention rather than ecom's minor units.
+  optional string amount_refunded = 18;
+  // True only when the whole payment has been refunded. False while partially refunded.
+  optional bool fully_refunded = 19;
 
   message PaymentData {
     google.protobuf.Timestamp date_paid = 1;
@@ -150,21 +156,47 @@ message PayResponse {
   message RefundDetails {
     string payment_id = 1;
     optional string refund_psp_reference = 2; // Might not have a PSP yet reference if pending
-    string payment_transaction_id = 3;
+    string payment_transaction_id = 3;        // This refund's own id. Use it to identify this refund.
     string refund_amount = 4;
     google.protobuf.Timestamp event_date = 5;
     optional string terminal_id = 6;
+    // Whether this refund completed. The list previously carried no status at all, so a caller could
+    // only guess from whether refund_psp_reference was set — which says the acquirer accepted it, not
+    // that it succeeded.
+    Refund.Status status = 7;
   }
 }
 
+// A refund's own lifecycle, which is not the payment's: the payment stays successful throughout.
+// Carried only on PayResponse.refunds[].status — a surface that did not exist before, so there is no
+// older field beside it saying something different. Nested so the values keep short names: proto enum
+// values are siblings of their type within the package, and PaymentStatus already occupies PENDING,
+// FAILED and CANCELLED there.
+message Refund {
+  enum Status {
+    UNSPECIFIED = 0;  // Never sent deliberately; a legal fallback rather than an illegal one.
+    PENDING = 1;      // Not yet sent to the acquirer.
+    REQUESTED = 2;    // The acquirer accepted the refund request. Not yet money back.
+    SUCCEEDED = 3;    // The refund completed.
+    FAILED = 4;       // The acquirer rejected or failed it.
+    CANCELLED = 5;    // The payment was voided instead, so the payer was never charged.
+  }
+}
+
+// Frozen with respect to refund outcomes: adding values here would change what every existing
+// integrator sees on this field. Whether a payment has been refunded, and by how much, is in
+// PayResponse.refunds.
 enum PaymentStatus {
   PENDING = 0;
   SUCCESS = 1;
   FAILED = 2;
   CANCELLED = 3;
   DECLINED = 4;
-  REFUND_PENDING = 5;
-  REFUND_REQUESTED = 6;
+  // Deprecated: refund state does not belong on the payment's status — the payment stays successful
+  // whether or not it was later refunded. These two predate that decision and are still emitted for
+  // compatibility. Read `refunds` and `amount_refunded` instead.
+  REFUND_PENDING = 5 [deprecated = true];
+  REFUND_REQUESTED = 6 [deprecated = true];
 }
 
 // requires X-API-Key header with 'API Key' value
@@ -204,10 +236,13 @@ message RefundResponse {
   string remaining_amount = 7;
   string total_amount_requested = 8;
   string paymentTransactionId = 9; // This refund's own id — not the payment's. Empty on the interim PENDING message, since the refund does not exist yet.
+  // Whether the refund REQUEST was accepted — which is all this response can say. Adyen's synchronous
+  // refund response carries `status: received` and nothing more; the outcome arrives later. Read the
+  // refund's own state from PaymentDetails.refunds[].status (ecom) / PayResponse.refunds[].status.
   enum RefundStatus {
     PENDING = 0;
-    REQUESTED = 1;
-    FAILED = 2;
+    REQUESTED = 1;    // Accepted by the acquirer. NOT money back yet.
+    FAILED = 2;       // Rejected outright.
   }
   optional string order_id = 10;
   optional string ext_pay_reference = 11;
@@ -215,8 +250,14 @@ message RefundResponse {
 }
 
 message VoidPaymentRequest {
+  // Voiding by psp_reference is no longer supported: removed 2026-09-05 after 90 days with no request
+  // using it. A request that still sets it now carries no identifier and is rejected rather than
+  // voiding anything. Field 1 and the name stay reserved so neither can be reused for something else.
+  reserved 1;
+  reserved "psp_reference";
+  // Kept as a oneof with one member: exactly one identifier, and room for another later without
+  // changing the shape of the generated code.
   oneof ids {
-    string psp_reference = 1;
     string payment_id = 2;
   }
   optional string payment_reference = 3 ;

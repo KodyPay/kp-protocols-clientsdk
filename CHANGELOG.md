@@ -2,6 +2,30 @@
 
 All notable changes to this repository will be documented in this file.
 
+## 2026-09-05
+
+### Added
+- Added `Refund.Status` — a refund's own lifecycle — carried on `RefundDetails.status` in both `com/kodypay/grpc/ecom/v1/ecom.proto` and `com/kodypay/grpc/pay/v1/pay.proto` (BAM-843). Whether a refund completed could not be expressed anywhere before. `CANCELLED` covers a refund taken as a void, where the payer is never charged rather than charged and refunded.
+- Added `repeated RefundDetails refunds`, `amount_refunded_minor_units` and `fully_refunded` to `PaymentDetailsResponse.PaymentDetails` in `ecom.proto` (BAM-842). ecom query responses carried no refund information at all. One change covers `PaymentDetails`, `PaymentDetailsStream` and `GetTokenPaymentDetails`, which all return `PaymentDetailsResponse`.
+- Added `status` (field 7) to `PayResponse.RefundDetails`, plus `amount_refunded` and `fully_refunded` on `PayResponse`, in `pay.proto` (BAM-842). The terminal API returned refunds with no status, so a caller could only infer the outcome from whether `refund_psp_reference` was set — which indicates acceptance, not success.
+
+The aggregates are server-derived from the same rows as `refunds`, so they cannot disagree with it — which is why they are worth carrying rather than making every caller sum a list. ecom uses minor units and terminal a BigDecimal string, each following its own service's existing convention. `fully_refunded` is deliberately named for what it means: it is false while a payment is only partially refunded.
+
+### Removed
+- Removed `psp_reference` from ecom `RefundRequest` (field 4) and terminal `VoidPaymentRequest` (field 1), and reserved both the numbers and the name. Refunding or voiding by psp reference is no longer supported; use `payment_id`. Verified beforehand that no request in the previous 90 days used either field.
+
+  Removal is wire-safe: a client still sending the field has it treated as an unknown field and skipped, which leaves the request with no identifier, so it is rejected rather than acting on the wrong thing. Both messages keep their `oneof` with a single member, so `payment_id` presence and the `IdCase` / `IdsCase` accessors generated code already uses are unchanged, and a future identifier can be added without reshaping anything.
+
+  `reserved` is the important half: without it, field 4 / field 1 or the name `psp_reference` could later be reused for something with different meaning, and old clients still sending the old value would have it silently interpreted as the new field.
+
+### Deprecated
+- `PaymentStatus.REFUND_PENDING` and `PaymentStatus.REFUND_REQUESTED` in `pay.proto`. Refund state does not belong on the payment's status — the payment stays successful whether or not it was later refunded, and how much came back belongs in `refunds` / `amount_refunded`. These two predate that decision and are still emitted for compatibility. ecom's `PaymentStatus` never had refund values, so it is already the shape both services should have.
+
+### Unchanged, deliberately
+- **`RefundStatus` gains no values, and needs none.** It describes whether the refund *request* was accepted, which is all a synchronous response can say — Adyen's refund endpoint returns `status: received` and nothing more. A refund's outcome is only knowable later, so it lives on `refunds[].status` and nowhere else. There is deliberately **no** second status field on `RefundResponse`: one concept, one field.
+- **`PaymentStatus` gains no values.** Adding to an existing field would land as `UNRECOGNIZED` on clients generated against an older contract. Every new field here is genuinely new, and proto3 skips unknown fields silently, so an old client is unaffected and a new client reads the new surface. No version negotiation, nothing to announce.
+- **No `REVERSED` value.** Adyen documents a `REFUNDED_REVERSED` webhook, but it is not enabled for our merchant accounts, so the state is unreachable. Adding a value we never emit would be worse than adding it later if that changes.
+
 ## 2026-09-04
 
 ### Added
