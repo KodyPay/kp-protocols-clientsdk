@@ -135,12 +135,26 @@ message PaymentDetailsResponse {
     optional PaymentData payment_data = 11; // PaymentData can be absent if payment has not been initiated
     optional SaleData sale_data = 12;
     // Every refund taken against this payment, oldest first. Empty when there are none.
+    //
+    // Not every endpoint returning this message populates the refund fields: GetPayments leaves them
+    // unset. Use it to find payments, then read a payment's refunds with PaymentDetails. A repeated
+    // field has no presence, so an empty list here cannot be told apart from a payment with no
+    // refunds — the two aggregates below are optional so that they can be.
     repeated RefundDetails refunds = 13;
     // How much of the payment has been refunded, counting only refunds that succeeded. Server-derived
     // from the same rows as `refunds`, so the two cannot disagree.
-    uint64 amount_refunded_minor_units = 14;
+    //
+    // Optional so that "not reported" is distinguishable from "nothing refunded". Not every endpoint
+    // returning PaymentDetails fills the refund fields in — see the field notes on `refunds` — and
+    // without explicit presence an endpoint that does not would report 0 here, which reads as a
+    // payment that was never refunded. Check presence before using it.
+    optional uint64 amount_refunded_minor_units = 14;
     // True only when the whole payment has been refunded; false while it is partially refunded.
-    bool fully_refunded = 15;
+    //
+    // Optional for the same reason as `amount_refunded_minor_units`: absent means the server did not
+    // report it, not that the payment is unrefunded. Measured against the amount charged, so it is
+    // also absent when that amount is unknown.
+    optional bool fully_refunded = 15;
   }
 
   // One refund taken against the payment. Mirrors the terminal API's PayResponse.RefundDetails.

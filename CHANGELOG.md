@@ -2,6 +2,17 @@
 
 All notable changes to this repository will be documented in this file.
 
+## 2026-09-09
+
+### Changed
+- `amount_refunded_minor_units` and `fully_refunded` on `PaymentDetailsResponse.PaymentDetails` in `com/kodypay/grpc/ecom/v1/ecom.proto` are now `optional`, so a caller can tell "the server did not report this" from "nothing was refunded" (BAM-962).
+
+  Without explicit presence, a `uint64` and a `bool` come back as `0` and `false` whether or not the server filled them in. Staging verification on 2026-09-09 found that `GetPayments` returns this message without populating the refund fields, so a fully refunded payment read there as one that was never refunded — and no client could detect the difference. The terminal side already had both fields optional; this brings ecom into line.
+
+  The two are also documented as not populated by every endpoint returning `PaymentDetails`, and `refunds` now records that `GetPayments` leaves them unset. Note that `repeated refunds` has no presence of its own and cannot express the distinction — hence relying on the two aggregates for it.
+
+  Wire-compatible and source-compatible: the field numbers and types are unchanged, generated getters keep returning `uint64` / `bool`, and a `hasX()` accessor is added alongside. This contract already uses `optional` on scalars extensively (77 such fields across `ecom.proto` and `pay.proto`), so it is not a new pattern for any language SDK.
+
 ## 2026-09-05
 
 ### Added
