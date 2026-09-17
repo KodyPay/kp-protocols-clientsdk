@@ -169,7 +169,8 @@ message PaymentDetailsResponse {
   // PaymentData message for the e-commerce domain.
   message PaymentData {
     string psp_reference = 1;
-    PaymentMethods payment_method = 2;
+    // Explicit presence: zero is VISA, so check presence before reading. See the note on PaymentMethods.
+    optional PaymentMethods payment_method = 2;
     string payment_method_variant = 3;
     PaymentAuthStatus auth_status =4;
     google.protobuf.Timestamp auth_status_date = 5; // The date and time of the auth status change.
@@ -299,6 +300,11 @@ message RefundResponse {
   }
 }
 
+// Zero is VISA for historical reasons, and renumbering it would silently reinterpret the bytes of
+// every client already published against this contract. Fields carrying this enum therefore use
+// explicit presence (`optional`), so that an unset field is not read as a Visa card. SDKs generated
+// before that presence existed cannot tell the two apart; there, `payment_method_variant` (a string,
+// where empty is unambiguous) is the signal to trust.
 enum PaymentMethods {
   VISA = 0;
   MASTERCARD = 1;
@@ -413,7 +419,8 @@ message GetCardTokenResponse {
     RecurringProcessingModel recurring_processing_model = 5; // Recurring processing model
     CardTokenStatus status = 6;
     google.protobuf.Timestamp created_at = 7; // Date when the token was created
-    PaymentMethods payment_method = 8; // Card brand, e.g. mc, visa and so on
+    // Explicit presence: zero is VISA, so check presence before reading. See the note on PaymentMethods.
+    optional PaymentMethods payment_method = 8; // Card brand, e.g. mc, visa and so on
     string payment_method_variant = 9; // Card variant, e.g. mccredit, mcdebit, visa, visadebit, etc.
     string funding_source = 10; // Funding source of the card, e.g. CREDIT, DEBIT, PREPAID, etc. (aligns with PaymentCard.funding_source)
     string card_last_4_digits = 11; // Last four digits of the card number (aligns with PaymentCard.card_last_4_digits)

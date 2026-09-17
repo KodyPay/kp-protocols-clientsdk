@@ -369,7 +369,8 @@ message PaymentCard {
   // distinct from the pre_auth_id which represents this specific transaction.
   optional string payment_token = 4;
 
-  com.kodypay.grpc.common.PaymentMethods payment_method = 5;
+  // Explicit presence: zero is VISA, so check presence before reading. See the note on PaymentMethods.
+  optional com.kodypay.grpc.common.PaymentMethods payment_method = 5;
   optional string payment_method_variant = 6; // e.g. visa debit', 'visa international credit'
 }
 

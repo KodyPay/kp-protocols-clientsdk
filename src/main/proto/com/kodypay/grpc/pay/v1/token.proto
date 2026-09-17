@@ -39,7 +39,8 @@ message TokenDetailsResponse {
   optional CardInfo card_info = 8; // Card information
 
   message CardInfo {
-    com.kodypay.grpc.common.PaymentMethods payment_method = 1; // Card brand, e.g. mc, visa and so on
+    // Explicit presence: zero is VISA, so check presence before reading. See the note on PaymentMethods.
+    optional com.kodypay.grpc.common.PaymentMethods payment_method = 1; // Card brand, e.g. mc, visa and so on
     string payment_method_variant = 2; // Card variant, e.g. mccredit, mcdebit, visadebit, etc.
     string card_last_4_digits = 3; // Last four digits of the card number
     string card_expiry_date = 4; // Expiry date of the card
