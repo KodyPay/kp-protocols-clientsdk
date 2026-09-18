@@ -2,6 +2,30 @@
 
 All notable changes to this repository will be documented in this file.
 
+## 2026-09-18
+
+### Changed
+- Six enum-typed fields become `optional`, so that an unset field is no longer read as a real value (BAM-987):
+
+  | file | field | zero value read when unset |
+  | :--- | :--- | :--- |
+  | `ecom/v1/ecom.proto` | `PaymentDetailsResponse.PaymentData.payment_method` | `VISA` |
+  | `ecom/v1/ecom.proto` | `GetCardTokenResponse.Response.payment_method` | `VISA` |
+  | `pay/v1/token.proto` | `TokenDetailsResponse.CardInfo.payment_method` | `VISA` |
+  | `preauth/v1/preauth.proto` | `PaymentCard.payment_method` | `VISA` |
+  | `pay/v1/pay.proto` | `CloseBatchResponse.status` | `SUCCESS` |
+  | `pay/v1/pay.proto` | `PayResponse.PaymentData.payment_method_type` | `CARD` |
+
+  `PaymentMethods` starts at `VISA = 0`, so a `PaymentData` with nothing set and one with `payment_method` explicitly set to Visa were byte-identical — both empty. A caller could not tell "the server said Visa" from "the server said nothing", and a successful WeChat payment whose `payment_method` had not yet been written read as a Visa card. `CloseBatchStatus` starts at `SUCCESS = 0`, which defaults an unreported batch closure to a successful one. `PaymentMethodType` starts at `CARD = 0`.
+
+  Renumbering those enums would silently reinterpret the bytes of every already-published client, so the zero values stay where they are and the fields gain presence instead. Notes on the `PaymentMethods` enums record this, and point at `payment_method_variant` (a string, where empty is unambiguous) as the signal for SDKs generated before the presence existed.
+
+  Wire-compatible and source-compatible: field numbers and types are unchanged, generated getters keep returning the enum, and a `hasX()` accessor is added alongside. Explicit presence on a scalar changes the accessor shape only in generators that switch to pointers (Go — no Go SDK here); C#, Java/Kotlin, Python, PHP and Ruby keep the value accessor.
+
+  One behavioural note for servers: a field explicitly set to its zero value now serialises as present-and-zero (two bytes rather than none), which is the intended meaning. Servers must set these fields explicitly for the presence to carry information.
+
+  `PayRequest.PaymentMethods` is deliberately not changed: it is only carried by `repeated` fields, which encode each element explicitly and so already distinguish a one-element `[VISA]` list from an empty one.
+
 ## 2026-09-09
 
 ### Changed

@@ -4,6 +4,11 @@ option java_multiple_files = true;
 option java_outer_classname = "KodyEnumsProto";
 option java_package = "com.kodypay.grpc.common";
 
+// Zero is VISA for historical reasons, and renumbering it would silently reinterpret the bytes of
+// every client already published against this contract. Fields carrying this enum therefore use
+// explicit presence (`optional`), so that an unset field is not read as a Visa card. SDKs generated
+// before that presence existed cannot tell the two apart; there, `payment_method_variant` (a string,
+// where empty is unambiguous) is the signal to trust.
 enum PaymentMethods {
   VISA = 0;
   MASTERCARD = 1;

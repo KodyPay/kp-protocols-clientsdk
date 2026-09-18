@@ -24,7 +24,9 @@ message CloseBatchRequest {
 
 // Response message for batch closure operation
 message CloseBatchResponse {
-  CloseBatchStatus status = 1;        // Overall status: "success", "partial_success", "failure"
+  // Explicit presence: zero is SUCCESS, so an unset field would read as a successful closure.
+  // Absence means no status was reported, which is not the same as success.
+  optional CloseBatchStatus status = 1;        // Overall status: "success", "partial_success", "failure"
   string message = 2;                // Descriptive message
   repeated CloseBatchResult results = 3;  // Results for each batch closure attempt
 
@@ -68,6 +70,9 @@ message PayRequest {
   repeated PaymentMethods accepts_only = 9; // An inclusion list of accepted payment methods. If empty, all payment methods are accepted.
   optional string tips_amount = 10; // tips amount in BigDecimal/2.dp (0.00), it should be included in the total amount.
 
+  // Zero is VISA, but only `repeated` fields carry this enum, and a repeated field encodes each
+  // element explicitly — a one-element [VISA] list is distinguishable from an empty one. So the
+  // presence hazard that applies to the singular fields elsewhere does not apply here.
   enum PaymentMethods {
     VISA = 0;
     MASTERCARD = 1;
@@ -130,7 +135,9 @@ message PayResponse {
     string tips_amount = 4;
     string receipt_json = 5; // json blob containing the receipt data
     string psp_reference = 6;
-    PaymentMethodType payment_method_type = 7;
+    // Explicit presence: zero is CARD, so an unset field would read as a card payment. The sibling
+    // `payment_method` string below says the same thing and is empty when unknown.
+    optional PaymentMethodType payment_method_type = 7;
     string payment_method = 8; // Payment method. e.g., visa, mc, amex, etc.
     optional PaymentCard payment_card = 9;
     optional string payment_method_variant = 10; // Payment method variant. e.g., mc, mcsuperpremiumcredit, visa, visadebit, visacredit, etc.
