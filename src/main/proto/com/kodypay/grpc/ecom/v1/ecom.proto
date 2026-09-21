@@ -4,6 +4,9 @@ option java_multiple_files = true;
 option java_outer_classname = "KodyEcomPaymentsProto";
 option java_package = "com.kodypay.grpc.ecom.v1";
 import "google/protobuf/timestamp.proto";
+// google.type.Date: a calendar date with no time and no timezone - what GetPaymentTransactionList's
+// filter selects on. Comes in transitively with grpc-protobuf (proto-google-common-protos).
+import "google/type/date.proto";
 
 // All service requests require X-API-Key header with 'API Key' value
 service KodyEcomPaymentsService {
@@ -279,16 +282,17 @@ message GetPaymentTransactionListRequest {
   optional Filter filter = 3;
 
   message Filter {
-    // The one calendar day to report, as YYYY-MM-DD - a date, not an instant, so it carries no time
-    // and no offset. It is read in the store's configured timezone and returns that whole day:
-    // 00:00:00 inclusive to 00:00:00 of the following day exclusive.
+    // The one calendar day to report. A date, not an instant: it carries no time and no offset, so
+    // there is nothing to truncate and no timezone to disagree about. It is read in the store's
+    // configured timezone and returns that whole day - 00:00:00 inclusive to 00:00:00 of the
+    // following day exclusive.
     //
     // It must be one of the three completed calendar days before today in that timezone. Today is
     // still in progress, so it is rejected, as are future dates and anything older than the window.
     // A date outside it is an error, never a date quietly moved to the nearest allowed one.
     //
     // The filter applies to the record's transaction date only; it never selects on settlement date.
-    string transaction_date = 1;
+    google.type.Date transaction_date = 1;
   }
 
   message PageCursor {
