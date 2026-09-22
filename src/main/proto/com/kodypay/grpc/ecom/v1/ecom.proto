@@ -4,6 +4,9 @@ option java_multiple_files = true;
 option java_outer_classname = "KodyEcomPaymentsProto";
 option java_package = "com.kodypay.grpc.ecom.v1";
 import "google/protobuf/timestamp.proto";
+// google.type.Date: a calendar date with no time and no timezone - what GetPaymentTransactionList's
+// filter selects on. Comes in transitively with grpc-protobuf (proto-google-common-protos).
+import "google/type/date.proto";
 
 // All service requests require X-API-Key header with 'API Key' value
 service KodyEcomPaymentsService {
@@ -13,6 +16,14 @@ service KodyEcomPaymentsService {
   rpc PaymentDetails(PaymentDetailsRequest) returns (PaymentDetailsResponse);
   rpc PaymentDetailsStream(PaymentDetailsRequest) returns (stream PaymentDetailsResponse);
   rpc GetPayments(GetPaymentsRequest) returns (GetPaymentsResponse);
+  // Transaction-level Sales reporting data for one store: the same rows, and the same value in
+  // every field, as Kody Universe > Sales > Transactions > Download.
+  //
+  // Reaches back three completed calendar days and no further, evaluated in the store's own
+  // timezone: asked on 18 September it can report 15, 16 or 17 September - never the 18th, which is
+  // still in progress. Filter to one of those days, or omit the filter for all three. Paging runs
+  // within whatever was selected and never reaches outside it.
+  rpc GetPaymentTransactionList(GetPaymentTransactionListRequest) returns (GetPaymentTransactionListResponse);
   rpc Refund(RefundRequest) returns (stream RefundResponse);
   rpc CreateCardToken(CreateTokenRequest) returns (CreateTokenResponse);
   rpc GetCardToken(GetCardTokenRequest) returns (GetCardTokenResponse);
@@ -261,6 +272,159 @@ message GetPaymentsResponse {
       NOT_FOUND = 1;
       INVALID_ARGUMENT = 2;
     }
+  }
+}
+
+message GetPaymentTransactionListRequest {
+  string store_id = 1; // Your Kody store id. The API key must be authorised for this store.
+  PageCursor page_cursor = 2;
+  // Omitted returns all three completed calendar days the endpoint allows.
+  optional Filter filter = 3;
+
+  message Filter {
+    // The one calendar day to report. A date, not an instant: it carries no time and no offset, so
+    // there is nothing to truncate and no timezone to disagree about. It is read in the store's
+    // configured timezone and returns that whole day - 00:00:00 inclusive to 00:00:00 of the
+    // following day exclusive.
+    //
+    // It must be one of the three completed calendar days before today in that timezone. Today is
+    // still in progress, so it is rejected, as are future dates and anything older than the window.
+    // A date outside it is an error, never a date quietly moved to the nearest allowed one.
+    //
+    // The filter applies to the record's transaction date only; it never selects on settlement date.
+    google.type.Date transaction_date = 1;
+  }
+
+  message PageCursor {
+    // The previous page's next_cursor. Unset or empty starts at the first page.
+    //
+    // A cursor is bound to the filter it was issued for: send it back with the same filter, or the
+    // request is rejected. Paging happens after the day has been selected and cannot change which
+    // day that is.
+    optional string cursor = 1;
+    // Rows per page, 1 to 1000; unset means 100. Page size limits how many rows come back and
+    // nothing else - it never reaches outside the selected day.
+    optional int64 page_size = 2;
+  }
+}
+
+message GetPaymentTransactionListResponse {
+  oneof result {
+    Response response = 1;
+    Error error = 2;
+  }
+
+  message Response {
+    repeated PaymentTransactionDetail transactions = 1;
+    // Absent on the last page. There is no total: counting every matching row costs a second pass
+    // over the same data, and cursor paging does not need one - page until this stops coming back.
+    optional string next_cursor = 2;
+  }
+
+  message Error {
+    Type type = 1;
+    string message = 2;
+
+    enum Type {
+      UNKNOWN = 0;
+      NOT_FOUND = 1;
+      // Also covers a window reaching outside the three completed calendar days, and a cursor sent
+      // back with a different filter. The message names the window that was allowed.
+      INVALID_ARGUMENT = 2;
+    }
+  }
+}
+
+// One row of Kody Universe > Sales > Transactions > Download. Every field holds the same value as
+// the CSV column named in its comment, for the same store and window; field order follows the file.
+//
+// Amounts are decimal strings with 2 decimal places ("12.34"), never floating point. A refund's
+// amounts are negative, as they are in the file.
+message PaymentTransactionDetail {
+  string store_name = 1;                      // Store Name: display name of the store
+  string store_id = 2;                        // Store Id: the store that was requested
+  // Payment Type: entry mode or channel, e.g. "Card Present", and " (Pre-auth)" is appended for a
+  // deposit flow. Free text rather than an enum because the set of channels grows and the suffix
+  // rides along with it; compare it as a string.
+  string payment_type = 3;
+  TransactionType transaction_type = 4;       // Transaction Type
+  TransactionStatus status = 5;               // Status
+  // Transaction Date: when the transaction happened, as an instant. The file prints this in the
+  // store's timezone ("Mon 21 Sep 2026 04:34:53"); render it in that timezone to get the same text.
+  // This is also the field the filter selects on.
+  google.protobuf.Timestamp transaction_date = 6;
+  // Tender Reference: absent for payment methods and outcomes that have none.
+  optional string tender_reference = 7;
+  string payment_reference = 8;               // Payment Reference: identifies this record
+  // Auth Code. A string so leading zeros survive. The CSV writes it as '123456 - an apostrophe to
+  // stop a spreadsheet reading it as a number - and that apostrophe is not part of the value here.
+  optional string auth_code = 9;
+  optional string batch_id = 10;              // Batch ID. A string, and no leading apostrophe, as above.
+  optional string terminal_id = 11;           // Terminal ID, where a terminal was involved
+  // Payment Method: scheme or wallet, e.g. Visa, Mastercard, Alipay. Free text for the same reason
+  // as payment_type - new wallets appear without a contract change.
+  string payment_method = 12;
+  // Payment Variant: the scheme or wallet product. "Unknown" where the variant could not be resolved,
+  // which is what the file prints.
+  optional string payment_variant = 13;
+  optional string card_last_four_digits = 14; // A string, and no leading apostrophe, as above.
+
+  // Sale: the sale amount with the offer added back, so sale + tip - |offer| reconciles to total.
+  string sale = 15;
+  string tip = 16;                            // Tip; "0.00" when none was added
+  // Offer: the discount, reported as a negative amount ("-1.50"); "0.00" when none was applied.
+  string offer = 17;
+  string total = 18;                          // Total, after sale, tip and offer
+  string transaction_fees = 19;               // Transaction Fees: the base processing fee
+  optional string instalment_fee = 20;        // Instalment Fee, where one applies
+  string total_fees = 21;                     // Total Fees: every fee component that applies
+  optional string no_cvv_fees = 22;           // NoCVV Fees, where they apply
+  optional string three_ds_fees = 23;         // 3DS Fees, where they apply
+  string net_total = 24;                      // Net Total: total less total_fees
+
+  bool mcc_payment = 25;                      // MCC Payment (Yes/No in the file)
+  bool no_cvv = 26;                           // No CVV (Yes/No in the file)
+  bool three_ds = 27;                         // 3DS (Yes/No in the file)
+  // Settlement Date: absent while the transaction has no settlement date yet. Reported only - the
+  // filter never applies to it, whatever the window asks for.
+  optional google.protobuf.Timestamp settlement_date = 28;
+  TransactionRegion transaction_region = 29;  // Transaction Region
+  optional string external_payment_reference = 30; // From your own system, when you supplied one
+  optional string external_order_id = 31;     // From your own system, when you supplied one
+  // Instalment: absent where instalments do not apply to this transaction or the answer is not
+  // available, which is not the same as false (it applies, and this one is not an instalment).
+  optional bool instalment = 32;
+  // Instalment Period: the instalment term, as the instalment service reports it. A string, not a
+  // number, because that is what the source field is and what the file prints.
+  optional string instalment_period = 33;
+  // RefundReference List: the refunds linked to this transaction, oldest first. Empty when none.
+  repeated string refund_reference_list = 34;
+  // Description (for payment link): set for a Payment Link transaction that carries one.
+  optional string description_for_payment_link = 35;
+
+  // A row is one or the other: a transaction carrying a refund reference is a Refund, everything
+  // else is a Sale. A pre-auth is not a third type - it shows up as a suffix on payment_type.
+  enum TransactionType {
+    TRANSACTION_TYPE_UNSPECIFIED = 0;
+    SALE = 1;
+    REFUND = 2;
+  }
+
+  // The five values the Sales report prints. Authorised and captured both read as APPROVED; a
+  // failed authorise, failed capture or cancellation all read as DECLINED.
+  enum TransactionStatus {
+    TRANSACTION_STATUS_UNSPECIFIED = 0;
+    APPROVED = 1;
+    DECLINED = 2;
+    REFUNDED = 3;
+    FAILED_REFUND = 4;
+    PENDING_REFUND = 5;
+  }
+
+  enum TransactionRegion {
+    TRANSACTION_REGION_UNSPECIFIED = 0;
+    DOMESTIC = 1;
+    INTERNATIONAL = 2;
   }
 }
 
