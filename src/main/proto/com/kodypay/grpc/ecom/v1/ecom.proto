@@ -4,9 +4,6 @@ option java_multiple_files = true;
 option java_outer_classname = "KodyEcomPaymentsProto";
 option java_package = "com.kodypay.grpc.ecom.v1";
 import "google/protobuf/timestamp.proto";
-// google.type.Date: a calendar date with no time and no timezone - what GetPaymentTransactionList's
-// filter selects on. Comes in transitively with grpc-protobuf (proto-google-common-protos).
-import "google/type/date.proto";
 
 // All service requests require X-API-Key header with 'API Key' value
 service KodyEcomPaymentsService {
@@ -282,17 +279,24 @@ message GetPaymentTransactionListRequest {
   optional Filter filter = 3;
 
   message Filter {
-    // The one calendar day to report. A date, not an instant: it carries no time and no offset, so
-    // there is nothing to truncate and no timezone to disagree about. It is read in the store's
-    // configured timezone and returns that whole day - 00:00:00 inclusive to 00:00:00 of the
-    // following day exclusive.
+    // Was google.type.Date transaction_date, published in v1.8.10 before any server implemented the
+    // rpc. That type is not one of protobuf's own well-known types, so every language SDK had to take
+    // on an extra dependency for it. Never reuse this number.
+    reserved 1;
+
+    // The one calendar day to report, as an ISO 8601 / RFC 3339 full-date: "2026-09-16". Exactly
+    // YYYY-MM-DD, zero-padded - no time, no offset, nothing else. A date, not an instant: there is
+    // nothing to truncate and no timezone to disagree about. It is read in the store's configured
+    // timezone and returns that whole day - 00:00:00 inclusive to 00:00:00 of the following day
+    // exclusive. Unset returns all three days, the same as omitting the filter.
     //
     // It must be one of the three completed calendar days before today in that timezone. Today is
     // still in progress, so it is rejected, as are future dates and anything older than the window.
-    // A date outside it is an error, never a date quietly moved to the nearest allowed one.
+    // A date outside it, or not in exactly this format, is INVALID_ARGUMENT - never a date quietly
+    // moved to the nearest allowed one, and never a leniently parsed "2026-9-16".
     //
     // The filter applies to the record's transaction date only; it never selects on settlement date.
-    google.type.Date transaction_date = 1;
+    optional string transaction_date = 2;
   }
 
   message PageCursor {
