@@ -16,10 +16,10 @@ service KodyEcomPaymentsService {
   // Transaction-level Sales reporting data for one store: the same rows, and the same value in
   // every field, as Kody Universe > Sales > Transactions > Download.
   //
-  // Reports one completed calendar day per request, evaluated in the store's own timezone: any day
-  // up to yesterday, however far back - asked on 18 September it can report the 17th or any earlier
-  // day, never the 18th, which is still in progress. filter.transaction_date is required. Paging
-  // runs within the selected day and never reaches outside it.
+  // Reports one calendar day per request, evaluated in the store's own timezone: any day, with no
+  // lower or upper limit. Today returns what has happened so far and can change between calls; a
+  // future day has no rows. filter.transaction_date is required. Paging runs within the selected day
+  // and never reaches outside it.
   rpc GetPaymentTransactionList(GetPaymentTransactionListRequest) returns (GetPaymentTransactionListResponse);
   rpc Refund(RefundRequest) returns (stream RefundResponse);
   rpc CreateCardToken(CreateTokenRequest) returns (CreateTokenResponse);
@@ -285,11 +285,10 @@ message GetPaymentTransactionListRequest {
     // timezone and returns that whole day - 00:00:00 inclusive to 00:00:00 of the following day
     // exclusive. Required; unset is INVALID_ARGUMENT.
     //
-    // It must be a completed calendar day - yesterday or earlier in that timezone, with no lower
-    // limit. Today is still in progress, so it is rejected, as are future dates. A day with no
-    // transactions returns an empty page, not an error. A date that is today or later, or not in
-    // exactly this format, is INVALID_ARGUMENT - never a date quietly moved to yesterday, and never
-    // a leniently parsed "2026-9-16".
+    // Any day is accepted, with no lower or upper limit. Today is still in progress, so its rows can
+    // change between calls; a future day, or any day with no transactions, returns an empty page, not
+    // an error. A date not in exactly this format is INVALID_ARGUMENT - never a leniently parsed
+    // "2026-9-16".
     //
     // The filter applies to the record's transaction date only; it never selects on settlement date.
     optional string transaction_date = 1;
@@ -328,8 +327,8 @@ message GetPaymentTransactionListResponse {
     enum Type {
       UNKNOWN = 0;
       NOT_FOUND = 1;
-      // Also covers a missing, malformed, today's or future transaction_date, and a cursor sent back
-      // with a different filter. The message says which.
+      // Also covers a missing or malformed transaction_date, and a cursor sent back with a different
+      // filter. The message says which.
       INVALID_ARGUMENT = 2;
     }
   }
