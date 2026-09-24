@@ -16,10 +16,10 @@ service KodyEcomPaymentsService {
   // Transaction-level Sales reporting data for one store: the same rows, and the same value in
   // every field, as Kody Universe > Sales > Transactions > Download.
   //
-  // Reaches back three completed calendar days and no further, evaluated in the store's own
-  // timezone: asked on 18 September it can report 15, 16 or 17 September - never the 18th, which is
-  // still in progress. Filter to one of those days, or omit the filter for all three. Paging runs
-  // within whatever was selected and never reaches outside it.
+  // Reports one calendar day per request, evaluated in the store's own timezone: any day, with no
+  // lower or upper limit. Today returns what has happened so far and can change between calls; a
+  // future day has no rows. filter.transaction_date is required. Paging runs within the selected day
+  // and never reaches outside it.
   rpc GetPaymentTransactionList(GetPaymentTransactionListRequest) returns (GetPaymentTransactionListResponse);
   rpc Refund(RefundRequest) returns (stream RefundResponse);
   rpc CreateCardToken(CreateTokenRequest) returns (CreateTokenResponse);
@@ -275,7 +275,7 @@ message GetPaymentsResponse {
 message GetPaymentTransactionListRequest {
   string store_id = 1; // Your Kody store id. The API key must be authorised for this store.
   PageCursor page_cursor = 2;
-  // Omitted returns all three completed calendar days the endpoint allows.
+  // Required: a request without filter.transaction_date is INVALID_ARGUMENT.
   optional Filter filter = 3;
 
   message Filter {
@@ -283,12 +283,12 @@ message GetPaymentTransactionListRequest {
     // YYYY-MM-DD, zero-padded - no time, no offset, nothing else. A date, not an instant: there is
     // nothing to truncate and no timezone to disagree about. It is read in the store's configured
     // timezone and returns that whole day - 00:00:00 inclusive to 00:00:00 of the following day
-    // exclusive. Unset returns all three days, the same as omitting the filter.
+    // exclusive. Required; unset is INVALID_ARGUMENT.
     //
-    // It must be one of the three completed calendar days before today in that timezone. Today is
-    // still in progress, so it is rejected, as are future dates and anything older than the window.
-    // A date outside it, or not in exactly this format, is INVALID_ARGUMENT - never a date quietly
-    // moved to the nearest allowed one, and never a leniently parsed "2026-9-16".
+    // Any day is accepted, with no lower or upper limit. Today is still in progress, so its rows can
+    // change between calls; a future day, or any day with no transactions, returns an empty page, not
+    // an error. A date not in exactly this format is INVALID_ARGUMENT - never a leniently parsed
+    // "2026-9-16".
     //
     // The filter applies to the record's transaction date only; it never selects on settlement date.
     optional string transaction_date = 1;
@@ -327,15 +327,15 @@ message GetPaymentTransactionListResponse {
     enum Type {
       UNKNOWN = 0;
       NOT_FOUND = 1;
-      // Also covers a window reaching outside the three completed calendar days, and a cursor sent
-      // back with a different filter. The message names the window that was allowed.
+      // Also covers a missing or malformed transaction_date, and a cursor sent back with a different
+      // filter. The message says which.
       INVALID_ARGUMENT = 2;
     }
   }
 }
 
 // One row of Kody Universe > Sales > Transactions > Download. Every field holds the same value as
-// the CSV column named in its comment, for the same store and window; field order follows the file.
+// the CSV column named in its comment, for the same store and day; field order follows the file.
 //
 // Amounts are decimal strings with 2 decimal places ("12.34"), never floating point. A refund's
 // amounts are negative, as they are in the file.
@@ -385,7 +385,7 @@ message PaymentTransactionDetail {
   bool no_cvv = 26;                           // No CVV (Yes/No in the file)
   bool three_ds = 27;                         // 3DS (Yes/No in the file)
   // Settlement Date: absent while the transaction has no settlement date yet. Reported only - the
-  // filter never applies to it, whatever the window asks for.
+  // filter never applies to it, whatever day is asked for.
   optional google.protobuf.Timestamp settlement_date = 28;
   TransactionRegion transaction_region = 29;  // Transaction Region
   optional string external_payment_reference = 30; // From your own system, when you supplied one

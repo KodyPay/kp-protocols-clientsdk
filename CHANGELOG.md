@@ -2,6 +2,13 @@
 
 All notable changes to this repository will be documented in this file.
 
+## 2026-09-25
+
+### Changed
+- `GetPaymentTransactionList` in `com/kodypay/grpc/ecom/v1/ecom.proto` is no longer limited to the three completed calendar days before today (INS-1448). `filter.transaction_date` may now be any day, with no lower or upper limit, and it is now required: a request without it is `INVALID_ARGUMENT` instead of returning the three-day window. Today and future dates are no longer rejected: today returns what has happened so far, and a future day has no rows.
+
+  Comments only: no field, number or type changes, so this is wire- and source-compatible. `filter` and `transaction_date` stay `optional` in the schema, and presence is enforced by the server, which returns `INVALID_ARGUMENT` when either is missing. The only caller-visible behaviour change is for requests that omit the date: they previously returned three days and are now rejected.
+
 ## 2026-09-24
 
 ### Changed
