@@ -275,15 +275,15 @@ message GetPaymentsResponse {
 message GetPaymentTransactionListRequest {
   string store_id = 1; // Your Kody store id. The API key must be authorised for this store.
   PageCursor page_cursor = 2;
-  // Omitted returns all three completed calendar days the endpoint allows.
-  optional Filter filter = 3;
+  // Required. The endpoint reports one day at a time, so there is no request without it.
+  Filter filter = 3;
 
   message Filter {
-    // The one calendar day to report, as an ISO 8601 / RFC 3339 full-date: "2026-09-16". Exactly
-    // YYYY-MM-DD, zero-padded - no time, no offset, nothing else. A date, not an instant: there is
-    // nothing to truncate and no timezone to disagree about. It is read in the store's configured
-    // timezone and returns that whole day - 00:00:00 inclusive to 00:00:00 of the following day
-    // exclusive. Unset returns all three days, the same as omitting the filter.
+    // Required. The one calendar day to report, as an ISO 8601 / RFC 3339 full-date: "2026-09-16".
+    // Exactly YYYY-MM-DD, zero-padded - no time, no offset, nothing else. A date, not an instant:
+    // there is nothing to truncate and no timezone to disagree about. It is read in the store's
+    // configured timezone and returns that whole day - 00:00:00 inclusive to 00:00:00 of the
+    // following day exclusive. Empty is rejected, the same as a malformed one.
     //
     // It must be one of the three completed calendar days before today in that timezone. Today is
     // still in progress, so it is rejected, as are future dates and anything older than the window.
@@ -291,7 +291,7 @@ message GetPaymentTransactionListRequest {
     // moved to the nearest allowed one, and never a leniently parsed "2026-9-16".
     //
     // The filter applies to the record's transaction date only; it never selects on settlement date.
-    optional string transaction_date = 1;
+    string transaction_date = 1;
   }
 
   message PageCursor {
