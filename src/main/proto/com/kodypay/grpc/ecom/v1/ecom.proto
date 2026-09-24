@@ -279,11 +279,6 @@ message GetPaymentTransactionListRequest {
   optional Filter filter = 3;
 
   message Filter {
-    // Was google.type.Date transaction_date, published in v1.8.10 and replaced before the rpc reached
-    // production. That type is not one of protobuf's own well-known types, so every language SDK had
-    // to take on an extra dependency for it. Never reuse this number.
-    reserved 1;
-
     // The one calendar day to report, as an ISO 8601 / RFC 3339 full-date: "2026-09-16". Exactly
     // YYYY-MM-DD, zero-padded - no time, no offset, nothing else. A date, not an instant: there is
     // nothing to truncate and no timezone to disagree about. It is read in the store's configured
@@ -296,7 +291,7 @@ message GetPaymentTransactionListRequest {
     // moved to the nearest allowed one, and never a leniently parsed "2026-9-16".
     //
     // The filter applies to the record's transaction date only; it never selects on settlement date.
-    optional string transaction_date = 2;
+    optional string transaction_date = 1;
   }
 
   message PageCursor {

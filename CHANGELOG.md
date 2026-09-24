@@ -5,11 +5,11 @@ All notable changes to this repository will be documented in this file.
 ## 2026-09-24
 
 ### Changed
-- `GetPaymentTransactionListRequest.Filter.transaction_date` in `com/kodypay/grpc/ecom/v1/ecom.proto` is now `optional string transaction_date = 2`, an ISO 8601 / RFC 3339 full-date (`"2026-09-16"`), replacing `google.type.Date transaction_date = 1` (INS-1448). Field 1 is reserved, and the `google/type/date.proto` import is gone.
+- `GetPaymentTransactionListRequest.Filter.transaction_date` in `com/kodypay/grpc/ecom/v1/ecom.proto` changes type from `google.type.Date` to `optional string`, an ISO 8601 / RFC 3339 full-date (`"2026-09-16"`) (INS-1448). It keeps field number 1, and the `google/type/date.proto` import is gone.
 
   `google.type.Date` is not one of protobuf's well-known types: it ships with googleapis (`proto-google-common-protos` / `googleapis-common-protos`), which none of the language SDKs had depended on until now. v1.8.10 broke each SDK's release in its own way - the Kotlin and Java builds failed with `cannot access GeneratedMessageV3` on their protobuf versions, and Python's protoc could not find `google/type/date.proto` - and every SDK would also have had to pass the extra dependency on to merchants. A full-date string is how date-only values are written elsewhere (Adyen's `format: date`, OpenAPI's `date`), needs nothing beyond protobuf, and keeps the semantics unchanged: a calendar day with no time and no offset, read in the store's timezone.
 
-  Breaking for no production caller: the field changes type and number, but `GetPaymentTransactionList` has never been served in production. It was published in v1.8.10 on 2026-09-22 and has been served on staging only, since 2026-09-23 (kp-core v5.0.1630); of the language SDKs only kody-clientsdk-kotlin 1.8.10 was released with the old field. A new number rather than a retyped field 1, because an old client's encoded `Date` would not parse as a string. Once kp-core reads field 2, a client still setting field 1 is read as sending no date and gets all three days.
+  The rpc is new and still in development - published in v1.8.10 on 2026-09-22, served on staging only (kp-core v5.0.1630), never in production - so the field is retyped in place rather than moved to a new number. A client built on v1.8.10 that sets the old `Date` value will have its request rejected (it does not parse as a UTF-8 string) rather than silently misread.
 
 ## 2026-09-18
 
