@@ -401,6 +401,10 @@ message PaymentTransactionDetail {
   // Description (for payment link): set for a Payment Link transaction that carries one.
   optional string description_for_payment_link = 35;
 
+  //The externally shareable Kody payout reference associated with the transaction's payout/settlement.
+  // Return the persisted value from the payout domain; the SDK/API must not derive or regenerate it.
+  optional string kody_payout_code = 36;
+
   // A row is one or the other: a transaction carrying a refund reference is a Refund, everything
   // else is a Sale. A pre-auth is not a third type - it shows up as a suffix on payment_type.
   enum TransactionType {
