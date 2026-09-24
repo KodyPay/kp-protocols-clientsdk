@@ -279,9 +279,9 @@ message GetPaymentTransactionListRequest {
   optional Filter filter = 3;
 
   message Filter {
-    // Was google.type.Date transaction_date, published in v1.8.10 before any server implemented the
-    // rpc. That type is not one of protobuf's own well-known types, so every language SDK had to take
-    // on an extra dependency for it. Never reuse this number.
+    // Was google.type.Date transaction_date, published in v1.8.10 and replaced before the rpc reached
+    // production. That type is not one of protobuf's own well-known types, so every language SDK had
+    // to take on an extra dependency for it. Never reuse this number.
     reserved 1;
 
     // The one calendar day to report, as an ISO 8601 / RFC 3339 full-date: "2026-09-16". Exactly

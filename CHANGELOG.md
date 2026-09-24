@@ -9,7 +9,7 @@ All notable changes to this repository will be documented in this file.
 
   `google.type.Date` is not one of protobuf's well-known types: it ships with googleapis (`proto-google-common-protos` / `googleapis-common-protos`), which none of the language SDKs had depended on until now. v1.8.10 broke each SDK's release in its own way - the Kotlin and Java builds failed with `cannot access GeneratedMessageV3` on their protobuf versions, and Python's protoc could not find `google/type/date.proto` - and every SDK would also have had to pass the extra dependency on to merchants. A full-date string is how date-only values are written elsewhere (Adyen's `format: date`, OpenAPI's `date`), needs nothing beyond protobuf, and keeps the semantics unchanged: a calendar day with no time and no offset, read in the store's timezone.
 
-  Breaking only on paper: the field changes type and number, but it was published in v1.8.10 on 2026-09-22 before any server implemented `GetPaymentTransactionList`, so no client has ever had a request served with it. A new number rather than a retyped field 1, because an old client's encoded `Date` would not parse as a string.
+  Breaking for no production caller: the field changes type and number, but `GetPaymentTransactionList` has never been served in production. It was published in v1.8.10 on 2026-09-22 and has been served on staging only, since 2026-09-23 (kp-core v5.0.1630); of the language SDKs only kody-clientsdk-kotlin 1.8.10 was released with the old field. A new number rather than a retyped field 1, because an old client's encoded `Date` would not parse as a string. Once kp-core reads field 2, a client still setting field 1 is read as sending no date and gets all three days.
 
 ## 2026-09-18
 
