@@ -16,10 +16,9 @@ service KodyEcomPaymentsService {
   // Transaction-level Sales reporting data for one store: the same rows, and the same value in
   // every field, as Kody Universe > Sales > Transactions > Download.
   //
-  // Reaches back three completed calendar days and no further, evaluated in the store's own
-  // timezone: asked on 18 September it can report 15, 16 or 17 September - never the 18th, which is
-  // still in progress. Filter to one of those days, or omit the filter for all three. Paging runs
-  // within whatever was selected and never reaches outside it.
+  // Reports one calendar day, evaluated in the store's own timezone. Any day can be asked for,
+  // including today and dates arbitrarily far back; a day with no transactions comes back empty.
+  // Paging runs within the day that was selected and never reaches outside it.
   rpc GetPaymentTransactionList(GetPaymentTransactionListRequest) returns (GetPaymentTransactionListResponse);
   rpc Refund(RefundRequest) returns (stream RefundResponse);
   rpc CreateCardToken(CreateTokenRequest) returns (CreateTokenResponse);
@@ -285,10 +284,9 @@ message GetPaymentTransactionListRequest {
     // configured timezone and returns that whole day - 00:00:00 inclusive to 00:00:00 of the
     // following day exclusive. Empty is rejected, the same as a malformed one.
     //
-    // It must be one of the three completed calendar days before today in that timezone. Today is
-    // still in progress, so it is rejected, as are future dates and anything older than the window.
-    // A date outside it, or not in exactly this format, is INVALID_ARGUMENT - never a date quietly
-    // moved to the nearest allowed one, and never a leniently parsed "2026-9-16".
+    // Any day is accepted: today, which reports what has happened so far, and any date before it.
+    // A future date is accepted too and simply has nothing to report. A value not in exactly this
+    // format is INVALID_ARGUMENT - never a leniently parsed "2026-9-16".
     //
     // The filter applies to the record's transaction date only; it never selects on settlement date.
     string transaction_date = 1;
@@ -327,8 +325,8 @@ message GetPaymentTransactionListResponse {
     enum Type {
       UNKNOWN = 0;
       NOT_FOUND = 1;
-      // Also covers a window reaching outside the three completed calendar days, and a cursor sent
-      // back with a different filter. The message names the window that was allowed.
+      // Also covers a missing or malformed transaction_date, a page_size outside its range, and a
+      // cursor sent back with a filter other than the one it was issued for.
       INVALID_ARGUMENT = 2;
     }
   }
