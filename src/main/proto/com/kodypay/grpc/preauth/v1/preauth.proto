@@ -406,6 +406,11 @@ message Capture {
   optional string psp_reference = 5;
   optional string error = 6;
 
+  // The capture_reference sent on CaptureAuthorisation, so a capture can be matched to the request
+  // that made it. Not set for captures that were not created through CaptureAuthorisation, and for
+  // captures made before this field existed.
+  optional string capture_reference = 7;
+
   enum CaptureStatus {
     CAPTURE_STATUS_UNSPECIFIED = 0;
     CAPTURE_PENDING = 1;

@@ -2,6 +2,13 @@
 
 All notable changes to this repository will be documented in this file.
 
+## 2026-10-13
+
+### Added
+- `preauth/v1/preauth.proto`: `Capture.capture_reference` (`optional string`, field 7) returns the `capture_reference` the caller sent on `CaptureAuthorisation`, so the entries in `GetPreAuthorisationResponse.captures` can be matched to requests, for example after a client timeout (BAM-1029).
+
+  Not set for captures that were not created through `CaptureAuthorisation` and for captures made before this field existed. Wire-compatible and source-compatible: a new optional field that older clients ignore.
+
 ## 2026-09-24
 
 ### Changed
