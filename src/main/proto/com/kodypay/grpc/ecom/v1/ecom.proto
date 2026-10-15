@@ -608,6 +608,7 @@ message GetCardTokenResponse {
       UNKNOWN = 0;
       PENDING_CREATE = 1; // Token not yet created, still in progress
       INVALID_REQUEST = 2;
+      NOT_FOUND = 3; // Token not found (aligns with DeleteCardTokenResponse.Error.Type.NOT_FOUND)
     }
   }
 }
