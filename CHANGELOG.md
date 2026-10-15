@@ -2,6 +2,13 @@
 
 All notable changes to this repository will be documented in this file.
 
+## 2026-10-15
+
+### Added
+- `ecom/v1/ecom.proto`: `GetCardTokenResponse.Error.Type.NOT_FOUND = 3`, matching `DeleteCardTokenResponse.Error.Type.NOT_FOUND`, so "this token does not exist" has a value in the documented error channel (BAM-1005).
+
+  Declaration only: kp-core does not populate the `error` oneof on this service yet (BAM-927) and still answers a missing token with gRPC status `NOT_FOUND`. Wire-compatible and source-compatible: a new enum value appended after the existing ones; older clients read it as `UNRECOGNIZED`.
+
 ## 2026-10-13
 
 ### Added
