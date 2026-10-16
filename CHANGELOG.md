@@ -9,6 +9,9 @@ All notable changes to this repository will be documented in this file.
 
   The rpc is still in development and has never been served in production, so the field is renamed in place rather than moved to a new number, as with `transaction_date` on 2026-09-24.
 
+### Fixed
+- Comments only, no change to fields or behaviour: `PaymentDetails.failure_reason` is reported by `PayWithCardToken` and not by `GetTokenPaymentDetails` (which answers a failed payment with its error branch); the pre-authorisation `failure_reason` fields are set when `status` is FAILED or DECLINED, not only FAILED. Both were wrong in the comments added by #165.
+
 ### Added
 - `ecom/v1/ecom.proto`: `PaymentTransactionDetail.merchant_business_id` (field 37) and `merchant_business_name` (field 38), both `optional string`: the merchant business the transaction's store belongs to, independent of the organisation / merchant / store hierarchy (INS-1472, INS-1487). Absent when the store has none. Wire-compatible and source-compatible: new optional fields that older clients ignore.
 
