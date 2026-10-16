@@ -2,6 +2,13 @@
 
 All notable changes to this repository will be documented in this file.
 
+## 2026-10-16
+
+### Added
+- `ecom/v1/ecom.proto`: `PaymentDetailsResponse.PaymentDetails.failure_reason` (`optional string`, field 16), and `preauth/v1/preauth.proto`: `PreAuthorisationResponse.failure_reason` (field 12) and `GetPreAuthorisationResponse.failure_reason` (field 16). They say why a payment or authorisation was refused, so a caller can tell a card that was declined from one that was not, instead of seeing only `FAILED` (BAM-976, BAM-934).
+
+  The text comes from the payment provider. It is for display and logging, not a stable code: do not parse it or branch on it. Declaration only until the server populates it. Wire-compatible and source-compatible: new optional fields that older clients ignore.
+
 ## 2026-10-15
 
 ### Added

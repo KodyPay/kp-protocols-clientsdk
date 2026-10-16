@@ -162,6 +162,15 @@ message PaymentDetailsResponse {
     // report it, not that the payment is unrefunded. Measured against the amount charged, so it is
     // also absent when that amount is unknown.
     optional bool fully_refunded = 15;
+    // Why the payment failed, when `status` is FAILED because the card was refused. A description
+    // taken from the payment provider, for display and logging: it is not a stable code and its
+    // wording can change, so do not parse it or branch on it. Branch on `status` and
+    // `payment_data.auth_status` instead.
+    //
+    // Reported for card token payments (PayWithCardToken and GetTokenPaymentDetails). Not set when
+    // the payment did not fail, when no reason is available, and for payments that failed before this
+    // field existed.
+    optional string failure_reason = 16;
   }
 
   // One refund taken against the payment. Mirrors the terminal API's PayResponse.RefundDetails.

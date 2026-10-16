@@ -96,6 +96,14 @@ message PreAuthorisationResponse {
 
   // The auth code returned by the PSP, if applicable.
   optional string auth_code = 11;
+
+  // Why the authorisation failed, when `status` is FAILED because the card was refused. A
+  // description taken from the payment provider, for display and logging: it is not a stable code
+  // and its wording can change, so do not parse it or branch on it. Branch on `status` instead.
+  //
+  // Not set when the authorisation did not fail, when no reason is available, and for
+  // authorisations that failed before this field existed.
+  optional string failure_reason = 12;
 }
 
 // Represents a request to initiate a pre-authorisation using a card token.
@@ -283,6 +291,12 @@ message GetPreAuthorisationResponse {
 
   // Any captures made against this pre-authorisation.
   repeated Capture captures = 15;
+
+  // Why the authorisation failed, when `status` is FAILED because the card was refused. Same
+  // meaning and the same caveats as `PreAuthorisationResponse.failure_reason`: a description for
+  // display and logging, not a stable code, and not set for authorisations that failed before this
+  // field existed.
+  optional string failure_reason = 16;
 }
 
 // ==========================================================
