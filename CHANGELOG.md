@@ -4,7 +4,14 @@ All notable changes to this repository will be documented in this file.
 
 ## 2026-10-16
 
+### Changed
+- `ecom/v1/ecom.proto`: `PaymentTransactionDetail.kody_payout_code` (field 36) is renamed `short_payout_id`, the payout's short reference (INS-1472, INS-1457). It keeps field number 36 and type `optional string`, so it is wire-compatible; code that used the old name has to switch to the new one.
+
+  The rpc is still in development and has never been served in production, so the field is renamed in place rather than moved to a new number, as with `transaction_date` on 2026-09-24.
+
 ### Added
+- `ecom/v1/ecom.proto`: `PaymentTransactionDetail.merchant_business_id` (field 37) and `merchant_business_name` (field 38), both `optional string`: the merchant business the transaction's store belongs to, independent of the organisation / merchant / store hierarchy (INS-1472, INS-1487). Absent when the store has none. Wire-compatible and source-compatible: new optional fields that older clients ignore.
+
 - `ecom/v1/ecom.proto`: `PaymentDetailsResponse.PaymentDetails.failure_reason` (`optional string`, field 16), and `preauth/v1/preauth.proto`: `PreAuthorisationResponse.failure_reason` (field 12) and `GetPreAuthorisationResponse.failure_reason` (field 16). They say why a payment or authorisation was refused, so a caller can tell a card that was declined from one that was not, instead of seeing only `FAILED` (BAM-976, BAM-934).
 
   The text comes from the payment provider. It is for display and logging, not a stable code: do not parse it or branch on it. Declaration only until the server populates it. Wire-compatible and source-compatible: new optional fields that older clients ignore.
