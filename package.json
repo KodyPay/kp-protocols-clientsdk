@@ -1,0 +1,21 @@
+{
+  "name": "@kodypay/kp-protocols-clientsdk",
+  "version": "0.0.0",
+  "description": "gRPC protocols for client-sdk",
+  "author": "tech@kodypay.com",
+  "license": "MIT",
+  "files": [
+    "src/main/proto/**/*.proto"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KodyPay/kp-protocols-clientsdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KodyPay/kp-protocols-clientsdk/issues"
+  },
+  "homepage": "https://github.com/KodyPay/kp-protocols-clientsdk#readme"
+}
