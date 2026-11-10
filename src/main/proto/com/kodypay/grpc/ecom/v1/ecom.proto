@@ -286,30 +286,38 @@ message GetPaymentTransactionListRequest {
   // Required. The endpoint reports one day at a time, so there is no request without it.
   Filter filter = 3;
 
+  // At least one of transaction_date and settlement_date is required; with neither the request is
+  // rejected. Set both and a record is returned only when it matches both - "the transactions of
+  // 2026-11-08 that settled on 2026-11-09" - and when no record matches both, the page is empty.
   message Filter {
-    // Required. The one calendar day to report, as an ISO 8601 / RFC 3339 full-date: "2026-09-16".
-    // Exactly YYYY-MM-DD, zero-padded - no time, no offset, nothing else. A date, not an instant:
-    // there is nothing to truncate and no timezone to disagree about. It is read in the store's
-    // configured timezone and returns that whole day - 00:00:00 inclusive to 00:00:00 of the
-    // following day exclusive. Empty is rejected, the same as a malformed one.
+    // The calendar day the transactions happened, as an ISO 8601 / RFC 3339 full-date:
+    // "2026-09-16". Exactly YYYY-MM-DD, zero-padded - no time, no offset, nothing else. A date, not
+    // an instant: there is nothing to truncate and no timezone to disagree about. It is read in the
+    // store's configured timezone and selects that whole day - 00:00:00 inclusive to 00:00:00 of
+    // the following day exclusive - on each record's transaction_date. Empty means unset.
     //
     // Any day is accepted: today, which reports what has happened so far, and any date before it.
     // A future date is accepted too and simply has nothing to report. A value not in exactly this
     // format is INVALID_ARGUMENT - never a leniently parsed "2026-9-16".
-    //
-    // The filter applies to the record's transaction date only; it never selects on settlement date.
     string transaction_date = 1;
+    // The calendar day the transactions settled. The same format and the same reading as
+    // transaction_date - one whole day in the store's configured timezone, any day accepted, empty
+    // means unset - but it selects on each record's settlement_date instead.
+    //
+    // A record that has not settled yet has no settlement_date, so it is never returned for any
+    // settlement_date filter; it appears once it has settled, under the day it settled on.
+    string settlement_date = 2;
   }
 
   message PageCursor {
     // The previous page's next_cursor. Unset or empty starts at the first page.
     //
     // A cursor is bound to the filter it was issued for: send it back with the same filter, or the
-    // request is rejected. Paging happens after the day has been selected and cannot change which
-    // day that is.
+    // request is rejected. Paging happens after the records have been selected and cannot change
+    // which records those are. Pages are ordered by transaction_date whichever date selected them.
     optional string cursor = 1;
     // Rows per page, 1 to 1000; unset means 100. Page size limits how many rows come back and
-    // nothing else - it never reaches outside the selected day.
+    // nothing else - it never reaches outside the records the filter selected.
     optional int64 page_size = 2;
   }
 }
@@ -334,8 +342,9 @@ message GetPaymentTransactionListResponse {
     enum Type {
       UNKNOWN = 0;
       NOT_FOUND = 1;
-      // Also covers a missing or malformed transaction_date, a page_size outside its range, and a
-      // cursor sent back with a filter other than the one it was issued for.
+      // Also covers a filter with neither date set, a malformed transaction_date or settlement_date,
+      // a page_size outside its range, and a cursor sent back with a filter other than the one it
+      // was issued for.
       INVALID_ARGUMENT = 2;
     }
   }
@@ -357,7 +366,7 @@ message PaymentTransactionDetail {
   TransactionStatus status = 5;               // Status
   // Transaction Date: when the transaction happened, as an instant. The file prints this in the
   // store's timezone ("Mon 21 Sep 2026 04:34:53"); render it in that timezone to get the same text.
-  // This is also the field the filter selects on.
+  // This is the field the filter's transaction_date selects on.
   google.protobuf.Timestamp transaction_date = 6;
   // Tender Reference: absent for payment methods and outcomes that have none.
   optional string tender_reference = 7;
@@ -391,8 +400,8 @@ message PaymentTransactionDetail {
   bool mcc_payment = 25;                      // MCC Payment (Yes/No in the file)
   bool no_cvv = 26;                           // No CVV (Yes/No in the file)
   bool three_ds = 27;                         // 3DS (Yes/No in the file)
-  // Settlement Date: absent while the transaction has no settlement date yet. Reported only - the
-  // filter never applies to it, whatever the window asks for.
+  // Settlement Date: absent while the transaction has no settlement date yet. This is the field the
+  // filter's settlement_date selects on, read as a day in the store's timezone.
   optional google.protobuf.Timestamp settlement_date = 28;
   TransactionRegion transaction_region = 29;  // Transaction Region
   optional string external_payment_reference = 30; // From your own system, when you supplied one

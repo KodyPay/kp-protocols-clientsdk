@@ -2,6 +2,14 @@
 
 All notable changes to this repository will be documented in this file.
 
+## 2026-11-10
+
+### Added
+- `ecom/v1/ecom.proto`: `GetPaymentTransactionListRequest.Filter.settlement_date` (`string`, field 2) selects records by the day they settled, on `PaymentTransactionDetail.settlement_date` (INS-1531). Same format and reading as `transaction_date`: an ISO 8601 / RFC 3339 full-date (`"2026-11-09"`), one whole day in the store's timezone, any day accepted, empty means unset. A record that has not settled yet is never returned for it. Wire-compatible and source-compatible: a new field that older clients ignore.
+
+### Changed
+- `ecom/v1/ecom.proto`: `GetPaymentTransactionListRequest.Filter.transaction_date` is no longer required on its own - at least one of `transaction_date` and `settlement_date` is. Set both and a record has to match both, e.g. the transactions of 2026-11-08 that settled on 2026-11-09 (INS-1531). Requests that set `transaction_date` alone behave exactly as before.
+
 ## 2026-10-16
 
 ### Changed
