@@ -69,6 +69,12 @@ message PayRequest {
   optional string order_id = 8; // Unique order reference provided by client
   repeated PaymentMethods accepts_only = 9; // An inclusion list of accepted payment methods. If empty, all payment methods are accepted.
   optional string tips_amount = 10; // tips amount in BigDecimal/2.dp (0.00), it should be included in the total amount.
+  // Whether to tokenise the card used for this payment, as PreAuthorisationRequest.need_tokenisation
+  // does for a pre-authorisation. When true and tokenisation succeeds, the response's
+  // payment_data.payment_card.payment_token is a Kody card token that can be used for later token
+  // payments, and card_expiry_date is that card's expiry. Best effort: if the card cannot be
+  // tokenised the payment still goes ahead without a token. Unset or false: unchanged.
+  optional bool need_tokenisation = 11;
 
   // Zero is VISA, but only `repeated` fields carry this enum, and a repeated field encodes each
   // element explicitly — a one-element [VISA] list is distinguishable from an empty one. So the
@@ -152,7 +158,7 @@ message PayResponse {
       string card_last_4_digits = 1;
       string card_expiry_date = 2;
       string pos_entry_mode = 3;
-      string payment_token = 4;
+      string payment_token = 4; // Kody card token for this card, when there is one. See PayRequest.need_tokenisation.
       string auth_code = 5;
       optional string card_bin = 6; // The first 6 digits of the card number, used to identify the issuer
       optional string card_issuing_bank = 7; // Issuing bank name, e.g., STANDARD CHARTERED BANK (HONG KONG) LTD
