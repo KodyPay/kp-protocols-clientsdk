@@ -2,6 +2,11 @@
 
 All notable changes to this repository will be documented in this file.
 
+## 2026-11-11
+
+### Added
+- `pay/v1/pay.proto`: `PayRequest.need_tokenisation` (`optional bool`, field 11) asks for the card used for the payment to be tokenised, as `PreAuthorisationRequest.need_tokenisation` does for a pre-authorisation (BAM-1066). When it succeeds, `PayResponse.payment_data.payment_card.payment_token` is a Kody card token for later token payments and `card_expiry_date` is that card's expiry. Best effort: a card that cannot be tokenised does not fail the payment; the payment then goes ahead without a token. Declaration only until the server and the terminal support it; until then the field is ignored. Wire-compatible and source-compatible: a new optional field that older clients do not send.
+
 ## 2026-11-10
 
 ### Added
